@@ -1,25 +1,27 @@
-import { logout } from "@/routes";
-import { Link, router } from "@inertiajs/react";
-import { LogOut } from "lucide-react";
+import { PlaceholderPattern } from "@/components/placeholder-pattern";
+import AuthLayout from "@/layouts/auth-layout";
+import { Head } from "@inertiajs/react";
 
 export default function Dashboard() {
-  const handleLogout = () => {
-    router.flushAll();
-  };
-
   return (
-    <>
-      <h1>Dashboard</h1>
-      <Link
-        className="block w-full cursor-pointer"
-        href={logout()}
-        as="button"
-        onClick={handleLogout}
-        data-test="logout-button"
-      >
-        <LogOut className="mr-2" />
-        Log out
-      </Link>
-    </>
+    <AuthLayout>
+      <Head title="Dashboard" />
+      <div className="flex h-full flex-1 flex-col gap-4 overflow-x-auto rounded-xl p-4">
+        <div className="grid auto-rows-min gap-4 md:grid-cols-3">
+          <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
+            <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
+          </div>
+          <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
+            <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
+          </div>
+          <div className="relative aspect-video overflow-hidden rounded-xl border border-sidebar-border/70 dark:border-sidebar-border">
+            <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
+          </div>
+        </div>
+        <div className="relative min-h-screen flex-1 overflow-hidden rounded-xl border border-sidebar-border/70 md:min-h-min dark:border-sidebar-border">
+          <PlaceholderPattern className="absolute inset-0 size-full stroke-neutral-900/20 dark:stroke-neutral-100/20" />
+        </div>
+      </div>
+    </AuthLayout>
   )
 }

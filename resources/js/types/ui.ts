@@ -6,3 +6,7 @@ export type GuestLayoutProps = {
   title?: string;
   description?: string;
 }
+
+export type AuthLayoutProps = {
+  children?: ReactNode
+}
