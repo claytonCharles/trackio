@@ -2,12 +2,11 @@
 
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use Illuminate\Http\Request;
 
 Route::get('/', function () {
-    return Inertia::render("home");
-})->name("home");
+    return redirect("/login");
+});
 
-Route::get("exemple", function () {
-    return Inertia::render("guest/exemple");
-})->name("exemple");
+Route::get("dashboard", function () {
+    return Inertia::render("auth/dashboard");
+})->middleware(["auth"])->name("dashboard");
