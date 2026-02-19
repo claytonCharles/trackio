@@ -1,0 +1,74 @@
+services:
+  traefik:
+    image: traefik:v3.6.8
+    container_name: traefik
+    command:
+      - --api.insecure=true
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --entryPoints.web.address=:80
+    ports:
+      - 80:80
+      - 8080:8080
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    networks:
+      - trackio
+
+  postgres:
+    image: postgres:18-alpine
+    container_name: trackio_db
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      POSTGRES_DB: ${DB_DATABASE}
+      POSTGRES_USER: ${DB_USERNAME}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - ${DB_PORT}:5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: [ "CMD-SHELL", "pg_isready -U ${DB_USERNAME} ${DB_DATABASE}" ]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  web:
+    container_name: trackio
+    build:
+      context: ./
+    restart: unless-stopped
+    ports:
+      - ${REACT_PORT:-7000}:${REACT_PORT:-7000}
+    volumes:
+      - ./:/var/www
+    depends_on:
+      - postgres
+    networks:
+      - trackio
+
+  nginx:
+    image: nginx:stable-alpine
+    container_name: trackio_nginx
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.trackio.rule=Host(`trackio.dev.com`)
+      - traefik.http.routers.trackio.service=app-trackio-service
+      - traefik.http.services.app-trackio-service.loadbalancer.server.port=80
+      # - traefik.http.routers.trackio.entrypoints=websecure
+      # - traefik.http.routers.trackio.tls=true
+    volumes:
+      - ./:/var/www
+      - ./nginx/default.conf:/etc/nginx/conf.d/default.conf
+    depends_on:
+      - web
+    networks:
+      - trackio
+
+volumes:
+  pgdata:
+
+networks:
+  trackio:
