@@ -5,6 +5,8 @@ namespace Database\Seeders;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class DatabaseSeeder extends Seeder
 {
@@ -15,11 +17,31 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
+        Permission::create(['name' => 'read roles', 'resource' => 'role']);
+        Permission::create(['name' => 'write roles', 'resource' => 'role']);
+        Permission::create(['name' => 'delete roles', 'resource' => 'role']);
+
+        Permission::create(['name' => 'read hardwares', 'resource' => 'hardware']);
+        Permission::create(['name' => 'write hardwares', 'resource' => 'hardware']);
+        Permission::create(['name' => 'delete hardwares', 'resource' => 'hardware']);
+
+        Role::create([
+            'name' => 'admin',
+            'is_system_role' => true
+        ])->givePermissionTo(Permission::all());
+
+        Role::create(['name' => 'manager'])->givePermissionTo(
+            Permission::where('resource', 'hardware')->get()
+        );
 
         User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+            'name' => 'Admin System',
+            'email' => 'admin@admin.com',
+        ])->assignRole('admin');
+
+        User::factory()->create([
+            'name' => 'Manager User',
+            'email' => 'manager@example.com',
+        ])->assignRole('manager');
     }
 }

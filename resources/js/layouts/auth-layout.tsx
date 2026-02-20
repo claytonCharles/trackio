@@ -25,12 +25,7 @@ export default function AuthLayout({ children }: AuthLayoutProps) {
         <div>
           <ul className="p-3">
             <li className="px-2 py-1 rounded hover:bg-sidebar-accent">
-              <NavUser 
-              
-              />
-              {/* <Link href={logout()} className="text-md">
-                Logout
-              </Link> */}
+              <NavUser />
             </li>
           </ul>
         </div>
