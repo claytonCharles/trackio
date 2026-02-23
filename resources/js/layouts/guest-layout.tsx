@@ -1,12 +1,12 @@
 import AppLogoIcon from "@/components/icons/app-logo-icon";
-import { GuestLayoutProps } from "@/types/ui";
+import { SimpleLayoutProps } from "@/types/ui";
 import { Link } from "@inertiajs/react";
 
 export default function GuestLayout({
   children,
   title,
   description,
-}: GuestLayoutProps) {
+}: SimpleLayoutProps) {
   return (
     <>
       <div className="flex min-h-svh flex-col items-center justify-center gap-6 bg-background p-6 md:p-10">

@@ -1,21 +1,24 @@
 import { Spinner } from "@/components/icons/spinner";
-import { Input } from "@/components/ui/inputs/input";
-import { InputError } from "@/components/ui/inputs/input-error";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Input } from "@/components/ui/input";
+import InputError from "@/components/ui/input-error";
 import { Label } from "@/components/ui/label";
-import GuestLayout from "@/layouts/guest-layout";
+import SimpleLayout from "@/layouts/simple-layout";
 import { store } from "@/routes/login";
 import { Form, Head } from "@inertiajs/react";
 
 export default function Login() {
   return (
-    <GuestLayout
+    <SimpleLayout
       title="Faça login na sua conta"
       description="Digite seu e-mail e senha abaixo para fazer login"
     >
       <Head title="Log in" />
+
       <Form
         {...store.form()}
-        resetOnSuccess={['password']}
+        resetOnSuccess={["password"]}
         className="flex flex-col gap-6"
       >
         {({ processing, errors }) => (
@@ -37,7 +40,6 @@ export default function Login() {
               </div>
 
               <div className="grid gap-2">
-                <Label htmlFor="password">Password</Label>
                 <Input
                   id="password"
                   type="password"
@@ -50,20 +52,25 @@ export default function Login() {
                 <InputError message={errors.password} />
               </div>
 
-              <button
+              <div className="flex items-center space-x-3">
+                <Checkbox id="remember" name="remember" tabIndex={3} />
+                <Label htmlFor="remember">Remember me</Label>
+              </div>
+
+              <Button
                 type="submit"
-                className="mt-4 w-full border px-3 py-2 rounded bg-foreground text-background cursor-pointer"
+                className="mt-4 w-full"
                 tabIndex={4}
                 disabled={processing}
                 data-test="login-button"
               >
                 {processing && <Spinner />}
                 Log in
-              </button>
+              </Button>
             </div>
           </>
         )}
       </Form>
-    </GuestLayout>
-  )
+    </SimpleLayout>
+  );
 }

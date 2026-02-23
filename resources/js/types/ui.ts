@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 
-export type GuestLayoutProps = {
+export type SimpleLayoutProps = {
   children?: ReactNode;
   name?: string;
   title?: string;
