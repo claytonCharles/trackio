@@ -1,9 +1,9 @@
 import { Spinner } from "@/components/icons/spinner";
-import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Input } from "@/components/ui/input";
-import InputError from "@/components/ui/input-error";
-import { Label } from "@/components/ui/label";
+import { Button } from "@/components/default/button";
+import { Checkbox } from "@/components/default/checkbox";
+import { Input } from "@/components/default/input";
+import InputError from "@/components/default/input-error";
+import { Label } from "@/components/default/label";
 import SimpleLayout from "@/layouts/simple-layout";
 import { store } from "@/routes/login";
 import { Form, Head } from "@inertiajs/react";

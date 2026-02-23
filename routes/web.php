@@ -11,7 +11,7 @@ Route::get('/', function () {
 
 Route::middleware(['auth'])->group(function () {
     Route::get('dashboard', function () {
-        return Inertia::render('auth/dashboard');
+        return Inertia::render('dashboard');
     })->name('dashboard');
 
     Route::resource('roles', RoleController::class);
