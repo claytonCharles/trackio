@@ -7,8 +7,15 @@ import { Label } from "@/components/default/label";
 import SimpleLayout from "@/layouts/simple-layout";
 import { store } from "@/routes/login";
 import { Form, Head } from "@inertiajs/react";
+import TextLink from "@/components/default/text-link";
+import { request } from "@/routes/password";
 
-export default function Login() {
+type Props = {
+  status?: string;
+  canResetPassword: boolean;
+};
+
+export default function Login({ status, canResetPassword }: Props) {
   return (
     <SimpleLayout
       title="Faça login na sua conta"
@@ -40,6 +47,18 @@ export default function Login() {
               </div>
 
               <div className="grid gap-2">
+                <div className="flex items-center">
+                  <Label htmlFor="password">Password</Label>
+                  {canResetPassword && (
+                    <TextLink
+                      href={request()}
+                      className="ml-auto text-sm"
+                      tabIndex={5}
+                    >
+                      Forgot password?
+                    </TextLink>
+                  )}
+                </div>
                 <Input
                   id="password"
                   type="password"

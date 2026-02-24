@@ -14,6 +14,7 @@ use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Laravel\Fortify\Actions\RedirectIfTwoFactorAuthenticatable;
 use Laravel\Fortify\Fortify;
+use Laravel\Fortify\Features;
 
 class FortifyServiceProvider extends ServiceProvider
 {
@@ -53,8 +54,28 @@ class FortifyServiceProvider extends ServiceProvider
     private function configureViews(): void
     {
         Fortify::loginView(function (Request $request) {
-            return Inertia::render("guest/login");
+            return Inertia::render("guest/login", [
+                'status' => $request->session()->get('status'),
+                'canResetPassword' => Features::enabled(Features::resetPasswords()),
+            ]);
         });
+
+        Fortify::resetPasswordView(fn(Request $request) => Inertia::render('guest/reset-password', [
+            'email' => $request->email,
+            'token' => $request->route('token'),
+        ]));
+
+        Fortify::requestPasswordResetLinkView(fn(Request $request) => Inertia::render('guest/forgot-password', [
+            'status' => $request->session()->get('status'),
+        ]));
+
+        Fortify::verifyEmailView(fn(Request $request) => Inertia::render('guest/verify-email', [
+            'status' => $request->session()->get('status'),
+        ]));
+
+        Fortify::twoFactorChallengeView(fn() => Inertia::render('guest/two-factor-challenge'));
+
+        Fortify::confirmPasswordView(fn() => Inertia::render('guest/confirm-password'));
     }
 
     /**
@@ -63,7 +84,7 @@ class FortifyServiceProvider extends ServiceProvider
     private function configureRateLimiting(): void
     {
         RateLimiter::for('login', function (Request $request) {
-            $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())).'|'.$request->ip());
+            $throttleKey = Str::transliterate(Str::lower($request->input(Fortify::username())) . '|' . $request->ip());
 
             return Limit::perMinute(5)->by($throttleKey);
         });

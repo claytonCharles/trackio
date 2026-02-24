@@ -17,3 +17,5 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('roles', RoleController::class);
     Route::resource('hardwares', HardwareController::class);
 });
+
+require __DIR__ . '/settings.php';
