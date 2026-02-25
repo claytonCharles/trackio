@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Hardwares\HardwareCategory;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -34,7 +35,7 @@ class DatabaseSeeder extends Seeder
             Permission::where('resource', 'hardware')->get()
         );
 
-        User::factory()->create([
+        $userAdmin = User::factory()->create([
             'name' => 'Admin System',
             'email' => 'admin@admin.com',
         ])->assignRole('admin');
@@ -43,5 +44,16 @@ class DatabaseSeeder extends Seeder
             'name' => 'Manager User',
             'email' => 'manager@example.com',
         ])->assignRole('manager');
+
+        $adminId = $userAdmin->id;
+        
+        HardwareCategory::create(['user_id' => $adminId, 'name' => 'CPU', 'is_system_category' => true]);
+        HardwareCategory::create(['user_id' => $adminId, 'name' => 'GPU', 'is_system_category' => true]);
+        HardwareCategory::create(['user_id' => $adminId, 'name' => 'RAM', 'is_system_category' => true]);
+        HardwareCategory::create(['user_id' => $adminId, 'name' => 'HDD', 'is_system_category' => true]);
+        HardwareCategory::create(['user_id' => $adminId, 'name' => 'PSU', 'is_system_category' => true]);
+        HardwareCategory::create(['user_id' => $adminId, 'name' => 'Placa Mãe', 'is_system_category' => true]);
+        HardwareCategory::create(['user_id' => $adminId, 'name' => 'Monitor', 'is_system_category' => true]);
+        HardwareCategory::create(['user_id' => $adminId, 'name' => 'Acessórios', 'is_system_category' => true]);
     }
 }

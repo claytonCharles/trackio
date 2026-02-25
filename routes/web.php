@@ -1,6 +1,6 @@
 <?php
 
-use App\Http\Controllers\HardwareController;
+use App\Http\Controllers\Hardwares\HardwareController;
 use App\Http\Controllers\RoleController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;

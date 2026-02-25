@@ -1,7 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Hardwares;
 
+use App\Http\Controllers\Controller;
+use App\Http\Requests\Hardwares\StoreHardwareRequest;
+use App\Models\Hardwares\HardwareCategory;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
@@ -9,15 +12,16 @@ class HardwareController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('permission:read hardwares')->only(['index', 'show']);
+        $this->middleware('permission:write hardwares')->only(['create', 'store', 'update']);
     }
+
 
     /**
      * Display a listing of the resource.
      */
     public function index()
     {
-        return Inertia::render('auth/hardwares/list');
+        return Inertia::render('hardwares/list');
     }
 
     /**
@@ -25,15 +29,19 @@ class HardwareController extends Controller
      */
     public function create()
     {
-        //
+        $listCategories = HardwareCategory::all();
+        return Inertia::render('hardwares/save', [
+            "listCategories" => $listCategories
+        ]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function store(StoreHardwareRequest $request)
     {
-        //
+        $data = $request->validated();
+        dd($data);
     }
 
     /**
@@ -41,7 +49,7 @@ class HardwareController extends Controller
      */
     public function show(string $id)
     {
-        return Inertia::render('auth/hardwares/show');
+        //
     }
 
     /**
