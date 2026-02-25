@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Hardwares;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Hardwares\StoreHardwareRequest;
+use App\Models\Hardwares\Hardware;
 use App\Models\Hardwares\HardwareCategory;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -21,7 +22,10 @@ class HardwareController extends Controller
      */
     public function index()
     {
-        return Inertia::render('hardwares/list');
+        $listHardwares = Hardware::all();
+        return Inertia::render('hardwares/list', [
+            'listHardwares' => $listHardwares
+        ]);
     }
 
     /**
@@ -41,7 +45,16 @@ class HardwareController extends Controller
     public function store(StoreHardwareRequest $request)
     {
         $data = $request->validated();
-        dd($data);
+        $hardware = Hardware::create([
+            'user_id' => $request->user()->id,
+            "category_id" => $data["category_id"],
+            "inventory_number" => $data["inventory_number"],
+            "serial_number" => $data["serial_number"],
+            "name" => $data["name"],
+            "description" => $data["description"]
+        ]);
+
+        return redirect('/hardwares');
     }
 
     /**
@@ -49,7 +62,10 @@ class HardwareController extends Controller
      */
     public function show(string $id)
     {
-        //
+        $hardware = Hardware::find($id);
+        return Inertia::render('hardwares/show', [
+            'hardware' => $hardware
+        ]);
     }
 
     /**
