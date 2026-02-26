@@ -22,7 +22,7 @@ class HardwareController extends Controller
      */
     public function index()
     {
-        $listHardwares = Hardware::all();
+        $listHardwares = Hardware::with('category:id,name')->get();
         return Inertia::render('hardwares/list', [
             'listHardwares' => $listHardwares
         ]);
@@ -62,7 +62,7 @@ class HardwareController extends Controller
      */
     public function show(string $id)
     {
-        $hardware = Hardware::find($id);
+        $hardware = Hardware::with(['category:id,name', 'user:id,name'])->findOrFail($id);
         return Inertia::render('hardwares/show', [
             'hardware' => $hardware
         ]);

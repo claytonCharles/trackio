@@ -6,17 +6,15 @@ import {
   Select,
   SelectContent,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/default/select";
 import { Spinner } from "@/components/default/spinner";
-import { TextArea } from "@/components/default/text-area";
+import { RichTextEditor } from "@/components/rich-text-editor";
 import AppLayout from "@/layouts/app-layout";
 import hardwares from "@/routes/hardwares";
 import { BreadcrumbItem } from "@/types";
-import { Form, Head, Link, usePage } from "@inertiajs/react";
-import { useEffect } from "react";
+import { Form, Head,} from "@inertiajs/react";
 
 const breadcrumbs: BreadcrumbItem[] = [
   {
@@ -30,16 +28,15 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 type HardwareCategory = {
-  id: number,
-  name: string
-}
+  id: number;
+  name: string;
+};
 
 type Props = {
-  listCategories: HardwareCategory[]
+  listCategories: HardwareCategory[];
 };
 
 export default function SaveHardware({ listCategories }: Props) {
-
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Hardwares Create" />
@@ -80,13 +77,14 @@ export default function SaveHardware({ listCategories }: Props) {
                         <SelectValue placeholder="Selecione uma opção" />
                       </SelectTrigger>
                       <SelectContent>
-                        {
-                          listCategories.map((category) => (
-                            <SelectItem key={category.id} value={`${category.id}`}>
-                              { category.name }
-                            </SelectItem>
-                          ))
-                        }
+                        {listCategories.map((category) => (
+                          <SelectItem
+                            key={category.id}
+                            value={`${category.id}`}
+                          >
+                            {category.name}
+                          </SelectItem>
+                        ))}
                       </SelectContent>
                     </Select>
                   </div>
@@ -117,7 +115,12 @@ export default function SaveHardware({ listCategories }: Props) {
 
                 <div className="grid gap-2">
                   <Label htmlFor="description">Descrição</Label>
-                  <TextArea id="description" required name="description" />
+                  <RichTextEditor
+                    name="description"
+                    label="Conteúdo"
+                    defaultValue={""}
+                    placeholder="Escreva algo..."
+                  />
                   <InputError message={errors.description} />
                 </div>
 
