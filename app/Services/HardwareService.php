@@ -50,7 +50,7 @@ class HardwareService
     {
         $result = [];
         try {
-            $result = Hardware::create([
+            $hardware = Hardware::create([
                 'user_id' => $user->id,
                 'category_id' => $data['category_id'],
                 'inventory_number' => $data['inventory_number'],
@@ -59,6 +59,7 @@ class HardwareService
                 'description' => $data['description'],
             ]);
 
+            $result = $hardware->toArray();
             LogService::created("Cadastrou um novo Hardware #{$result['id']} com Sucesso! ");
         } catch (Exception $exc) {
             LogService::error("Falhou em cadastrar um novo hardware! ERROR: {$exc->getMessage()}");
@@ -80,7 +81,8 @@ class HardwareService
         try {
             $hardware = Hardware::findOrFail($id);
             $data['user_id'] = $user->id;
-            $result = $hardware->update($data);
+            $hardware->update($data);
+            $result = $hardware->toArray();
 
             LogService::updated("Atualizou o Hardware #$id com Sucesso!");
         } catch (Exception $exc) {
