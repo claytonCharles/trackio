@@ -19,6 +19,7 @@ class Hardware extends Model
         'serial_number',
         'name',
         'description',
+        'deleted_at'
     ];
 
     protected $appends = ['updated_at_formatted'];

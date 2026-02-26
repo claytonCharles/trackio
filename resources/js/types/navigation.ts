@@ -12,3 +12,10 @@ export type NavItem = {
     icon?: LucideIcon | null;
     isActive?: boolean;
 };
+
+export type PaginationProps = {
+    currentPage: number;
+    lastPage: number;
+    perPage: number;
+    totalItems: number;
+}

@@ -37,7 +37,7 @@ return new class extends Migration
             $table->string('modified_at')->useCurrent();
         });
 
-        DB::statement("
+        DB::statement('
             CREATE OR REPLACE FUNCTION save_old_hardware_version()
             RETURNS TRIGGER AS $$
             BEGIN
@@ -45,16 +45,18 @@ return new class extends Migration
                     (hardware_id, user_id, category_id, inventory_number, serial_number, name, description, deleted_at, modified_at)
                 VALUES 
                     (OLD.id, OLD.user_id, OLD.category_id, OLD.inventory_number, OLD.serial_number, OLD.name, OLD.description, OLD.deleted_at, NOW());
+                
+                RETURN NEW;
             END;
             $$ LANGUAGE plpgsql;
-        ");
+        ');
 
-        DB::statement("
+        DB::statement('
             CREATE TRIGGER before_updated_hardware
             BEFORE UPDATE ON hardwares
             FOR EACH ROW
             EXECUTE FUNCTION save_old_hardware_version();
-        ");
+        ');
     }
 
     /**
@@ -62,8 +64,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        DB::statement("DROP TRIGGER IF EXISTS before_updated_hardware ON hardwares");
-        DB::statement("DROP FUNCTION IF EXISTS save_old_hardware_version()");
+        DB::statement('DROP TRIGGER IF EXISTS before_updated_hardware ON hardwares');
+        DB::statement('DROP FUNCTION IF EXISTS save_old_hardware_version()');
         Schema::dropIfExists('history_hardware');
         Schema::dropIfExists('hardwares');
     }

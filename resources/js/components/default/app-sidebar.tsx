@@ -1,5 +1,5 @@
 import { Link } from "@inertiajs/react";
-import { BookOpen, CircuitBoard, Folder, LayoutGrid } from "lucide-react";
+import { BookOpen, CircuitBoard, Folder, Github, LayoutGrid } from "lucide-react";
 import { NavFooter } from "@/components/default/nav-footer";
 import { NavMain } from "@/components/default/nav-main";
 import { NavUser } from "@/components/default/nav-user";
@@ -32,15 +32,10 @@ const mainNavItems: NavItem[] = [
 
 const footerNavItems: NavItem[] = [
   {
-    title: "Repository",
-    href: "https://github.com/laravel/react-starter-kit",
-    icon: Folder,
-  },
-  {
-    title: "Documentation",
-    href: "https://laravel.com/docs/starter-kits#react",
-    icon: BookOpen,
-  },
+    title: "Repositório",
+    href: "https://github.com/claytonCharles/trackio",
+    icon: Github,
+  }
 ];
 
 export function AppSidebar() {

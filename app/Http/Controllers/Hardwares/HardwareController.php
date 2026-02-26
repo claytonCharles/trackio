@@ -3,28 +3,38 @@
 namespace App\Http\Controllers\Hardwares;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Hardwares\StoreHardwareRequest;
+use App\Http\Requests\Hardwares\HardwareSaveRequest;
+use App\Http\Requests\Hardwares\HardwareSearchRequest;
 use App\Models\Hardwares\Hardware;
 use App\Models\Hardwares\HardwareCategory;
-use Illuminate\Http\Request;
+use App\Services\HardwareService;
+use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class HardwareController extends Controller
 {
+    private HardwareService $hardwareService;
+
     public function __construct()
     {
-        $this->middleware('permission:write hardwares')->only(['create', 'store', 'update']);
-    }
+        $this->middleware('permission:read hardwares')->only(['index']);
+        $this->middleware('permission:write hardwares')->only(['create', 'store', 'edit', 'update']);
+        $this->middleware('permission:delete hardwares')->only(['destroy']);
 
+        $this->hardwareService = new HardwareService;
+    }
 
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(HardwareSearchRequest $request)
     {
-        $listHardwares = Hardware::with('category:id,name')->get();
+        $filters = $request->validated();
+        $hardwares = $this->hardwareService->searchHardwares($filters);
+
         return Inertia::render('hardwares/list', [
-            'listHardwares' => $listHardwares
+            ...$hardwares,
+            'filters' => $filters,
         ]);
     }
 
@@ -33,28 +43,23 @@ class HardwareController extends Controller
      */
     public function create()
     {
-        $listCategories = HardwareCategory::all();
         return Inertia::render('hardwares/save', [
-            "listCategories" => $listCategories
+            'listCategories' => $this->hardwareService->getAllHardwareCategories()
         ]);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreHardwareRequest $request)
+    public function store(HardwareSaveRequest $request)
     {
         $data = $request->validated();
-        $hardware = Hardware::create([
-            'user_id' => $request->user()->id,
-            "category_id" => $data["category_id"],
-            "inventory_number" => $data["inventory_number"],
-            "serial_number" => $data["serial_number"],
-            "name" => $data["name"],
-            "description" => $data["description"]
-        ]);
+        $hardware = $this->hardwareService->storeHardware($data, $request->user());
+        if (empty($hardware)) {
+            return back()->with('flashMsg', 'Não foi possivel realizar o cadastro do Hardware!');
+        }
 
-        return redirect('/hardwares');
+        return redirect(route('hardwares.show', ['hardware' => $hardware['id']]));
     }
 
     /**
@@ -62,9 +67,13 @@ class HardwareController extends Controller
      */
     public function show(string $id)
     {
-        $hardware = Hardware::with(['category:id,name', 'user:id,name'])->findOrFail($id);
+        $hardware = $this->hardwareService->getHardwareInfoById($id);
+        if (empty($hardware)) {
+            abort(404);
+        }
+
         return Inertia::render('hardwares/show', [
-            'hardware' => $hardware
+            'hardware' => $hardware,
         ]);
     }
 
@@ -73,15 +82,28 @@ class HardwareController extends Controller
      */
     public function edit(string $id)
     {
-        //
+        $hardware = Hardware::with('category:id,name')->findOrFail($id);
+        $listCategories = HardwareCategory::all();
+
+        return Inertia::render('hardwares/save', [
+            'hardware' => $hardware,
+            'listCategories' => $listCategories,
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, string $id)
+    public function update(HardwareSaveRequest $request, string $id)
     {
-        //
+        $data = $request->validated();
+        $data = array_filter($data, fn ($value) => ! is_null($value));
+        $hardware = $this->hardwareService->updateHardware($data, $id, $request->user());
+        if (empty($hardware)) {
+            return back()->with('flashMsg', 'Não foi possivel realizar a atualização do Hardware!');
+        }
+
+        return redirect(route('hardwares.show', ['hardware' => $id]));
     }
 
     /**
@@ -89,6 +111,8 @@ class HardwareController extends Controller
      */
     public function destroy(string $id)
     {
-        //
+        $user = Auth::user();
+        $result = $this->hardwareService->deactivateHardware($id, $user);
+        return redirect(route('hardwares.index'))->with('flashMsg', $result);
     }
 }

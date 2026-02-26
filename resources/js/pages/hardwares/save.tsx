@@ -6,6 +6,7 @@ import {
   Select,
   SelectContent,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/default/select";
@@ -14,18 +15,20 @@ import { RichTextEditor } from "@/components/rich-text-editor";
 import AppLayout from "@/layouts/app-layout";
 import hardwares from "@/routes/hardwares";
 import { BreadcrumbItem } from "@/types";
-import { Form, Head,} from "@inertiajs/react";
+import { Form, Head, } from "@inertiajs/react";
 
-const breadcrumbs: BreadcrumbItem[] = [
-  {
-    title: "Hardwares",
-    href: hardwares.index().url,
-  },
-  {
-    title: "Create",
-    href: hardwares.create().url,
-  },
-];
+
+type Hardware = {
+  id: string;
+  name: string;
+  serial_number: string | null;
+  inventory_number: string | null;
+  description: string;
+  category: {
+    id: number;
+    name: string;
+  };
+}
 
 type HardwareCategory = {
   id: number;
@@ -33,19 +36,36 @@ type HardwareCategory = {
 };
 
 type Props = {
+  hardware?: Hardware;
   listCategories: HardwareCategory[];
 };
 
-export default function SaveHardware({ listCategories }: Props) {
+export default function SaveHardware({ hardware, listCategories }: Props) {
+  const editing = !!hardware;
+  const breadcrumbs: BreadcrumbItem[] = [
+    {
+      title: "Hardwares",
+      href: hardwares.index().url,
+    },
+    {
+      title: editing ? "Editando" : "Cadastrando",
+      href: "#",
+    },
+  ];
+
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Hardwares Create" />
       <div className="mt-5 flex w-full flex-col items-center justify-center">
         <h2 className="text-foreground mb-6 text-center text-2xl font-bold">
-          Formulário de Cadastro
+          {editing ? "Atualização de Hardware" : "Cadastro de Hardware"}
         </h2>
         <Form
-          {...hardwares.store.form()}
+          action={editing
+            ? hardwares.update(hardware.id).url
+            : hardwares.store().url
+          }
+          method={editing ? 'PUT' : 'POST'}
           className="flex w-[75%] flex-col gap-6"
         >
           {({ processing, errors }) => (
@@ -64,6 +84,7 @@ export default function SaveHardware({ listCategories }: Props) {
                       required
                       autoFocus
                       tabIndex={1}
+                      defaultValue={hardware?.name ?? ""}
                       placeholder="Nome do Hardware"
                     />
                   </div>
@@ -72,7 +93,7 @@ export default function SaveHardware({ listCategories }: Props) {
                       <Label htmlFor="category_id">Categoria</Label>
                       <InputError message={errors.category_id} />
                     </div>
-                    <Select name="category_id">
+                    <Select defaultValue={hardware?.category.id.toString()} name="category_id">
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione uma opção" />
                       </SelectTrigger>
@@ -96,6 +117,7 @@ export default function SaveHardware({ listCategories }: Props) {
                     type="text"
                     name="inventory_number"
                     tabIndex={1}
+                    defaultValue={hardware?.inventory_number ?? ""}
                     placeholder="Tombamento do Hardware"
                   />
                   <InputError message={errors.inventory_number} />
@@ -108,6 +130,7 @@ export default function SaveHardware({ listCategories }: Props) {
                     type="text"
                     name="serial_number"
                     tabIndex={1}
+                    defaultValue={hardware?.serial_number ?? ""}
                     placeholder="Nome do Hardware"
                   />
                   <InputError message={errors.serial_number} />
@@ -118,7 +141,7 @@ export default function SaveHardware({ listCategories }: Props) {
                   <RichTextEditor
                     name="description"
                     label="Conteúdo"
-                    defaultValue={""}
+                    defaultValue={hardware?.description ?? ""}
                     placeholder="Escreva algo..."
                   />
                   <InputError message={errors.description} />
@@ -139,6 +162,6 @@ export default function SaveHardware({ listCategories }: Props) {
           )}
         </Form>
       </div>
-    </AppLayout>
+    </AppLayout >
   );
 }

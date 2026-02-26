@@ -4,7 +4,7 @@ namespace App\Http\Requests\Hardwares;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreHardwareRequest extends FormRequest
+class HardwareSaveRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -26,7 +26,7 @@ class StoreHardwareRequest extends FormRequest
             'inventory_number' => ['nullable', 'string'],
             'serial_number' => ['nullable', 'string'],
             'name' => ['required', 'string'],
-            'description' => ['required', 'string']
+            'description' => ['required', 'string'],
         ];
     }
 }
