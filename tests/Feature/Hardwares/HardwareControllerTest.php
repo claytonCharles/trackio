@@ -96,7 +96,46 @@ class HardwareControllerTest extends TestCase
                 'description' => null
             ]);
         
+
         $response->assertRedirectBack();
+        $response->assertSessionHasErrors(['name', 'category_id', 'description']);
+    }
+
+    public function test_can_delete_hardware()
+    {
+        $this->actingAs($this->managerUser)
+            ->post(route('hardwares.store'), [
+                'category_id' => 1,
+                'inventory_number' => null,
+                'serial_number' => null,
+                'name' => "Tester Hardware",
+                'description' => "Lorem ipsum dolor sit amet consectetur adipisicing elit."
+            ]);
+
+        $response = $this
+            ->actingAs($this->managerUser)
+            ->delete(route('hardwares.destroy', ['hardware' => 1]));
+
+        $response->assertRedirect(route('hardwares.index'));
+        $response->assertSessionHas('flashMsg', 'Desativação do Hardware#1 realizada com Sucesso!');        
+    }
+
+    public function test_cant_delete_hardware()
+    {
+        $this->actingAs($this->managerUser)
+            ->post(route('hardwares.store'), [
+                'category_id' => 1,
+                'inventory_number' => null,
+                'serial_number' => null,
+                'name' => "Tester Hardware",
+                'description' => "Lorem ipsum dolor sit amet consectetur adipisicing elit."
+            ]);
+
+        $response = $this
+            ->actingAs($this->commomUser)
+            ->delete(route('hardwares.destroy', ['hardware' => 1]));
+
+        $response->assertForbidden();
     }
 }
 
