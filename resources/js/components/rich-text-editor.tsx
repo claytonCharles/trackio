@@ -72,22 +72,7 @@ export function RichTextEditor({
         >
           U
         </button>
-        <button
-          type="button"
-          className="px-2 py-1 text-sm"
-          onClick={() => exec("insertUnorderedList")}
-        >
-          • Lista
-        </button>
-        <button
-          type="button"
-          className="px-2 py-1 text-sm"
-          onClick={() => exec("insertOrderedList")}
-        >
-          1. Lista
-        </button>
-        <div className="ml-2 h-5 w-px border-l bg-white" />
-
+        <div className="ml-2 h-5 w-0.5 border-l bg-white" />
         <button
           type="button"
           className="px-2 py-1 text-xs"

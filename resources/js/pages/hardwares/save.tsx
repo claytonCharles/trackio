@@ -6,7 +6,6 @@ import {
   Select,
   SelectContent,
   SelectItem,
-  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/default/select";
@@ -137,10 +136,9 @@ export default function SaveHardware({ hardware, listCategories }: Props) {
                 </div>
 
                 <div className="grid gap-2">
-                  <Label htmlFor="description">Descrição</Label>
                   <RichTextEditor
                     name="description"
-                    label="Conteúdo"
+                    label="Descrição"
                     defaultValue={hardware?.description ?? ""}
                     placeholder="Escreva algo..."
                   />
