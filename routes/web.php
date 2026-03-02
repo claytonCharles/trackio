@@ -1,13 +1,21 @@
 <?php
 
+use App\Http\Controllers\Hardwares\HardwareController;
+use App\Http\Controllers\RoleController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
-use Illuminate\Http\Request;
 
 Route::get('/', function () {
-    return Inertia::render("home");
-})->name("home");
+    return redirect('/login');
+});
 
-Route::get("exemple", function () {
-    return Inertia::render("guest/exemple");
-})->name("exemple");
+Route::middleware(['auth'])->group(function () {
+    Route::get('dashboard', function () {
+        return Inertia::render('dashboard');
+    })->name('dashboard');
+
+    Route::resource('roles', RoleController::class);
+    Route::resource('hardwares', HardwareController::class);
+});
+
+require __DIR__ . '/settings.php';
