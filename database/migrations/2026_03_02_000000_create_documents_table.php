@@ -17,7 +17,6 @@ return new class extends Migration
             $table->foreignId('updated_by')->constrained('users');
             $table->string('title')->unique()->index();
             $table->longText('content');
-            $table->fullText('content');
             $table->timestamps();
             $table->softDeletes();
         });

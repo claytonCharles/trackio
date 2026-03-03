@@ -3,8 +3,9 @@
 namespace App\Http\Controllers\Hardwares;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\Hardwares\HardwareSaveRequest;
+use App\Http\Requests\Hardwares\HardwareUpdateRequest;
 use App\Http\Requests\Hardwares\HardwareSearchRequest;
+use App\Http\Requests\Hardwares\HardwareStoreRequest;
 use App\Models\Hardwares\Hardware;
 use App\Models\Hardwares\HardwareCategory;
 use App\Services\HardwareService;
@@ -50,7 +51,7 @@ class HardwareController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(HardwareSaveRequest $request)
+    public function store(HardwareStoreRequest $request)
     {
         $data = $request->validated();
         $hardware = $this->hardwareService->storeHardware($data, $request->user());
@@ -92,7 +93,7 @@ class HardwareController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(HardwareSaveRequest $request, string $id)
+    public function update(HardwareUpdateRequest $request, string $id)
     {
         $data = $request->validated();
         $data = array_filter($data, fn ($value) => ! is_null($value));

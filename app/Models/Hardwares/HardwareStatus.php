@@ -9,6 +9,8 @@ class HardwareStatus extends Model
     protected $table = 'hardware_status';
 
     protected $fillable = [
+        'created_by',
+        'updated_by',
         'name'
     ];
 }
