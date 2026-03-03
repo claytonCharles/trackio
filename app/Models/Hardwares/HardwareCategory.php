@@ -9,8 +9,9 @@ class HardwareCategory extends Model
     protected $table = 'hardware_categories';
 
     protected $fillable = [
-        'user_id',
+        'created_by',
+        'updated_by',
         'name',
-        'is_system_category'
+        'is_system_category',
     ];
 }

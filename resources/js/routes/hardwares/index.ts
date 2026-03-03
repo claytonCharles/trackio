@@ -163,7 +163,7 @@ create.form = createForm
 
 /**
 * @see \App\Http\Controllers\Hardwares\HardwareController::store
-* @see app/Http/Controllers/Hardwares/HardwareController.php:54
+* @see app/Http/Controllers/Hardwares/HardwareController.php:53
 * @route '/hardwares'
 */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -178,7 +178,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\Hardwares\HardwareController::store
-* @see app/Http/Controllers/Hardwares/HardwareController.php:54
+* @see app/Http/Controllers/Hardwares/HardwareController.php:53
 * @route '/hardwares'
 */
 store.url = (options?: RouteQueryOptions) => {
@@ -187,7 +187,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Hardwares\HardwareController::store
-* @see app/Http/Controllers/Hardwares/HardwareController.php:54
+* @see app/Http/Controllers/Hardwares/HardwareController.php:53
 * @route '/hardwares'
 */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -197,7 +197,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\Hardwares\HardwareController::store
-* @see app/Http/Controllers/Hardwares/HardwareController.php:54
+* @see app/Http/Controllers/Hardwares/HardwareController.php:53
 * @route '/hardwares'
 */
 const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -207,7 +207,7 @@ const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => 
 
 /**
 * @see \App\Http\Controllers\Hardwares\HardwareController::store
-* @see app/Http/Controllers/Hardwares/HardwareController.php:54
+* @see app/Http/Controllers/Hardwares/HardwareController.php:53
 * @route '/hardwares'
 */
 storeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -219,7 +219,7 @@ store.form = storeForm
 
 /**
 * @see \App\Http\Controllers\Hardwares\HardwareController::show
-* @see app/Http/Controllers/Hardwares/HardwareController.php:68
+* @see app/Http/Controllers/Hardwares/HardwareController.php:67
 * @route '/hardwares/{hardware}'
 */
 export const show = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -234,7 +234,7 @@ show.definition = {
 
 /**
 * @see \App\Http\Controllers\Hardwares\HardwareController::show
-* @see app/Http/Controllers/Hardwares/HardwareController.php:68
+* @see app/Http/Controllers/Hardwares/HardwareController.php:67
 * @route '/hardwares/{hardware}'
 */
 show.url = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -261,7 +261,7 @@ show.url = (args: { hardware: string | number } | [hardware: string | number ] |
 
 /**
 * @see \App\Http\Controllers\Hardwares\HardwareController::show
-* @see app/Http/Controllers/Hardwares/HardwareController.php:68
+* @see app/Http/Controllers/Hardwares/HardwareController.php:67
 * @route '/hardwares/{hardware}'
 */
 show.get = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -271,7 +271,7 @@ show.get = (args: { hardware: string | number } | [hardware: string | number ] |
 
 /**
 * @see \App\Http\Controllers\Hardwares\HardwareController::show
-* @see app/Http/Controllers/Hardwares/HardwareController.php:68
+* @see app/Http/Controllers/Hardwares/HardwareController.php:67
 * @route '/hardwares/{hardware}'
 */
 show.head = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -281,7 +281,7 @@ show.head = (args: { hardware: string | number } | [hardware: string | number ] 
 
 /**
 * @see \App\Http\Controllers\Hardwares\HardwareController::show
-* @see app/Http/Controllers/Hardwares/HardwareController.php:68
+* @see app/Http/Controllers/Hardwares/HardwareController.php:67
 * @route '/hardwares/{hardware}'
 */
 const showForm = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -291,7 +291,7 @@ const showForm = (args: { hardware: string | number } | [hardware: string | numb
 
 /**
 * @see \App\Http\Controllers\Hardwares\HardwareController::show
-* @see app/Http/Controllers/Hardwares/HardwareController.php:68
+* @see app/Http/Controllers/Hardwares/HardwareController.php:67
 * @route '/hardwares/{hardware}'
 */
 showForm.get = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -301,7 +301,7 @@ showForm.get = (args: { hardware: string | number } | [hardware: string | number
 
 /**
 * @see \App\Http\Controllers\Hardwares\HardwareController::show
-* @see app/Http/Controllers/Hardwares/HardwareController.php:68
+* @see app/Http/Controllers/Hardwares/HardwareController.php:67
 * @route '/hardwares/{hardware}'
 */
 showForm.head = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -318,7 +318,7 @@ show.form = showForm
 
 /**
 * @see \App\Http\Controllers\Hardwares\HardwareController::edit
-* @see app/Http/Controllers/Hardwares/HardwareController.php:83
+* @see app/Http/Controllers/Hardwares/HardwareController.php:82
 * @route '/hardwares/{hardware}/edit'
 */
 export const edit = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -333,7 +333,7 @@ edit.definition = {
 
 /**
 * @see \App\Http\Controllers\Hardwares\HardwareController::edit
-* @see app/Http/Controllers/Hardwares/HardwareController.php:83
+* @see app/Http/Controllers/Hardwares/HardwareController.php:82
 * @route '/hardwares/{hardware}/edit'
 */
 edit.url = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -360,7 +360,7 @@ edit.url = (args: { hardware: string | number } | [hardware: string | number ] |
 
 /**
 * @see \App\Http\Controllers\Hardwares\HardwareController::edit
-* @see app/Http/Controllers/Hardwares/HardwareController.php:83
+* @see app/Http/Controllers/Hardwares/HardwareController.php:82
 * @route '/hardwares/{hardware}/edit'
 */
 edit.get = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -370,7 +370,7 @@ edit.get = (args: { hardware: string | number } | [hardware: string | number ] |
 
 /**
 * @see \App\Http\Controllers\Hardwares\HardwareController::edit
-* @see app/Http/Controllers/Hardwares/HardwareController.php:83
+* @see app/Http/Controllers/Hardwares/HardwareController.php:82
 * @route '/hardwares/{hardware}/edit'
 */
 edit.head = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -380,7 +380,7 @@ edit.head = (args: { hardware: string | number } | [hardware: string | number ] 
 
 /**
 * @see \App\Http\Controllers\Hardwares\HardwareController::edit
-* @see app/Http/Controllers/Hardwares/HardwareController.php:83
+* @see app/Http/Controllers/Hardwares/HardwareController.php:82
 * @route '/hardwares/{hardware}/edit'
 */
 const editForm = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -390,7 +390,7 @@ const editForm = (args: { hardware: string | number } | [hardware: string | numb
 
 /**
 * @see \App\Http\Controllers\Hardwares\HardwareController::edit
-* @see app/Http/Controllers/Hardwares/HardwareController.php:83
+* @see app/Http/Controllers/Hardwares/HardwareController.php:82
 * @route '/hardwares/{hardware}/edit'
 */
 editForm.get = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -400,7 +400,7 @@ editForm.get = (args: { hardware: string | number } | [hardware: string | number
 
 /**
 * @see \App\Http\Controllers\Hardwares\HardwareController::edit
-* @see app/Http/Controllers/Hardwares/HardwareController.php:83
+* @see app/Http/Controllers/Hardwares/HardwareController.php:82
 * @route '/hardwares/{hardware}/edit'
 */
 editForm.head = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -417,7 +417,7 @@ edit.form = editForm
 
 /**
 * @see \App\Http\Controllers\Hardwares\HardwareController::update
-* @see app/Http/Controllers/Hardwares/HardwareController.php:97
+* @see app/Http/Controllers/Hardwares/HardwareController.php:95
 * @route '/hardwares/{hardware}'
 */
 export const update = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -432,7 +432,7 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\Hardwares\HardwareController::update
-* @see app/Http/Controllers/Hardwares/HardwareController.php:97
+* @see app/Http/Controllers/Hardwares/HardwareController.php:95
 * @route '/hardwares/{hardware}'
 */
 update.url = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -459,7 +459,7 @@ update.url = (args: { hardware: string | number } | [hardware: string | number ]
 
 /**
 * @see \App\Http\Controllers\Hardwares\HardwareController::update
-* @see app/Http/Controllers/Hardwares/HardwareController.php:97
+* @see app/Http/Controllers/Hardwares/HardwareController.php:95
 * @route '/hardwares/{hardware}'
 */
 update.put = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -469,7 +469,7 @@ update.put = (args: { hardware: string | number } | [hardware: string | number ]
 
 /**
 * @see \App\Http\Controllers\Hardwares\HardwareController::update
-* @see app/Http/Controllers/Hardwares/HardwareController.php:97
+* @see app/Http/Controllers/Hardwares/HardwareController.php:95
 * @route '/hardwares/{hardware}'
 */
 update.patch = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -479,7 +479,7 @@ update.patch = (args: { hardware: string | number } | [hardware: string | number
 
 /**
 * @see \App\Http\Controllers\Hardwares\HardwareController::update
-* @see app/Http/Controllers/Hardwares/HardwareController.php:97
+* @see app/Http/Controllers/Hardwares/HardwareController.php:95
 * @route '/hardwares/{hardware}'
 */
 const updateForm = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -494,7 +494,7 @@ const updateForm = (args: { hardware: string | number } | [hardware: string | nu
 
 /**
 * @see \App\Http\Controllers\Hardwares\HardwareController::update
-* @see app/Http/Controllers/Hardwares/HardwareController.php:97
+* @see app/Http/Controllers/Hardwares/HardwareController.php:95
 * @route '/hardwares/{hardware}'
 */
 updateForm.put = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -509,7 +509,7 @@ updateForm.put = (args: { hardware: string | number } | [hardware: string | numb
 
 /**
 * @see \App\Http\Controllers\Hardwares\HardwareController::update
-* @see app/Http/Controllers/Hardwares/HardwareController.php:97
+* @see app/Http/Controllers/Hardwares/HardwareController.php:95
 * @route '/hardwares/{hardware}'
 */
 updateForm.patch = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -526,7 +526,7 @@ update.form = updateForm
 
 /**
 * @see \App\Http\Controllers\Hardwares\HardwareController::destroy
-* @see app/Http/Controllers/Hardwares/HardwareController.php:112
+* @see app/Http/Controllers/Hardwares/HardwareController.php:110
 * @route '/hardwares/{hardware}'
 */
 export const destroy = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -541,7 +541,7 @@ destroy.definition = {
 
 /**
 * @see \App\Http\Controllers\Hardwares\HardwareController::destroy
-* @see app/Http/Controllers/Hardwares/HardwareController.php:112
+* @see app/Http/Controllers/Hardwares/HardwareController.php:110
 * @route '/hardwares/{hardware}'
 */
 destroy.url = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -568,7 +568,7 @@ destroy.url = (args: { hardware: string | number } | [hardware: string | number 
 
 /**
 * @see \App\Http\Controllers\Hardwares\HardwareController::destroy
-* @see app/Http/Controllers/Hardwares/HardwareController.php:112
+* @see app/Http/Controllers/Hardwares/HardwareController.php:110
 * @route '/hardwares/{hardware}'
 */
 destroy.delete = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -578,7 +578,7 @@ destroy.delete = (args: { hardware: string | number } | [hardware: string | numb
 
 /**
 * @see \App\Http\Controllers\Hardwares\HardwareController::destroy
-* @see app/Http/Controllers/Hardwares/HardwareController.php:112
+* @see app/Http/Controllers/Hardwares/HardwareController.php:110
 * @route '/hardwares/{hardware}'
 */
 const destroyForm = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -593,7 +593,7 @@ const destroyForm = (args: { hardware: string | number } | [hardware: string | n
 
 /**
 * @see \App\Http\Controllers\Hardwares\HardwareController::destroy
-* @see app/Http/Controllers/Hardwares/HardwareController.php:112
+* @see app/Http/Controllers/Hardwares/HardwareController.php:110
 * @route '/hardwares/{hardware}'
 */
 destroyForm.delete = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

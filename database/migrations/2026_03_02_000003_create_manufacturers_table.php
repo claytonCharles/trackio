@@ -16,6 +16,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('created_by')->constrained('users');
             $table->foreignId('updated_by')->constrained('users');
+            $table->string('cnpj', 14)->nullable()->unique();
             $table->string('name');
             $table->timestamps();
             $table->softDeletes();
@@ -25,6 +26,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('manufacturer_id')->constrained('manufacturers');
             $table->foreignId('updated_by')->constrained('users');
+            $table->string('cnpj', 14)->nullable();
             $table->string('name');
             $table->softDeletes();
             $table->string('modified_at')->useCurrent();
@@ -36,9 +38,9 @@ return new class extends Migration
                 RETURNS TRIGGER AS $$
                 BEGIN
                     INSERT INTO history_manufacturers
-                        (manufacturer_id, updated_by, name, deleted_at, modified_at)
+                        (manufacturer_id, updated_by, cnpj, name, deleted_at, modified_at)
                     VALUES 
-                        (OLD.id, OLD.updated_by, OLD.name, OLD.deleted_at, NOW());
+                        (OLD.id, OLD.updated_by, OLD.cnpj, OLD.name, OLD.deleted_at, NOW());
                     
                     RETURN NEW;
                 END;

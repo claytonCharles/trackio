@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Models\Hardwares\Hardware;
 use App\Models\Hardwares\HardwareCategory;
+use App\Models\Hardwares\HardwareStatus;
+use App\Models\Manufacturers\Manufacturer;
 use App\Models\User;
 use Carbon\Carbon;
 use Exception;
@@ -51,8 +53,11 @@ class HardwareService
         $result = [];
         try {
             $hardware = Hardware::create([
-                'user_id' => $user->id,
+                'created_by' => $user->id,
+                'updated_by' => $user->id,
                 'category_id' => $data['category_id'],
+                'status_id' => $data['status_id'],
+                'manufacturer_id' => $data['manufacturer_id'],
                 'inventory_number' => $data['inventory_number'],
                 'serial_number' => $data['serial_number'],
                 'name' => $data['name'],
@@ -80,7 +85,7 @@ class HardwareService
         $result = [];
         try {
             $hardware = Hardware::findOrFail($id);
-            $data['user_id'] = $user->id;
+            $data['updated_by'] = $user->id;
             $hardware->update($data);
             $result = $hardware->toArray();
 
@@ -105,7 +110,7 @@ class HardwareService
         try {
             $hardware = Hardware::findOrFail($id);
             $hardware->update([
-                'user_id' => $user->id,
+                'updated_by' => $user->id,
                 'deleted_at' => Carbon::now(),
             ]);
 
@@ -118,16 +123,15 @@ class HardwareService
         return $message;
     }
 
-
-    /**
-     * Lista as categorias de hardware existente.
-     * @return array
-     */
-    public function getAllHardwareCategories(): array
+    public function getAllComplements(): array
     {
-        $result = [];
+        $result =  [];
         try {
-            $result = HardwareCategory::all(['id', 'name'])->toArray();
+            $result = [
+                'listCategories' => HardwareCategory::all(['id', 'name'])->toArray(),
+                'listStatus' => HardwareStatus::all(['id', 'name'])->toArray(),
+                'listManufacturers' => Manufacturer::all(['id', 'name'])->toArray()
+            ];
         } catch(Exception $exc) {
             LogService::error("Falhou resgatar a listagem de Categorias de Hardware! ERROR: {$exc->getMessage()}");
         }
@@ -144,7 +148,14 @@ class HardwareService
     {
         $result = [];
         try {
-            $hardware = Hardware::with(['category:id,name', 'user:id,name'])->findOrFail($id);
+            $hardware = Hardware::with([
+                'category:id,name',
+                'status:id,name',
+                'manufacturer:id,name',
+                'createdBy:id,name',
+                'updatedBy:id,name'
+            ])->findOrFail($id);
+
             $result = $hardware->toArray();
         } catch(Exception $exc) {
             LogService::error("Falhou resgatar as informações do Hardware #$id! ERROR: {$exc->getMessage()}");

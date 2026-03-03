@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Hardwares\HardwareController;
+use App\Http\Controllers\Manufacturers\ManufactureController;
 use App\Http\Controllers\RoleController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -16,6 +17,7 @@ Route::middleware(['auth'])->group(function () {
 
     Route::resource('roles', RoleController::class);
     Route::resource('hardwares', HardwareController::class);
+    Route::resource('manufacturer', ManufactureController::class)->only(['store', 'update', 'destroy']);
 });
 
 require __DIR__ . '/settings.php';

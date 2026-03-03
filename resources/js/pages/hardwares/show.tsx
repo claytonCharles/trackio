@@ -13,12 +13,11 @@ type Hardware = {
   inventory_number: string | null;
   description: string;
   updated_at_formatted: string;
-  category: {
-    name: string;
-  };
-  user: {
-    name: string;
-  };
+  category: { name: string; };
+  status: { name: string; };
+  manufacturer: { name: string; };
+  created_by: { name: string; };
+  updated_by: { name: string; };
 };
 
 type Props = {
@@ -77,8 +76,16 @@ export default function ShowHardware({ hardware }: Props) {
                   <td className="px-4">{hardware.name}</td>
                 </tr>
                 <tr className="border">
+                  <td className="p-4 border">Fabricante:</td>
+                  <td className="px-4">{hardware.manufacturer.name}</td>
+                </tr>
+                <tr className="border">
                   <td className="p-4 border">Categoria:</td>
                   <td className="px-4">{hardware.category.name}</td>
+                </tr>
+                <tr className="border">
+                  <td className="p-4 border">Status:</td>
+                  <td className="px-4">{hardware.status.name}</td>
                 </tr>
                 <tr className="border">
                   <td className="p-4 border">Tombamento:</td>
@@ -90,7 +97,7 @@ export default function ShowHardware({ hardware }: Props) {
                 </tr>
                 <tr className="border">
                   <td className="p-4 border">Última Atualização:</td>
-                  <td className="px-4">{hardware.updated_at_formatted} feita por {hardware.user.name}</td>
+                  <td className="px-4">{hardware.updated_at_formatted} feita por {hardware.updated_by.name}</td>
                 </tr>
               </tbody>
             </table>

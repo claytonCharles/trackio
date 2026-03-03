@@ -43,9 +43,8 @@ class HardwareController extends Controller
      */
     public function create()
     {
-        return Inertia::render('hardwares/save', [
-            'listCategories' => $this->hardwareService->getAllHardwareCategories()
-        ]);
+        $createComplements = $this->hardwareService->getAllComplements();
+        return Inertia::render('hardwares/save', $createComplements);
     }
 
     /**
@@ -82,12 +81,11 @@ class HardwareController extends Controller
      */
     public function edit(string $id)
     {
-        $hardware = Hardware::with('category:id,name')->findOrFail($id);
-        $listCategories = HardwareCategory::all();
-
+        $hardware = $this->hardwareService->getHardwareInfoById($id);
+        $complements = $this->hardwareService->getAllComplements();
         return Inertia::render('hardwares/save', [
             'hardware' => $hardware,
-            'listCategories' => $listCategories,
+            ...$complements
         ]);
     }
 

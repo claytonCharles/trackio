@@ -23,6 +23,8 @@ class HardwareSaveRequest extends FormRequest
     {
         return [
             'category_id' => ['required', 'int', 'exists:hardware_categories,id'],
+            'status_id' => ['required', 'int', 'exists:hardware_status,id'],
+            'manufacturer_id' => ['required', 'int', 'exists:manufacturers,id'],
             'inventory_number' => ['nullable', 'string'],
             'serial_number' => ['nullable', 'string'],
             'name' => ['required', 'string'],
