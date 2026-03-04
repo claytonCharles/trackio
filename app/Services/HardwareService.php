@@ -19,15 +19,9 @@ class HardwareService
      */
     public function searchHardwares(array $filters): array
     {
-        $query = Hardware::with('category:id,name');
-        if (! empty($filters['search'])) {
-            $term = strip_tags($filters['search']);
-            $query->where('name', 'LIKE', "%{$term}%")
-                ->orWhere('inventory_number', 'LIKE', "%{$term}%")
-                ->orWhere('serial_number', 'LIKE', "%{$term}%");
-        }
-
-        $paginated = $query
+        $term = strip_tags($filters['search']);
+        $paginated = Hardware::with(['category:id,name'])
+            ->search($term)
             ->orderBy('id')
             ->paginate(10);
 

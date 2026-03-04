@@ -5,6 +5,7 @@ namespace App\Models\Hardwares;
 use App\Models\Manufacturers\Manufacturer;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Hardware extends Model
@@ -40,33 +41,44 @@ class Hardware extends Model
         ];
     }
 
-    public function createdBy()
+    public function createdBy(): BelongsTo
     {
-        return $this->hasOne(User::class, 'id', 'created_by');
+        return $this->belongsTo(User::class, 'created_by');
     }
 
-    public function updatedBy()
+    public function updatedBy(): BelongsTo
     {
-        return $this->hasOne(User::class, 'id', 'updated_by');
+        return $this->belongsTo(User::class, 'updated_by');
     }
 
-    public function category()
+    public function category(): BelongsTo
     {
-        return $this->hasOne(HardwareCategory::class, 'id', 'category_id');
+        return $this->belongsTo(HardwareCategory::class, 'category_id');
     }
 
-    public function status()
+    public function status(): BelongsTo
     {
-        return $this->hasOne(HardwareStatus::class, 'id', 'status_id');
+        return $this->belongsTo(HardwareStatus::class, 'status_id');
     }
 
-    public function manufacturer()
+    public function manufacturer(): BelongsTo
     {
-        return $this->hasOne(Manufacturer::class, 'id', 'manufacturer_id');
+        return $this->belongsTo(Manufacturer::class, 'manufacturer_id');
     }
 
     public function getUpdatedAtFormattedAttribute()
     {
         return $this->updated_at->subHours(3)->format('d/m/Y à\s H:i');
+    }
+
+    public function scopeSearch($query, ?string $search) 
+    {
+        if (blank($search)) return $query;
+
+        return $query->where(fn($q) => 
+            $q->where('name', 'ilike', "%{$search}%")
+              ->orWhere('serial_number', 'ilike', "%{$search}%")
+              ->orWhere('inventory_number', 'ilike', "%{$search}%")
+        );
     }
 }
