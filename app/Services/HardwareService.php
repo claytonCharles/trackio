@@ -19,7 +19,7 @@ class HardwareService
      */
     public function searchHardwares(array $filters): array
     {
-        $term = strip_tags($filters['search']);
+        $term = strip_tags($filters['search'] ?? "");
         $paginated = Hardware::with(['category:id,name'])
             ->search($term)
             ->orderBy('id')
