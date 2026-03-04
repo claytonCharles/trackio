@@ -2,10 +2,14 @@
 
 namespace App\Models\Hardwares;
 
+use App\Models\Machines\Machine;
+use App\Models\Machines\MachineHardware;
 use App\Models\Manufacturers\Manufacturer;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Hardware extends Model
@@ -26,8 +30,6 @@ class Hardware extends Model
         'description',
         'deleted_at',
     ];
-
-    protected $appends = ['updated_at_formatted'];
 
     /**
      * Get the attributes that should be cast.
@@ -66,19 +68,37 @@ class Hardware extends Model
         return $this->belongsTo(Manufacturer::class, 'manufacturer_id');
     }
 
-    public function getUpdatedAtFormattedAttribute()
+    public function histories(): HasMany
     {
-        return $this->updated_at->subHours(3)->format('d/m/Y à\s H:i');
+        return $this->hasMany(HardwareHistory::class)->latest('modified_at');
     }
 
-    public function scopeSearch($query, ?string $search) 
+    public function machineHardware()
     {
-        if (blank($search)) return $query;
+        return $this->hasOne(MachineHardware::class);
+    }
 
-        return $query->where(fn($q) => 
-            $q->where('name', 'ilike', "%{$search}%")
-              ->orWhere('serial_number', 'ilike', "%{$search}%")
-              ->orWhere('inventory_number', 'ilike', "%{$search}%")
+    public function machine(): HasOneThrough
+    {
+        return $this->hasOneThrough(
+            Machine::class,
+            MachineHardware::class,
+            'hardware_id',
+            'id',
+            'id',
+            'machine_id'
+        );
+    }
+
+    public function scopeSearch($query, ?string $search)
+    {
+        if (blank($search)) {
+            return $query;
+        }
+
+        return $query->where(fn ($q) => $q->where('name', 'ilike', "%{$search}%")
+            ->orWhere('serial_number', 'ilike', "%{$search}%")
+            ->orWhere('inventory_number', 'ilike', "%{$search}%")
         );
     }
 }

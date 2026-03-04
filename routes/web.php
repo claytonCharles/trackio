@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Hardwares\HardwareController;
+use App\Http\Controllers\Machines\MachineController;
 use App\Http\Controllers\Manufacturers\ManufactureController;
 use App\Http\Controllers\RoleController;
 use Illuminate\Support\Facades\Route;
@@ -18,6 +19,7 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('roles', RoleController::class);
     Route::resource('hardwares', HardwareController::class);
     Route::resource('manufacturer', ManufactureController::class)->only(['store', 'update', 'destroy']);
+    Route::resource('machines', MachineController::class);
 });
 
 require __DIR__ . '/settings.php';

@@ -19,7 +19,7 @@ class HardwareService
      */
     public function searchHardwares(array $filters): array
     {
-        $term = strip_tags($filters['search'] ?? "");
+        $term = strip_tags($filters['search'] ?? '');
         $paginated = Hardware::with(['category:id,name'])
             ->search($term)
             ->orderBy('id')
@@ -38,9 +38,6 @@ class HardwareService
 
     /**
      * Cadastro de um Hardware no sistema.
-     * @param array $data
-     * @param User $user
-     * @return array
      */
     public function storeHardware(array $data, User $user): array
     {
@@ -69,10 +66,6 @@ class HardwareService
 
     /**
      * Atualiza um hardware existente no sistema.
-     * @param array $data
-     * @param string $id
-     * @param User $user
-     * @return array
      */
     public function updateHardware(array $data, string $id, User $user): array
     {
@@ -94,9 +87,6 @@ class HardwareService
     /**
      * Desativa um hardware do sistema.
      * Desativações são apenas exclusão logica no sistema.
-     * @param string $id
-     * @param User $user
-     * @return string
      */
     public function deactivateHardware(string $id, User $user): string
     {
@@ -119,24 +109,22 @@ class HardwareService
 
     public function getAllComplements(): array
     {
-        $result =  [];
+        $result = [];
         try {
             $result = [
                 'listCategories' => HardwareCategory::all(['id', 'name'])->toArray(),
                 'listStatus' => HardwareStatus::all(['id', 'name'])->toArray(),
-                'listManufacturers' => Manufacturer::all(['id', 'name'])->toArray()
+                'listManufacturers' => Manufacturer::all(['id', 'name'])->toArray(),
             ];
-        } catch(Exception $exc) {
+        } catch (Exception $exc) {
             LogService::error("Falhou resgatar a listagem de Categorias de Hardware! ERROR: {$exc->getMessage()}");
         }
+
         return $result;
     }
 
-
     /**
      * Resgata as informações completa o hardware o buscando pelo id.
-     * @param string $id
-     * @return array
      */
     public function getHardwareInfoById(string $id): array
     {
@@ -147,12 +135,60 @@ class HardwareService
                 'status:id,name',
                 'manufacturer:id,name',
                 'createdBy:id,name',
-                'updatedBy:id,name'
+                'updatedBy:id,name',
             ])->findOrFail($id);
 
             $result = $hardware->toArray();
-        } catch(Exception $exc) {
+        } catch (Exception $exc) {
             LogService::error("Falhou resgatar as informações do Hardware #$id! ERROR: {$exc->getMessage()}");
+        }
+
+        return $result;
+    }
+
+    /**
+     * Carrega os dados completos do hardware desejado.
+     */
+    public function loadFullHardware(Hardware $hardware): array
+    {
+        $result = [];
+        try {
+            $hardware->load([
+                'category:id,name',
+                'status:id,name',
+                'manufacturer:id,name',
+                'createdBy:id,name',
+                'updatedBy:id,name',
+                'machineHardware.machine:id,name',
+                'histories.category:id,name',
+                'histories.status:id,name',
+                'histories.manufacturer:id,name',
+                'histories.updatedBy:id,name',
+            ]);
+
+            $result = [
+                ...$hardware->toArray(),
+                'updated_at_formatted' => $hardware->updated_at->subHour(3)->format('d/m/Y à\s H:i'),
+                'machine' => $hardware->machineHardware?->machine
+                    ? ['id' => $hardware->machineHardware->machine->id, 'name' => $hardware->machineHardware->machine->name]
+                    : null,
+                'histories' => $hardware->histories->map(fn ($h) => [
+                    'id' => $h->id,
+                    'name' => $h->name,
+                    'serial_number' => $h->serial_number,
+                    'inventory_number' => $h->inventory_number,
+                    'description' => $h->description,
+                    'modified_at' => Carbon::parse($h->modified_at)->subHour(3)->format('d/m/Y à\s H:i'),
+                    'category' => $h->category,
+                    'status' => $h->status,
+                    'manufacturer' => $h->manufacturer,
+                    'updated_by' => $h->updatedBy,
+                ]),
+            ];
+        } catch (Exception $exc) {
+            LogService::error(
+                "Falhou resgatar as informações completa do Hardware #{$hardware->id}! ERROR: {$exc->getMessage()}"
+            );
         }
 
         return $result;

@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\Hardwares\HardwareCategory;
 use App\Models\Hardwares\HardwareStatus;
+use App\Models\Machines\MachineStatus;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -31,6 +32,10 @@ class DatabaseSeeder extends Seeder
         Permission::create(['name' => 'write hardwares', 'resource' => 'hardware']);
         Permission::create(['name' => 'delete hardwares', 'resource' => 'hardware']);
 
+        Permission::create(['name' => 'read machines', 'resource' => 'machine']);
+        Permission::create(['name' => 'write machines', 'resource' => 'machine']);
+        Permission::create(['name' => 'delete machines', 'resource' => 'machine']);
+
         Role::create(['name' => 'admin', 'is_system_role' => true])->givePermissionTo(Permission::all());
 
         $userAdmin = User::factory()->create(['name' => 'Admin System', 'email' => 'admin@admin.com'])->assignRole('admin');
@@ -50,5 +55,11 @@ class DatabaseSeeder extends Seeder
         HardwareStatus::create([...$creator, 'name' => 'Vinculado']);
         HardwareStatus::create([...$creator, 'name' => 'Defeituoso']);
         HardwareStatus::create([...$creator, 'name' => 'Em Garantia']);
+
+        MachineStatus::create([...$creator, 'name' => 'Armazenado']);
+        MachineStatus::create([...$creator, 'name' => 'Defeituoso']);
+        MachineStatus::create([...$creator, 'name' => 'Em Uso']);
+        MachineStatus::create([...$creator, 'name' => 'Em Espera']);
+        MachineStatus::create([...$creator, 'name' => 'Em Garantia']);
     }
 }

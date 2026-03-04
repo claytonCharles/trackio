@@ -222,7 +222,7 @@ store.form = storeForm
 * @see app/Http/Controllers/Hardwares/HardwareController.php:68
 * @route '/hardwares/{hardware}'
 */
-export const show = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+export const show = (args: { hardware: number | { id: number } } | [hardware: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
     method: 'get',
 })
@@ -237,9 +237,13 @@ show.definition = {
 * @see app/Http/Controllers/Hardwares/HardwareController.php:68
 * @route '/hardwares/{hardware}'
 */
-show.url = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions) => {
+show.url = (args: { hardware: number | { id: number } } | [hardware: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
     if (typeof args === 'string' || typeof args === 'number') {
         args = { hardware: args }
+    }
+
+    if (typeof args === 'object' && !Array.isArray(args) && 'id' in args) {
+        args = { hardware: args.id }
     }
 
     if (Array.isArray(args)) {
@@ -251,7 +255,9 @@ show.url = (args: { hardware: string | number } | [hardware: string | number ] |
     args = applyUrlDefaults(args)
 
     const parsedArgs = {
-        hardware: args.hardware,
+        hardware: typeof args.hardware === 'object'
+        ? args.hardware.id
+        : args.hardware,
     }
 
     return show.definition.url
@@ -264,7 +270,7 @@ show.url = (args: { hardware: string | number } | [hardware: string | number ] |
 * @see app/Http/Controllers/Hardwares/HardwareController.php:68
 * @route '/hardwares/{hardware}'
 */
-show.get = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
+show.get = (args: { hardware: number | { id: number } } | [hardware: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
     url: show.url(args, options),
     method: 'get',
 })
@@ -274,7 +280,7 @@ show.get = (args: { hardware: string | number } | [hardware: string | number ] |
 * @see app/Http/Controllers/Hardwares/HardwareController.php:68
 * @route '/hardwares/{hardware}'
 */
-show.head = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
+show.head = (args: { hardware: number | { id: number } } | [hardware: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
     url: show.url(args, options),
     method: 'head',
 })
@@ -284,7 +290,7 @@ show.head = (args: { hardware: string | number } | [hardware: string | number ] 
 * @see app/Http/Controllers/Hardwares/HardwareController.php:68
 * @route '/hardwares/{hardware}'
 */
-const showForm = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+const showForm = (args: { hardware: number | { id: number } } | [hardware: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, options),
     method: 'get',
 })
@@ -294,7 +300,7 @@ const showForm = (args: { hardware: string | number } | [hardware: string | numb
 * @see app/Http/Controllers/Hardwares/HardwareController.php:68
 * @route '/hardwares/{hardware}'
 */
-showForm.get = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+showForm.get = (args: { hardware: number | { id: number } } | [hardware: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, options),
     method: 'get',
 })
@@ -304,7 +310,7 @@ showForm.get = (args: { hardware: string | number } | [hardware: string | number
 * @see app/Http/Controllers/Hardwares/HardwareController.php:68
 * @route '/hardwares/{hardware}'
 */
-showForm.head = (args: { hardware: string | number } | [hardware: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
+showForm.head = (args: { hardware: number | { id: number } } | [hardware: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
     action: show.url(args, {
         [options?.mergeQuery ? 'mergeQuery' : 'query']: {
             _method: 'HEAD',

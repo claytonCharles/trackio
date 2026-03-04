@@ -65,9 +65,9 @@ class HardwareController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(string $id)
+    public function show(Hardware $hardware)
     {
-        $hardware = $this->hardwareService->getHardwareInfoById($id);
+        $hardware = $this->hardwareService->loadFullHardware($hardware);
         if (empty($hardware)) {
             abort(404);
         }

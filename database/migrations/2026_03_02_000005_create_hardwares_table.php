@@ -39,7 +39,7 @@ return new class extends Migration
             $table->string('name');
             $table->text('description');
             $table->softDeletes();
-            $table->string('modified_at')->useCurrent();
+            $table->timestamp('modified_at');
         });
 
         if (DB::getDriverName() === 'pgsql') {
@@ -51,7 +51,6 @@ return new class extends Migration
                         (hardware_id, updated_by, category_id, status_id, manufacturer_id, inventory_number, serial_number, name, description, deleted_at, modified_at)
                     VALUES 
                         (OLD.id, OLD.updated_by, OLD.category_id, OLD.manufacturer_id, OLD.status_id, OLD.inventory_number, OLD.serial_number, OLD.name, OLD.description, OLD.deleted_at, NOW());
-                    
                     RETURN NEW;
                 END;
                 $$ LANGUAGE plpgsql;
