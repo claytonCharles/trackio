@@ -1,10 +1,12 @@
 <?php
 
-namespace App\Http\Requests\Hardwares;
+namespace App\Http\Requests\Manufacturers;
 
+use App\Models\Manufacturers\Manufacturer;
 use Illuminate\Foundation\Http\FormRequest;
+use Illuminate\Validation\Rule;
 
-class HardwareSaveRequest extends FormRequest
+class ManufacturerSaveRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
@@ -22,11 +24,7 @@ class HardwareSaveRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'category_id' => ['required', 'int', 'exists:hardware_categories,id'],
-            'inventory_number' => ['nullable', 'string'],
-            'serial_number' => ['nullable', 'string'],
-            'name' => ['required', 'string'],
-            'description' => ['required', 'string'],
+            'name' => ['required', 'string', 'max:255', Rule::unique(Manufacturer::class)]
         ];
     }
 }

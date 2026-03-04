@@ -14,8 +14,11 @@ return new class extends Migration
     {
         Schema::create('hardwares', function (Blueprint $table) {
             $table->id();
-            $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('created_by')->constrained('users');
+            $table->foreignId('updated_by')->constrained('users');
             $table->foreignId('category_id')->constrained('hardware_categories');
+            $table->foreignId('status_id')->constrained('hardware_status');
+            $table->foreignId('manufacturer_id')->constrained('manufacturers');
             $table->string('inventory_number')->nullable()->unique();
             $table->string('serial_number')->nullable()->unique();
             $table->string('name');
@@ -27,14 +30,16 @@ return new class extends Migration
         Schema::create('history_hardware', function (Blueprint $table) {
             $table->id();
             $table->foreignId('hardware_id')->constrained('hardwares');
-            $table->foreignId('user_id')->constrained('users');
+            $table->foreignId('updated_by')->constrained('users');
             $table->foreignId('category_id')->constrained('hardware_categories');
+            $table->foreignId('status_id')->constrained('hardware_status');
+            $table->foreignId('manufacturer_id')->constrained('manufacturers');
             $table->string('inventory_number')->nullable();
             $table->string('serial_number')->nullable();
             $table->string('name');
             $table->text('description');
             $table->softDeletes();
-            $table->string('modified_at')->useCurrent();
+            $table->timestamp('modified_at');
         });
 
         if (DB::getDriverName() === 'pgsql') {
@@ -43,10 +48,9 @@ return new class extends Migration
                 RETURNS TRIGGER AS $$
                 BEGIN
                     INSERT INTO history_hardware 
-                        (hardware_id, user_id, category_id, inventory_number, serial_number, name, description, deleted_at, modified_at)
+                        (hardware_id, updated_by, category_id, status_id, manufacturer_id, inventory_number, serial_number, name, description, deleted_at, modified_at)
                     VALUES 
-                        (OLD.id, OLD.user_id, OLD.category_id, OLD.inventory_number, OLD.serial_number, OLD.name, OLD.description, OLD.deleted_at, NOW());
-                    
+                        (OLD.id, OLD.updated_by, OLD.category_id, OLD.manufacturer_id, OLD.status_id, OLD.inventory_number, OLD.serial_number, OLD.name, OLD.description, OLD.deleted_at, NOW());
                     RETURN NEW;
                 END;
                 $$ LANGUAGE plpgsql;

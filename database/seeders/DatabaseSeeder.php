@@ -3,6 +3,8 @@
 namespace Database\Seeders;
 
 use App\Models\Hardwares\HardwareCategory;
+use App\Models\Hardwares\HardwareStatus;
+use App\Models\Machines\MachineStatus;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -22,38 +24,42 @@ class DatabaseSeeder extends Seeder
         Permission::create(['name' => 'write roles', 'resource' => 'role']);
         Permission::create(['name' => 'delete roles', 'resource' => 'role']);
 
+        Permission::create(['name' => 'read manufacturers', 'resource' => 'manufacturer']);
+        Permission::create(['name' => 'write manufacturers', 'resource' => 'manufacturer']);
+        Permission::create(['name' => 'delete manufacturers', 'resource' => 'manufacturer']);
+
         Permission::create(['name' => 'read hardwares', 'resource' => 'hardware']);
         Permission::create(['name' => 'write hardwares', 'resource' => 'hardware']);
         Permission::create(['name' => 'delete hardwares', 'resource' => 'hardware']);
 
-        Role::create([
-            'name' => 'admin',
-            'is_system_role' => true
-        ])->givePermissionTo(Permission::all());
+        Permission::create(['name' => 'read machines', 'resource' => 'machine']);
+        Permission::create(['name' => 'write machines', 'resource' => 'machine']);
+        Permission::create(['name' => 'delete machines', 'resource' => 'machine']);
 
-        Role::create(['name' => 'manager'])->givePermissionTo(
-            Permission::where('resource', 'hardware')->get()
-        );
+        Role::create(['name' => 'admin', 'is_system_role' => true])->givePermissionTo(Permission::all());
 
-        $userAdmin = User::factory()->create([
-            'name' => 'Admin System',
-            'email' => 'admin@admin.com',
-        ])->assignRole('admin');
-
-        User::factory()->create([
-            'name' => 'Manager User',
-            'email' => 'manager@example.com',
-        ])->assignRole('manager');
-
+        $userAdmin = User::factory()->create(['name' => 'Admin System', 'email' => 'admin@admin.com'])->assignRole('admin');
         $adminId = $userAdmin->id;
-        
-        HardwareCategory::create(['user_id' => $adminId, 'name' => 'CPU', 'is_system_category' => true]);
-        HardwareCategory::create(['user_id' => $adminId, 'name' => 'GPU', 'is_system_category' => true]);
-        HardwareCategory::create(['user_id' => $adminId, 'name' => 'RAM', 'is_system_category' => true]);
-        HardwareCategory::create(['user_id' => $adminId, 'name' => 'HDD', 'is_system_category' => true]);
-        HardwareCategory::create(['user_id' => $adminId, 'name' => 'PSU', 'is_system_category' => true]);
-        HardwareCategory::create(['user_id' => $adminId, 'name' => 'Placa Mãe', 'is_system_category' => true]);
-        HardwareCategory::create(['user_id' => $adminId, 'name' => 'Monitor', 'is_system_category' => true]);
-        HardwareCategory::create(['user_id' => $adminId, 'name' => 'Acessórios', 'is_system_category' => true]);
+        $creator = ['created_by' => $adminId, 'updated_by' => $adminId];
+
+        HardwareCategory::create([...$creator, 'name' => 'CPU', 'is_system_category' => true]);
+        HardwareCategory::create([...$creator, 'name' => 'GPU', 'is_system_category' => true]);
+        HardwareCategory::create([...$creator, 'name' => 'RAM', 'is_system_category' => true]);
+        HardwareCategory::create([...$creator, 'name' => 'HDD', 'is_system_category' => true]);
+        HardwareCategory::create([...$creator, 'name' => 'PSU', 'is_system_category' => true]);
+        HardwareCategory::create([...$creator, 'name' => 'Placa Mãe', 'is_system_category' => true]);
+        HardwareCategory::create([...$creator, 'name' => 'Monitor', 'is_system_category' => true]);
+        HardwareCategory::create([...$creator, 'name' => 'Acessórios', 'is_system_category' => true]);
+
+        HardwareStatus::create([...$creator, 'name' => 'Armazenado']);
+        HardwareStatus::create([...$creator, 'name' => 'Vinculado']);
+        HardwareStatus::create([...$creator, 'name' => 'Defeituoso']);
+        HardwareStatus::create([...$creator, 'name' => 'Em Garantia']);
+
+        MachineStatus::create([...$creator, 'name' => 'Armazenado']);
+        MachineStatus::create([...$creator, 'name' => 'Defeituoso']);
+        MachineStatus::create([...$creator, 'name' => 'Em Uso']);
+        MachineStatus::create([...$creator, 'name' => 'Em Espera']);
+        MachineStatus::create([...$creator, 'name' => 'Em Garantia']);
     }
 }

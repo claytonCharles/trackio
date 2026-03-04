@@ -3,10 +3,12 @@
 namespace Tests\Feature\Hardwares;
 
 use App\Models\Hardwares\HardwareCategory;
-use Spatie\Permission\Models\Permission;
-use Spatie\Permission\Models\Role;
+use App\Models\Hardwares\HardwareStatus;
+use App\Models\Manufacturers\Manufacturer;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 use Tests\TestCase;
 
 class HardwareControllerTest extends TestCase
@@ -30,10 +32,14 @@ class HardwareControllerTest extends TestCase
         $this->managerUser = User::factory()->create();
         $this->managerUser->assignRole('manager');
 
-        HardwareCategory::create([
-            'user_id' => $this->managerUser->id,
-            'name' => 'tester'
-        ]);
+        $creator = [
+            'created_by' => $this->managerUser->id,
+            'updated_by' => $this->managerUser->id,
+        ];
+
+        HardwareStatus::create([...$creator, 'name' => 'testing']);
+        HardwareCategory::create([...$creator, 'name' => 'tester']);
+        Manufacturer::create([...$creator, 'name' => 'tester']);
     }
 
     public function test_hardware_list_page_is_displayed()
@@ -62,10 +68,12 @@ class HardwareControllerTest extends TestCase
                 'category_id' => 1,
                 'inventory_number' => null,
                 'serial_number' => null,
-                'name' => "Tester Hardware",
-                'description' => "Lorem ipsum dolor sit amet consectetur adipisicing elit."
+                'status_id' => 1,
+                'manufacturer_id' => 1,
+                'name' => 'Tester Hardware',
+                'description' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
             ]);
-        
+
         $response->assertRedirect(route('hardwares.show', ['hardware' => 1]));
     }
 
@@ -77,10 +85,12 @@ class HardwareControllerTest extends TestCase
                 'category_id' => 1,
                 'inventory_number' => null,
                 'serial_number' => null,
-                'name' => "Tester Hardware",
-                'description' => "Lorem ipsum dolor sit amet consectetur adipisicing elit."
+                'status_id' => 1,
+                'manufacturer_id' => 1,
+                'name' => 'Tester Hardware',
+                'description' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
             ]);
-        
+
         $response->assertForbidden();
     }
 
@@ -92,13 +102,14 @@ class HardwareControllerTest extends TestCase
                 'category_id' => 100,
                 'inventory_number' => null,
                 'serial_number' => null,
+                'status_id' => 10,
+                'manufacturer_id' => 3,
                 'name' => null,
-                'description' => null
+                'description' => null,
             ]);
-        
 
         $response->assertRedirectBack();
-        $response->assertSessionHasErrors(['name', 'category_id', 'description']);
+        $response->assertSessionHasErrors(['name', 'category_id', 'description', 'status_id', 'manufacturer_id']);
     }
 
     public function test_can_delete_hardware()
@@ -108,8 +119,10 @@ class HardwareControllerTest extends TestCase
                 'category_id' => 1,
                 'inventory_number' => null,
                 'serial_number' => null,
-                'name' => "Tester Hardware",
-                'description' => "Lorem ipsum dolor sit amet consectetur adipisicing elit."
+                'status_id' => 1,
+                'manufacturer_id' => 1,
+                'name' => 'Tester Hardware',
+                'description' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
             ]);
 
         $response = $this
@@ -117,7 +130,7 @@ class HardwareControllerTest extends TestCase
             ->delete(route('hardwares.destroy', ['hardware' => 1]));
 
         $response->assertRedirect(route('hardwares.index'));
-        $response->assertSessionHas('flashMsg', 'Desativação do Hardware#1 realizada com Sucesso!');        
+        $response->assertSessionHas('flashMsg', 'Desativação do Hardware#1 realizada com Sucesso!');
     }
 
     public function test_cant_delete_hardware()
@@ -127,8 +140,10 @@ class HardwareControllerTest extends TestCase
                 'category_id' => 1,
                 'inventory_number' => null,
                 'serial_number' => null,
-                'name' => "Tester Hardware",
-                'description' => "Lorem ipsum dolor sit amet consectetur adipisicing elit."
+                'status_id' => 1,
+                'manufacturer_id' => 1,
+                'name' => 'Tester Hardware',
+                'description' => 'Lorem ipsum dolor sit amet consectetur adipisicing elit.',
             ]);
 
         $response = $this
@@ -138,4 +153,3 @@ class HardwareControllerTest extends TestCase
         $response->assertForbidden();
     }
 }
-

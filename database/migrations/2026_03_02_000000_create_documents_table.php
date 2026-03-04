@@ -11,7 +11,13 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
+        Schema::create('documents', function (Blueprint $table) {
+            $table->id();
+            $table->foreignId('created_by')->constrained('users');
+            $table->foreignId('updated_by')->constrained('users');
+            $table->string('title')->unique()->index();
+            $table->longText('content');
+            $table->timestamps();
             $table->softDeletes();
         });
     }
@@ -21,8 +27,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->dropSoftDeletes(); 
-        });
+        Schema::dropIfExists('documents');
     }
 };

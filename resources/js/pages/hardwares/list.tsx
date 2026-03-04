@@ -15,6 +15,7 @@ import hardwares from "@/routes/hardwares";
 import { BreadcrumbItem, PaginationProps } from "@/types";
 import { Form, Head, Link } from "@inertiajs/react";
 import { Ellipsis, Eye, Pen, Settings, Trash } from "lucide-react";
+import { useRef } from "react";
 
 type Hardware = {
   id: number,
@@ -41,11 +42,13 @@ const breadcrumbs: BreadcrumbItem[] = [
   },
 ];
 
-export default function ListHardwares({ 
-  listHardwares, 
-  pagination, 
-  filters 
+export default function ListHardwares({
+  listHardwares,
+  pagination,
+  filters
 }: Props) {
+  const timeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Hardwares" />
@@ -54,8 +57,13 @@ export default function ListHardwares({
         <div className="container px-5">
           <div className="flex w-full justify-between items-center my-2">
             <Form
-              {...hardwares.index.form()}
               className="w-[25%]"
+              {...hardwares.index.form()}
+              options={{
+                preserveState: true,
+                preserveScroll: true,
+                replace: true
+              }}
             >
               {({ processing, errors }) => (
                 <>
@@ -68,8 +76,17 @@ export default function ListHardwares({
                       id="search"
                       name="search"
                       type="text"
+                      autoFocus={true}
                       defaultValue={filters.search}
                       placeholder="Digite aqui..."
+                      onChange={(e) => {
+                        const form = e.currentTarget.form;
+                        if (timeout.current) clearTimeout(timeout.current);
+
+                        timeout.current = setTimeout(() => {
+                          form?.requestSubmit();
+                        }, 300);
+                      }}
                     />
                   </div>
                 </>

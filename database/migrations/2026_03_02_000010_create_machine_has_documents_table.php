@@ -11,8 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('roles', function (Blueprint $table) {
-            $table->boolean('is_system_role')->default(false)->after('guard_name');
+        Schema::create('machine_has_documents', function (Blueprint $table) {
+            $table->id();
+            $table->timestamps();
         });
     }
 
@@ -21,8 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('roles', function (Blueprint $table) {
-            $table->dropColumn('is_system_role');
-        });
+        Schema::dropIfExists('machine_has_documents');
     }
 };

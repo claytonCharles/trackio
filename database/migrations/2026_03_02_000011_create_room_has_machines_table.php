@@ -11,8 +11,9 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('permissions', function (Blueprint $table) {
-            $table->string('resource')->nullable()->index()->after('name');
+        Schema::create('room_machines', function (Blueprint $table) {
+            $table->id();
+            $table->timestamps();
         });
     }
 
@@ -21,8 +22,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::table('permissions', function (Blueprint $table) {
-            $table->dropColumn('resource');
-        });
+        Schema::dropIfExists('room_machines');
     }
 };

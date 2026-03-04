@@ -40,5 +40,6 @@ WORKDIR /var/www
 # Copiando os arquivos do projeto
 COPY ./ ./
 
-RUN composer update
+RUN composer install
 RUN npm install
+RUN npm run build

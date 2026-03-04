@@ -2,6 +2,7 @@ services:
   traefik:
     image: traefik:v3.6.8
     container_name: traefik
+    restart: unless-stopped
     command:
       - --api.insecure=true
       - --providers.docker=true
@@ -52,6 +53,7 @@ services:
   nginx:
     image: nginx:stable-alpine
     container_name: trackio_nginx
+    restart: unless-stopped
     labels:
       - traefik.enable=true
       - traefik.http.routers.trackio.rule=Host(`trackio.dev.com`)

@@ -1,5 +1,5 @@
 import { Link } from "@inertiajs/react";
-import { BookOpen, CircuitBoard, Folder, Github, LayoutGrid } from "lucide-react";
+import { BookOpen, CircuitBoard, Computer, Folder, Github, LayoutGrid } from "lucide-react";
 import { NavFooter } from "@/components/default/nav-footer";
 import { NavMain } from "@/components/default/nav-main";
 import { NavUser } from "@/components/default/nav-user";
@@ -16,12 +16,18 @@ import type { NavItem } from "@/types";
 import AppLogo from "./app-logo";
 import { dashboard } from "@/routes";
 import hardwares from "@/routes/hardwares";
+import machines from "@/routes/machines";
 
 const mainNavItems: NavItem[] = [
   {
     title: "Dashboard",
     href: dashboard(),
     icon: LayoutGrid,
+  },
+  {
+    title: "Maquinas",
+    href: machines.index(),
+    icon: Computer,
   },
   {
     title: "Hardwares",
