@@ -13,4 +13,14 @@ class HardwareStatus extends Model
         'updated_by',
         'name',
     ];
+
+    public function scopeLinkedStatus($query)
+    {
+        return $query->where('name', 'Vinculado');
+    }
+
+    public function scopeStorageStatus($query)
+    {
+        return $query->where('name', 'Armazenado');
+    }
 }

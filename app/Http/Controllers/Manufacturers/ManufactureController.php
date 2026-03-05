@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Manufacturers;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Manufacturers\ManufacturerSaveRequest;
 use App\Services\ManufacturerService;
+use App\Support\FlashMsg;
 use Illuminate\Support\Facades\Auth;
 
 class ManufactureController extends Controller
@@ -26,10 +27,10 @@ class ManufactureController extends Controller
         $data = $request->validated();
         $manufacturer = $this->manufacturerService->storeManufacturer($data, $request->user());
         if (empty($manufacturer)) {
-            return back()->with('flashMsg', 'Não foi possivel realizar o cadastro do Fabricante!');
+            return back()->with('flashMsg', FlashMsg::error('Não foi possivel realizar o cadastro do Fabricante!'));
         }
 
-        return back()->with('flashMsg', "Cadastro do fabriante {$manufacturer['name']} realizado com sucesso!");
+        return back()->with('flashMsg', FlashMsg::success("Cadastro do fabriante {$manufacturer['name']} realizado com sucesso!"));
     }
 
     /**
@@ -41,10 +42,13 @@ class ManufactureController extends Controller
         $data = array_filter($data, fn ($value) => ! is_null($value));
         $manufacturer = $this->manufacturerService->updateManufacturer($data, $id, $request->user());
         if (empty($manufacturer)) {
-            return back()->with('flashMsg', 'Não foi possivel realizar a atualização do Fabricante!');
+            return back()->with('flashMsg', FlashMsg::error('Não foi possivel realizar a atualização do Fabricante!'));
         }
 
-        return back()->with('flashMsg', "Atualização do fabriante {$manufacturer['name']} realizado com sucesso!");
+        return back()->with(
+            'flashMsg', 
+            FlashMsg::success("Atualização do fabriante {$manufacturer['name']} realizado com sucesso!")
+        );
     }
 
     /**

@@ -58,6 +58,9 @@ class MachineController extends Controller
         $data = $request->validated();
         $machineProps = Arr::except($data, 'hardware_ids');
         $message = $this->machineService->storeMachine($machineProps, $data['hardware_ids']);
+        if ($message['type'] != 'success') {
+            return back()->with('flashMsg', $message);
+        }
 
         return redirect()->route('machines.index')->with('flashMsg', $message);
     }
