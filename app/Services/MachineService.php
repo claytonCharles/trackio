@@ -20,6 +20,7 @@ class MachineService
         $term = strip_tags($filters['search'] ?? '');
         $paginated = Machine::query()
             ->with(['manufacturer', 'status'])
+            ->withCount('machineHardwares')
             ->search($term)
             ->latest()
             ->paginate(10);

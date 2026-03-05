@@ -1,3 +1,4 @@
+import { MetaItem } from "@/components/custom/meta-item";
 import Pagination from "@/components/custom/pagination";
 import { Button } from "@/components/default/button";
 import {
@@ -12,19 +13,29 @@ import InputError from "@/components/default/input-error";
 import { Label } from "@/components/default/label";
 import AppLayout from "@/layouts/app-layout";
 import machines from "@/routes/machines";
-import { BreadcrumbItem, PaginationProps } from "@/types";
+import { BreadcrumbItem, PaginationProps, SimpleIdentifier } from "@/types";
 import { Form, Head, Link } from "@inertiajs/react";
-import { Ellipsis, Eye, Pen, Settings, Trash } from "lucide-react";
+import {
+  CpuIcon,
+  Ellipsis,
+  Eye,
+  HashIcon,
+  Pen,
+  PlusIcon,
+  ServerIcon,
+  Trash,
+} from "lucide-react";
+import { useRef } from "react";
 
-type Option = { id: number; name: string };
 
 type Machine = {
   id: number;
   name: string;
   serial_number: string | null;
   inventory_number: string | null;
-  manufacturer: Option;
-  status: Option;
+  manufacturer: SimpleIdentifier;
+  status: SimpleIdentifier;
+  machine_hardwares_count?: number;
 };
 
 type Props = {
@@ -34,119 +45,180 @@ type Props = {
 };
 
 const breadcrumbs: BreadcrumbItem[] = [
-  { title: "Máquinas", href: "#" },
+  { title: "Máquinas", href: machines.index().url },
 ];
+export default function MachinesIndex({
+  listMachines,
+  pagination,
+  filters
+}: Props) {
+  const timeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-export default function MachinesIndex({ listMachines, pagination, filters }: Props) {
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Máquinas" />
 
-      <div className="mt-5 flex w-full flex-col items-center justify-center">
-        <div className="container px-5">
-          <div className="my-2 flex w-full items-center justify-between">
-            <Form {...machines.index.form()} className="w-[25%]">
-              {({ errors }) => (
-                <div className="flex w-full flex-col gap-2">
-                  <div className="flex items-center gap-3">
-                    <Label htmlFor="search">Pesquisar</Label>
-                    <InputError message={errors.search} />
-                  </div>
-                  <Input
-                    id="search"
-                    name="search"
-                    type="text"
-                    defaultValue={filters.search}
-                    placeholder="Digite aqui..."
-                  />
-                </div>
-              )}
-            </Form>
-            <Link href={machines.create().url}>
-              <Button>Adicionar</Button>
-            </Link>
+      <div className="mt-5 flex w-full flex-col gap-6 px-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-foreground text-2xl font-bold tracking-tight">
+              Máquinas
+            </h2>
+            <p className="text-muted-foreground mt-1 text-sm">
+              {pagination.totalItems ?? listMachines.length} máquina(s) cadastrada(s)
+            </p>
           </div>
+          <Link href={machines.create().url}>
+            <Button className="gap-2">
+              <PlusIcon className="size-4" />
+              Adicionar
+            </Button>
+          </Link>
         </div>
 
-        <div className="container mt-3 px-5">
-          <table className="min-w-full border-collapse text-center text-sm">
-            <thead className="text-xs uppercase">
-              <tr className="border">
-                <th className="border px-3 py-4">Nome</th>
-                <th className="border px-3 py-4">Tombamento</th>
-                <th className="border px-3 py-4">Número de Série</th>
-                <th className="border px-3 py-4">Fabricante</th>
-                <th className="border px-3 py-4">Status</th>
-                <th className="flex items-center justify-center py-3">
-                  <Settings />
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {listMachines.length > 0 ? (
-                listMachines.map((machine) => (
-                  <tr key={machine.id} className="border hover:bg-muted">
-                    <td className="border px-3 py-4 text-start">{machine.name}</td>
-                    <td className="border px-3 py-4 text-start">
-                      {machine.inventory_number ?? "—"}
-                    </td>
-                    <td className="border px-3 py-4 text-start">
-                      {machine.serial_number ?? "—"}
-                    </td>
-                    <td className="border px-3 py-4">{machine.manufacturer.name}</td>
-                    <td className="border px-3 py-4">{machine.status.name}</td>
-                    <td className="py-4">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger>
-                          <Ellipsis className="cursor-pointer" />
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent>
-                          <DropdownMenuItem>
-                            <Link
-                              className="flex items-center gap-2"
-                              href={machines.show(machine.id).url}
-                            >
-                              <Eye className="h-4 w-4" />
-                              Visualizar
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem>
-                            <Link
-                              className="flex items-center gap-2"
-                              href={machines.edit(machine.id).url}
-                            >
-                              <Pen className="h-4 w-4" />
-                              Editar
-                            </Link>
-                          </DropdownMenuItem>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem variant="destructive">
-                            <Link
-                              className="flex items-center gap-2"
-                              href={machines.destroy(machine.id).url}
-                            >
-                              <Trash className="h-4 w-4" />
-                              Deletar
-                            </Link>
-                          </DropdownMenuItem>
-                        </DropdownMenuContent>
-                      </DropdownMenu>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={6}>Nenhuma Máquina encontrada!</td>
-                </tr>
-              )}
-            </tbody>
-          </table>
+        {/* Search */}
+        <Form
+          {...machines.index.form()}
+          className="w-full max-w-sm"
+          options={{
+            preserveState: true,
+            preserveScroll: true,
+            replace: true
+          }}
+        >
+          {({ errors }) => (
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-3">
+                <Label htmlFor="search">Pesquisar</Label>
+                <InputError message={errors.search} />
+              </div>
+              <Input
+                id="search"
+                name="search"
+                type="text"
+                defaultValue={filters.search}
+                placeholder="Nome, serial ou tombamento..."
+                onChange={(e) => {
+                  const form = e.currentTarget.form;
+                  if (timeout.current) clearTimeout(timeout.current);
 
-          <div className="h-10">
-            <Pagination pagination={pagination} />
+                  timeout.current = setTimeout(() => {
+                    form?.requestSubmit();
+                  }, 300);
+                }}
+              />
+            </div>
+          )}
+        </Form>
+
+        {/* Cards grid */}
+        {listMachines.length === 0 ? (
+          <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-20 text-center">
+            <ServerIcon className="text-muted-foreground/40 mb-4 size-12" />
+            <p className="text-muted-foreground font-medium">
+              Nenhuma máquina encontrada
+            </p>
+            <p className="text-muted-foreground mt-1 text-sm">
+              Tente ajustar o filtro ou cadastre uma nova máquina.
+            </p>
           </div>
-        </div>
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {listMachines.map((machine) => (
+              <MachineCard key={machine.id} machine={machine} />
+            ))}
+          </div>
+        )}
+
+        {/* Paginação */}
+        <Pagination pagination={pagination} />
       </div>
     </AppLayout>
+  );
+}
+
+function MachineCard({ machine }: { machine: Machine }) {
+  return (
+    <div className="group relative flex flex-col gap-4 rounded-xl border bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
+      {/* Topo — nome + dropdown */}
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="bg-muted flex size-9 shrink-0 items-center justify-center rounded-lg">
+            <ServerIcon className="text-muted-foreground size-4" />
+          </div>
+          <div className="min-w-0">
+            <p className="truncate font-semibold leading-tight">{machine.name}</p>
+            <p className="text-muted-foreground truncate text-xs">
+              {machine.manufacturer.name}
+            </p>
+          </div>
+        </div>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8 shrink-0 opacity-60 group-hover:opacity-100"
+            >
+              <Ellipsis className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <Link className="flex items-center gap-2" href={machines.show(machine.id).url}>
+                <Eye className="size-4" /> Visualizar
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link className="flex items-center gap-2" href={machines.edit(machine.id).url}>
+                <Pen className="size-4" /> Editar
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem variant="destructive" asChild>
+              <Link className="flex items-center gap-2" href={machines.destroy(machine.id).url}>
+                <Trash className="size-4" /> Deletar
+              </Link>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      {/* Metadados */}
+      <div className="grid grid-cols-2 gap-2 text-xs">
+        <MetaItem
+          icon={<HashIcon className="size-3" />}
+          label="Tombamento"
+          value={machine.inventory_number}
+        />
+        <MetaItem
+          icon={<HashIcon className="size-3" />}
+          label="Serial"
+          value={machine.serial_number}
+        />
+        {machine.machine_hardwares_count !== undefined && (
+          <MetaItem
+            icon={<CpuIcon className="size-3" />}
+            label="Hardwares"
+            value={String(machine.machine_hardwares_count)}
+          />
+        )}
+      </div>
+
+      {/* Rodapé — status */}
+      <div className="flex items-center justify-between border-t pt-3">
+        <span className="bg-secondary text-secondary-foreground rounded-full px-2.5 py-0.5 text-xs font-medium">
+          {machine.status.name}
+        </span>
+        <Link
+          href={machines.show(machine.id).url}
+          className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs transition-colors"
+        >
+          Ver detalhes →
+        </Link>
+      </div>
+    </div>
   );
 }
