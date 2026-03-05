@@ -1,8 +1,10 @@
-import { createContext, useContext, useState, useCallback, type ReactNode } from "react"
-import * as ToastPrimitive from "@radix-ui/react-toast"
+import {
+  createContext, useContext, useState,
+  useCallback, type ReactNode,
+} from "react"
 import { Toast, ToastViewport, type ToastProps, type ToastVariant } from "@/components/custom/toast"
 
-type ToastEntry = Omit<ToastProps, never>
+type ToastEntry = Omit<ToastProps, "onDismiss">
 
 type ToastContextType = {
   toast: (message: string, variant?: ToastVariant) => void
@@ -13,23 +15,23 @@ const ToastContext = createContext<ToastContextType | null>(null)
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastEntry[]>([])
 
+  const dismiss = useCallback((id: string) => {
+    setToasts((prev) => prev.filter((t) => t.id !== id))
+  }, [])
+
   const toast = useCallback((message: string, variant: ToastVariant = "default") => {
     const id = `${Date.now()}-${Math.random()}`
     setToasts((prev) => [...prev, { id, message, variant }])
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id))
-    }, 4500)
   }, [])
 
   return (
     <ToastContext.Provider value={{ toast }}>
-      <ToastPrimitive.Provider swipeDirection="right">
-        {children}
+      {children}
+      <ToastViewport>
         {toasts.map((t) => (
-          <Toast key={t.id} {...t} />
+          <Toast key={t.id} {...t} onDismiss={dismiss} />
         ))}
-        <ToastViewport />
-      </ToastPrimitive.Provider>
+      </ToastViewport>
     </ToastContext.Provider>
   )
 }

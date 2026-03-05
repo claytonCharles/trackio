@@ -1,59 +1,168 @@
-import * as ToastPrimitive from "@radix-ui/react-toast"
-import { cva, type VariantProps } from "class-variance-authority"
 import { CheckCircle, XCircle, AlertTriangle, Info, X } from "lucide-react"
 import { cn } from "@/lib/utils"
+import { ReactNode, useEffect, useRef, useState } from "react"
 
-export const toastVariants = cva(
-  "group pointer-events-auto relative flex w-full items-start gap-3 overflow-hidden rounded-lg border p-4 shadow-lg transition-all data-[swipe=cancel]:translate-x-0 data-[swipe=end]:translate-x-[var(--radix-toast-swipe-end-x)] data-[swipe=move]:translate-x-[var(--radix-toast-swipe-move-x)] data-[swipe=move]:transition-none data-[state=open]:animate-in data-[state=closed]:animate-out data-[swipe=end]:animate-out data-[state=closed]:fade-out-80 data-[state=closed]:slide-out-to-right-full data-[state=open]:slide-in-from-top-full",
-  {
-    variants: {
-      variant: {
-        success: "border-green-200 bg-green-50 text-green-900 dark:border-green-800 dark:bg-green-950 dark:text-green-100",
-        error: "border-red-200 bg-red-50 text-red-900 dark:border-red-800 dark:bg-red-950 dark:text-red-100",
-        warning: "border-yellow-200 bg-yellow-50 text-yellow-900 dark:border-yellow-800 dark:bg-yellow-950 dark:text-yellow-100",
-        default: "border bg-background text-foreground",
-      },
-    },
-    defaultVariants: { variant: "default" },
-  }
-)
+export type ToastVariant = "success" | "error" | "warning" | "default"
 
-const icons = {
-  success: <CheckCircle className="mt-0.5 size-5 shrink-0 text-green-600  dark:text-green-400" />,
-  error: <XCircle className="mt-0.5 size-5 shrink-0 text-red-600    dark:text-red-400" />,
-  warning: <AlertTriangle className="mt-0.5 size-5 shrink-0 text-yellow-600 dark:text-yellow-400" />,
-  default: <Info className="mt-0.5 size-5 shrink-0 text-muted-foreground" />,
-}
-
-export type ToastVariant = keyof typeof icons
-
-export interface ToastProps extends VariantProps<typeof toastVariants> {
+export interface ToastProps {
   id: string
   message: string
   variant?: ToastVariant
+  duration?: number
+  onDismiss: (id: string) => void
 }
 
-export function Toast({ id, message, variant = "default" }: ToastProps) {
+const DURATION = 4000
+
+const config: Record<ToastVariant, {
+  icon: React.ReactNode
+  bar: string
+  container: string
+  iconWrapper: string
+  closeBtn: string
+}> = {
+  success: {
+    icon: <CheckCircle className="size-5" />,
+    bar: "bg-green-500",
+    container: "border-green-200 bg-green-50 text-green-900 dark:border-green-800/60 dark:bg-green-950/90 dark:text-green-100",
+    iconWrapper: "text-green-600 dark:text-green-400",
+    closeBtn: "hover:bg-green-100 dark:hover:bg-green-900",
+  },
+  error: {
+    icon: <XCircle className="size-5" />,
+    bar: "bg-red-500",
+    container: "border-red-200 bg-red-50 text-red-900 dark:border-red-800/60 dark:bg-red-950/90 dark:text-red-100",
+    iconWrapper: "text-red-600 dark:text-red-400",
+    closeBtn: "hover:bg-red-100 dark:hover:bg-red-900",
+  },
+  warning: {
+    icon: <AlertTriangle className="size-5" />,
+    bar: "bg-yellow-500",
+    container: "border-yellow-200 bg-yellow-50 text-yellow-900 dark:border-yellow-800/60 dark:bg-yellow-950/90 dark:text-yellow-100",
+    iconWrapper: "text-yellow-600 dark:text-yellow-400",
+    closeBtn: "hover:bg-yellow-100 dark:hover:bg-yellow-900",
+  },
+  default: {
+    icon: <Info className="size-5" />,
+    bar: "bg-foreground/40",
+    container: "border bg-background text-foreground",
+    iconWrapper: "text-muted-foreground",
+    closeBtn: "hover:bg-muted",
+  },
+}
+
+export function Toast({
+  id,
+  message,
+  variant = "default",
+  duration = DURATION,
+  onDismiss,
+}: ToastProps) {
+  const { icon, bar, container, iconWrapper, closeBtn } = config[variant]
+
+  // "visible" controla entrada/saída via CSS
+  const [visible, setVisible] = useState(false)
+  const [progress, setProgress] = useState(100)
+
+  const pausedRef = useRef(false)
+  const remaining = useRef(duration)
+  const lastTickRef = useRef<number | null>(null)
+  const rafRef = useRef<number | null>(null)
+
+  // dispara animação de entrada no próximo frame
+  useEffect(() => {
+    const id = requestAnimationFrame(() => setVisible(true))
+    return () => cancelAnimationFrame(id)
+  }, [])
+
+  // fecha com animação: tira visible, espera transição acabar, remove do DOM
+  function dismiss() {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    setVisible(false)
+    setTimeout(() => onDismiss(id), 300) // mesmo tempo da transition de saída
+  }
+
+  // loop do timer — 100% no nosso controle
+  useEffect(() => {
+    const tick = (now: number) => {
+      if (!pausedRef.current) {
+        if (lastTickRef.current !== null) {
+          const delta = now - lastTickRef.current
+          remaining.current = Math.max(0, remaining.current - delta)
+          setProgress((remaining.current / duration) * 100)
+
+          if (remaining.current <= 0) {
+            dismiss()
+            return
+          }
+        }
+        lastTickRef.current = now
+      } else {
+        // pausado: zera lastTick para não acumular delta ao retomar
+        lastTickRef.current = null
+      }
+
+      rafRef.current = requestAnimationFrame(tick)
+    }
+
+    rafRef.current = requestAnimationFrame(tick)
+    return () => {
+      if (rafRef.current) cancelAnimationFrame(rafRef.current)
+    }
+  }, [duration])
+
   return (
-    <ToastPrimitive.Root
-      className={cn(toastVariants({ variant }))}
-      duration={4000}
+    <div
+      onMouseEnter={() => { pausedRef.current = true }}
+      onMouseLeave={() => { pausedRef.current = false }}
+      className={cn(
+        // base
+        "group pointer-events-auto relative flex w-full flex-col overflow-hidden rounded-xl border shadow-lg backdrop-blur-sm",
+        // transição CSS — entrada e saída
+        "transition-all duration-300 ease-out",
+        visible
+          ? "translate-x-0 opacity-100"
+          : "translate-x-full opacity-0",
+        container,
+      )}
     >
-      {icons[variant]}
-      <div className="flex-1">
-        <ToastPrimitive.Description className="text-sm font-medium leading-snug">
-          {message}
-        </ToastPrimitive.Description>
+      {/* Corpo */}
+      <div className="flex items-start gap-3 px-4 pt-4 pb-3">
+        <div className="flex justify-start items-center gap-3">
+          <span className={cn("mt-px shrink-0", iconWrapper)}>
+            {icon}
+          </span>
+
+          <p className="flex-1 text-sm font-medium leading-snug">
+            {message}
+          </p>
+        </div>
+        <button
+          onClick={dismiss}
+          className={cn(
+            "ml-1 shrink-0 rounded-md p-1 opacity-50 transition-opacity hover:opacity-100",
+            closeBtn,
+          )}
+        >
+          <X className="size-4" />
+        </button>
       </div>
-      <ToastPrimitive.Close className="text-current opacity-50 transition-opacity hover:opacity-100">
-        <X className="size-4" />
-      </ToastPrimitive.Close>
-    </ToastPrimitive.Root>
+
+      {/* Barra de progresso */}
+      <div className="h-1 w-full bg-black/10 dark:bg-white/10">
+        <div
+          className={cn("h-full", bar)}
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+    </div>
   )
 }
 
-export function ToastViewport() {
+export function ToastViewport({ children }: { children: ReactNode }) {
   return (
-    <ToastPrimitive.Viewport className="fixed top-4 right-4 z-100 flex w-90 max-w-[100vw] flex-col gap-2 outline-none" />
+    <div className="fixed top-4 right-4 z-100 flex w-95 max-w-[calc(100vw-2rem)] flex-col gap-2 outline-none">
+      {children}
+    </div>
   )
 }
