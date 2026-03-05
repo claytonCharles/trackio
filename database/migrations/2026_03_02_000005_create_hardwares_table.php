@@ -48,7 +48,7 @@ return new class extends Migration
                 RETURNS TRIGGER AS $$
                 BEGIN
                     INSERT INTO history_hardware 
-                        (hardware_id, updated_by, category_id, status_id, manufacturer_id, inventory_number, serial_number, name, description, deleted_at, modified_at)
+                        (hardware_id, updated_by, category_id, manufacturer_id, status_id, inventory_number, serial_number, name, description, deleted_at, modified_at)
                     VALUES 
                         (OLD.id, OLD.updated_by, OLD.category_id, OLD.manufacturer_id, OLD.status_id, OLD.inventory_number, OLD.serial_number, OLD.name, OLD.description, OLD.deleted_at, NOW());
                     RETURN NEW;

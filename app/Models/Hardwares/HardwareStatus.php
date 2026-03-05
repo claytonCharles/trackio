@@ -11,6 +11,6 @@ class HardwareStatus extends Model
     protected $fillable = [
         'created_by',
         'updated_by',
-        'name'
+        'name',
     ];
 }

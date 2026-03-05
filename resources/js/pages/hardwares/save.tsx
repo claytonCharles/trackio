@@ -1,5 +1,11 @@
 import { Button } from "@/components/default/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/default/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle
+} from "@/components/default/dialog";
 import { Input } from "@/components/default/input";
 import InputError from "@/components/default/input-error";
 import { Label } from "@/components/default/label";
@@ -16,52 +22,33 @@ import { RichTextEditor } from "@/components/rich-text-editor";
 import AppLayout from "@/layouts/app-layout";
 import hardwares from "@/routes/hardwares";
 import manufacturer from "@/routes/manufacturer";
-import { BreadcrumbItem } from "@/types";
+import { BreadcrumbItem, SimpleIdentifier } from "@/types";
 import { Form, Head, usePage, } from "@inertiajs/react";
 import { SelectGroup, SelectLabel } from "@radix-ui/react-select";
-import { useCallback, useState } from "react";
-
-
-type Hardware = {
-  id: string;
-  name: string;
-  serial_number: string | null;
-  inventory_number: string | null;
-  description: string;
-  category: {
-    id: number;
-    name: string;
-  },
-  status: {
-    id: number;
-    name: string;
-  },
-  manufacturer: {
-    id: number;
-    name: string;
-  };
-}
-
-type HardwareCategory = {
-  id: number;
-  name: string;
-};
+import { useEffect, useState } from "react";
 
 type HardwareStatus = {
   id: number;
   name: string;
+  only_system: boolean;
 };
 
-type Manufacturer = {
+type Hardware = {
   id: number;
   name: string;
+  serial_number: string | null;
+  inventory_number: string | null;
+  description: string;
+  category: SimpleIdentifier,
+  status: HardwareStatus,
+  manufacturer: SimpleIdentifier;
 }
 
 type Props = {
   hardware?: Hardware;
-  listCategories: HardwareCategory[];
+  listCategories: SimpleIdentifier[];
   listStatus: HardwareStatus[];
-  listManufacturers: Manufacturer[];
+  listManufacturers: SimpleIdentifier[];
 };
 
 export default function SaveHardware({
@@ -124,7 +111,10 @@ export default function SaveHardware({
                       <Label htmlFor="category_id">Categoria</Label>
                       <InputError message={errors.category_id} />
                     </div>
-                    <Select defaultValue={hardware?.category.id.toString()} name="category_id">
+                    <Select
+                      defaultValue={hardware?.category.id.toString()}
+                      name="category_id"
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione uma opção" />
                       </SelectTrigger>
@@ -159,19 +149,25 @@ export default function SaveHardware({
                       <Label htmlFor="status_id">Status</Label>
                       <InputError message={errors.status_id} />
                     </div>
-                    <Select defaultValue={hardware?.status.id.toString()} name="status_id">
+                    <Select
+                      defaultValue={hardware?.status.id.toString()}
+                      name="status_id"
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione uma opção" />
                       </SelectTrigger>
                       <SelectContent>
-                        {listStatus.map((status) => (
-                          <SelectItem
-                            key={status.id}
-                            value={`${status.id}`}
-                          >
-                            {status.name}
-                          </SelectItem>
-                        ))}
+                        {listStatus.flatMap((status) => {
+                          if (status.only_system) return null;
+                          return (
+                            <SelectItem
+                              key={status.id}
+                              value={`${status.id}`}
+                            >
+                              {status.name}
+                            </SelectItem>
+                          )
+                        })}
                       </SelectContent>
                     </Select>
                   </div>
@@ -194,7 +190,10 @@ export default function SaveHardware({
                       <Label htmlFor="manufacturer_id">Fabricantes</Label>
                       <InputError message={errors.manufacturer_id} />
                     </div>
-                    <Select defaultValue={hardware?.manufacturer.id.toString()} name="manufacturer_id">
+                    <Select
+                      defaultValue={hardware?.manufacturer.id.toString()}
+                      name="manufacturer_id"
+                    >
                       <SelectTrigger>
                         <SelectValue placeholder="Selecione uma opção" />
                       </SelectTrigger>

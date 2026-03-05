@@ -1,4 +1,5 @@
 import { Button } from "@/components/default/button";
+import useSafeBack from "@/hooks/use-safe-back";
 import AppLayout from "@/layouts/app-layout";
 import machines from "@/routes/machines";
 import { BreadcrumbItem } from "@/types";
@@ -71,6 +72,7 @@ export default function ShowMachine({ machine }: Props) {
 
   const breadcrumbs: BreadcrumbItem[] = [
     { title: "Máquinas", href: machines.index().url },
+    { title: "Visualizar", href: "#" },
     { title: machine.name, href: "#" },
   ];
 
@@ -87,11 +89,13 @@ export default function ShowMachine({ machine }: Props) {
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <Link href={machines.index().url}>
-              <Button variant="ghost" size="icon">
-                <ArrowLeftIcon className="size-4" />
-              </Button>
-            </Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => useSafeBack(machines.index().url)}
+            >
+              <ArrowLeftIcon className="size-4" />
+            </Button>
             <div>
               <h2 className="text-foreground text-2xl font-bold">
                 {machine.name}

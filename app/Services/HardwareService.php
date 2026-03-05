@@ -7,8 +7,10 @@ use App\Models\Hardwares\HardwareCategory;
 use App\Models\Hardwares\HardwareStatus;
 use App\Models\Manufacturers\Manufacturer;
 use App\Models\User;
+use App\Support\FlashMsg;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Support\Facades\Auth;
 
 class HardwareService
 {
@@ -67,18 +69,19 @@ class HardwareService
     /**
      * Atualiza um hardware existente no sistema.
      */
-    public function updateHardware(array $data, string $id, User $user): array
+    public function updateHardware(array $data, Hardware $hardware): array
     {
         $result = [];
         try {
-            $hardware = Hardware::findOrFail($id);
-            $data['updated_by'] = $user->id;
-            $hardware->update($data);
-            $result = $hardware->toArray();
+            $hardware->update([
+                ...$data,
+                'updated_by' => Auth::id(),
+            ]);
 
-            LogService::updated("Atualizou o Hardware #$id com Sucesso!");
+            $result = $hardware->toArray();
+            LogService::updated("Atualizou o Hardware #{$hardware->id} com Sucesso!");
         } catch (Exception $exc) {
-            LogService::error("Falhou em atualizar o Hardware #$id! ERROR: {$exc->getMessage()}");
+            LogService::error("Falhou em atualizar o Hardware #{$hardware->id}! ERROR: {$exc->getMessage()}");
         }
 
         return $result;
@@ -88,59 +91,35 @@ class HardwareService
      * Desativa um hardware do sistema.
      * Desativações são apenas exclusão logica no sistema.
      */
-    public function deactivateHardware(string $id, User $user): string
+    public function deactivateHardware(Hardware $hardware): array
     {
-        $message = 'Não foi possivel realizar a desativação do Hardware!';
+        $message = FlashMsg::error('Não foi possivel realizar a desativação do Hardware!');
         try {
-            $hardware = Hardware::findOrFail($id);
             $hardware->update([
-                'updated_by' => $user->id,
+                'updated_by' => Auth::id(),
                 'deleted_at' => Carbon::now(),
             ]);
 
-            $message = "Desativação do Hardware#$id realizada com Sucesso!";
-            LogService::deactivate("Desativou o Hardware #$id com Sucesso!");
+            $message = FlashMsg::success("Desativação do Hardware#{$hardware->id} realizada com Sucesso!");
+            LogService::deactivate("Desativou o Hardware #{$hardware->id} com Sucesso!");
         } catch (Exception $exc) {
-            LogService::error("Falhou em desativar o Hardware #$id! ERROR: {$exc->getMessage()}");
+            LogService::error("Falhou em desativar o Hardware #{$hardware->id}! ERROR: {$exc->getMessage()}");
         }
 
         return $message;
     }
 
-    public function getAllComplements(): array
+    public function getAllCreationComplements(): array
     {
         $result = [];
         try {
             $result = [
                 'listCategories' => HardwareCategory::all(['id', 'name'])->toArray(),
-                'listStatus' => HardwareStatus::all(['id', 'name'])->toArray(),
                 'listManufacturers' => Manufacturer::all(['id', 'name'])->toArray(),
+                'listStatus' => HardwareStatus::all(['id', 'name', 'only_system'])->toArray(),
             ];
         } catch (Exception $exc) {
             LogService::error("Falhou resgatar a listagem de Categorias de Hardware! ERROR: {$exc->getMessage()}");
-        }
-
-        return $result;
-    }
-
-    /**
-     * Resgata as informações completa o hardware o buscando pelo id.
-     */
-    public function getHardwareInfoById(string $id): array
-    {
-        $result = [];
-        try {
-            $hardware = Hardware::with([
-                'category:id,name',
-                'status:id,name',
-                'manufacturer:id,name',
-                'createdBy:id,name',
-                'updatedBy:id,name',
-            ])->findOrFail($id);
-
-            $result = $hardware->toArray();
-        } catch (Exception $exc) {
-            LogService::error("Falhou resgatar as informações do Hardware #$id! ERROR: {$exc->getMessage()}");
         }
 
         return $result;
@@ -155,7 +134,7 @@ class HardwareService
         try {
             $hardware->load([
                 'category:id,name',
-                'status:id,name',
+                'status:id,name,only_system',
                 'manufacturer:id,name',
                 'createdBy:id,name',
                 'updatedBy:id,name',
@@ -188,6 +167,43 @@ class HardwareService
         } catch (Exception $exc) {
             LogService::error(
                 "Falhou resgatar as informações completa do Hardware #{$hardware->id}! ERROR: {$exc->getMessage()}"
+            );
+        }
+
+        return $result;
+    }
+
+    public function loadDataEditHardware(Hardware $hardware)
+    {
+        $result = [];
+        try {
+            $hardware->load([
+                'category:id,name',
+                'status:id,name,only_system',
+                'manufacturer:id,name',
+                'createdBy:id,name',
+                'updatedBy:id,name',
+            ]);
+
+            $result = $hardware->toArray();
+        } catch (Exception $exc) {
+            LogService::error(
+                "Falhou em carregar as informações do Hardware #{$hardware->id}! ERROR: {$exc->getMessage()}"
+            );
+        }
+
+        return $result;
+    }
+
+    public function canUpdateHardware(Hardware $hardware)
+    {
+        $result = false;
+        try {
+            $hardware->load(['status:id,name,only_system']);
+            $result = !$hardware->status->only_system;
+        } catch (Exception $exc) {
+            LogService::error(
+                "Falhou em validar o vinculo de Hardware #{$hardware->id}! ERROR: {$exc->getMessage()}"
             );
         }
 

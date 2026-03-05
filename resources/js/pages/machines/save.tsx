@@ -13,19 +13,17 @@ import { Spinner } from "@/components/default/spinner";
 import { Checkbox } from "@/components/default/checkbox";
 import AppLayout from "@/layouts/app-layout";
 import machines from "@/routes/machines";
-import { BreadcrumbItem } from "@/types";
+import { BreadcrumbItem, SimpleIdentifier } from "@/types";
 import { Form, Head } from "@inertiajs/react";
 import { useState } from "react";
-
-type Option = { id: number; name: string };
 
 type Hardware = {
   id: number;
   name: string;
   serial_number: string | null;
   inventory_number: string | null;
-  category: Option;
-  manufacturer: Option;
+  category: SimpleIdentifier;
+  manufacturer: SimpleIdentifier;
 };
 
 type Machine = {
@@ -33,15 +31,15 @@ type Machine = {
   name: string;
   serial_number: string | null;
   inventory_number: string | null;
-  manufacturer: Option;
-  status: Option;
+  manufacturer: SimpleIdentifier;
+  status: SimpleIdentifier;
   machine_hardwares: { hardware_id: number }[];
 };
 
 type Props = {
   machine?: Machine;
-  manufacturers: Option[];
-  statuses: Option[];
+  manufacturers: SimpleIdentifier[];
+  statuses: SimpleIdentifier[];
   hardwares: Hardware[];
 };
 

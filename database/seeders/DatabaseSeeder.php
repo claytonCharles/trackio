@@ -51,9 +51,10 @@ class DatabaseSeeder extends Seeder
         HardwareCategory::create([...$creator, 'name' => 'Monitor', 'is_system_category' => true]);
         HardwareCategory::create([...$creator, 'name' => 'Acessórios', 'is_system_category' => true]);
 
+        HardwareStatus::create([...$creator, 'name' => 'Vinculado', 'only_system' => true]);
         HardwareStatus::create([...$creator, 'name' => 'Armazenado']);
-        HardwareStatus::create([...$creator, 'name' => 'Vinculado']);
         HardwareStatus::create([...$creator, 'name' => 'Defeituoso']);
+        HardwareStatus::create([...$creator, 'name' => 'Em Análise']);
         HardwareStatus::create([...$creator, 'name' => 'Em Garantia']);
 
         MachineStatus::create([...$creator, 'name' => 'Armazenado']);
