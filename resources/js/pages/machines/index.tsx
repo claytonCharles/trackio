@@ -14,7 +14,7 @@ import { Label } from "@/components/default/label";
 import AppLayout from "@/layouts/app-layout";
 import machines from "@/routes/machines";
 import { BreadcrumbItem, PaginationProps, SimpleIdentifier } from "@/types";
-import { Form, Head, Link } from "@inertiajs/react";
+import { Form, Head, Link, router } from "@inertiajs/react";
 import {
   CpuIcon,
   Ellipsis,
@@ -24,6 +24,7 @@ import {
   PlusIcon,
   ServerIcon,
   Trash,
+  Trash2Icon,
 } from "lucide-react";
 import { useRef } from "react";
 
@@ -139,6 +140,11 @@ export default function MachinesIndex({
 }
 
 function MachineCard({ machine }: { machine: Machine }) {
+  function handleDelete() {
+    if (!confirm("Tem certeza que deseja remover esta máquina?")) return;
+    router.delete(machines.destroy(machine.id).url);
+  }
+
   return (
     <div className="group relative flex flex-col gap-4 rounded-xl border bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
       {/* Topo — nome + dropdown */}
@@ -148,7 +154,9 @@ function MachineCard({ machine }: { machine: Machine }) {
             <ServerIcon className="text-muted-foreground size-4" />
           </div>
           <div className="min-w-0">
-            <p className="truncate font-semibold leading-tight">{machine.name}</p>
+            <p className="truncate font-semibold leading-tight">
+              {machine.name}
+            </p>
             <p className="text-muted-foreground truncate text-xs">
               {machine.manufacturer.name}
             </p>
@@ -167,20 +175,28 @@ function MachineCard({ machine }: { machine: Machine }) {
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end">
             <DropdownMenuItem asChild>
-              <Link className="flex items-center gap-2" href={machines.show(machine.id).url}>
+              <Link
+                className="flex items-center gap-2"
+                href={machines.show(machine.id).url}>
                 <Eye className="size-4" /> Visualizar
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
-              <Link className="flex items-center gap-2" href={machines.edit(machine.id).url}>
+              <Link
+                className="flex items-center gap-2"
+                href={machines.edit(machine.id).url}>
                 <Pen className="size-4" /> Editar
               </Link>
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive" asChild>
-              <Link className="flex items-center gap-2" href={machines.destroy(machine.id).url}>
-                <Trash className="size-4" /> Deletar
-              </Link>
+              <span
+                className="flex items-center gap-2"
+                onClick={handleDelete}
+              >
+                <Trash2Icon className="mr-2 size-4" />
+                Desativar
+              </span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

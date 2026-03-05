@@ -14,7 +14,7 @@ import { Label } from "@/components/default/label";
 import AppLayout from "@/layouts/app-layout";
 import hardwares from "@/routes/hardwares";
 import { BreadcrumbItem, PaginationProps } from "@/types";
-import { Form, Head, Link } from "@inertiajs/react";
+import { Form, Head, Link, router } from "@inertiajs/react";
 import {
   CpuIcon,
   Ellipsis,
@@ -23,6 +23,7 @@ import {
   Pen,
   PlusIcon,
   Trash,
+  Trash2Icon,
 } from "lucide-react";
 import { useRef } from "react";
 
@@ -135,6 +136,11 @@ export default function ListHardwares({
 }
 
 function HardwareCard({ hardware }: { hardware: Hardware }) {
+  function handleDelete() {
+    if (!confirm("Tem certeza que deseja remover este hardware?")) return;
+    router.delete(hardwares.destroy(hardware.id).url);
+  }
+
   return (
     <div className="group relative flex flex-col gap-4 rounded-xl border bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
       {/* Topo — nome + dropdown */}
@@ -180,12 +186,13 @@ function HardwareCard({ hardware }: { hardware: Hardware }) {
             </DropdownMenuItem>
             <DropdownMenuSeparator />
             <DropdownMenuItem variant="destructive" asChild>
-              <Link
+              <span
                 className="flex items-center gap-2"
-                href={hardwares.destroy(hardware.id).url}
+                onClick={handleDelete}
               >
-                <Trash className="size-4" /> Deletar
-              </Link>
+                <Trash2Icon className="mr-2 size-4" />
+                Desativar
+              </span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
