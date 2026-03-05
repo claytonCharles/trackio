@@ -36,20 +36,29 @@ class MachineService
         ];
     }
 
-    public function getAllCreationComplements(): array
+    public function getAllCreationComplements(array $filters = []): array
     {
         $result = [];
         try {
+            $term = strip_tags($filters['hw_search'] ?? '');
+            $page = max(1, (int) ($filters['hw_page'] ?? 1));
+            $perPage = 10;
+
+            $paginated = Hardware::whereDoesntHave('machineHardware')
+                ->with(['category', 'manufacturer'])
+                ->search($term)
+                ->orderBy('name')
+                ->paginate($perPage, ['*'], 'page', $page);
+
             $result = [
                 'statuses' => MachineStatus::orderBy('name')->get(['id', 'name']),
                 'manufacturers' => Manufacturer::orderBy('name')->get(['id', 'name']),
-                'hardwares' => Hardware::whereDoesntHave('machineHardware')
-                    ->with(['category', 'manufacturer'])
-                    ->orderBy('name')
-                    ->get(['id', 'name', 'serial_number', 'inventory_number', 'category_id', 'manufacturer_id', 'updated_at']),
+                'hardwares' => $paginated->items(),
+                'hw_has_more' => $paginated->hasMorePages(),
+                'hw_total' => $paginated->total(),
             ];
         } catch (Exception $exc) {
-            LogService::error("Falhou resgatar os complementos de criação de máquinas! ERROR: {$exc->getMessage()}");
+            LogService::error("Falhou resgatar complementos de criação de máquinas! ERROR: {$exc->getMessage()}");
         }
 
         return $result;
@@ -76,13 +85,13 @@ class MachineService
                     'hardware:id,name',
                     'machine:id,name',
                     'previousMachine:id,name',
-                    'createdBy:id,name'
+                    'createdBy:id,name',
                 ])
                 ->latest('modified_at')
                 ->get();
 
             $result = array_merge($machine->toArray(), [
-                "hardware_histories" => $histories->toArray()
+                'hardware_histories' => $histories->toArray(),
             ]);
         } catch (Exception $exc) {
             LogService::error(
@@ -93,28 +102,46 @@ class MachineService
         return $result;
     }
 
-    public function loadDataEditMachine(Machine $machine)
+    public function loadDataEditMachine(Machine $machine, array $filters = []): array
     {
         $result = [];
         try {
             $machine->load(['machineHardwares.hardware', 'status', 'manufacturer']);
+
+            $term = strip_tags($filters['hw_search'] ?? '');
+            $page = max(1, (int) ($filters['hw_page'] ?? 1));
+            $perPage = 15;
+
+            $paginated = Hardware::where(function ($q) use ($machine) {
+                $q->whereDoesntHave('machineHardware')
+                    ->orWhereHas('machineHardware', fn ($q2) => $q2->where('machine_id', $machine->id)
+                    );
+            })
+                ->with(['category', 'manufacturer'])
+                ->search($term)
+                ->orderByRaw('
+                    CASE
+                        WHEN EXISTS (
+                            SELECT 1 FROM machine_has_hardwares
+                            WHERE machine_has_hardwares.hardware_id = hardwares.id
+                            AND machine_has_hardwares.machine_id = ?
+                        ) THEN 0
+                        ELSE 1
+                    END ASC,
+                    name ASC
+                ', [$machine->id])
+                ->paginate($perPage, ['*'], 'page', $page);
+
             $result = [
                 'machine' => $machine,
                 'manufacturers' => Manufacturer::orderBy('name')->get(['id', 'name']),
                 'statuses' => MachineStatus::orderBy('name')->get(['id', 'name']),
-                'hardwares' => Hardware::where(function ($q) use ($machine) {
-                    $q->whereDoesntHave('machineHardware')
-                        ->orWhereHas('machineHardware', fn ($q2) => $q2->where('machine_id', $machine->id)
-                        );
-                })
-                    ->with(['category', 'manufacturer'])
-                    ->orderBy('name')
-                    ->get(['id', 'name', 'serial_number', 'inventory_number', 'category_id', 'manufacturer_id']),
+                'hardwares' => $paginated->items(),
+                'hw_has_more' => $paginated->hasMorePages(),
+                'hw_total' => $paginated->total(),
             ];
         } catch (Exception $exc) {
-            LogService::error(
-                "Falhou resgatar as informações para edição da máquina #{$machine->id}! ERROR: {$exc->getMessage()}"
-            );
+            LogService::error("Falhou resgatar dados para edição da máquina #{$machine->id}! ERROR: {$exc->getMessage()}");
         }
 
         return $result;
