@@ -6,6 +6,10 @@ declare module "@inertiajs/core" {
       name: string;
       auth: Auth;
       sidebarOpen: boolean;
+      flashMsg?: {
+        type: ToastVariant
+        message: string
+      } | null;
       [key: string]: unknown;
     };
   }
