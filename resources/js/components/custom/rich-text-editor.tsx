@@ -21,6 +21,53 @@ type ToolbarButtonProps = {
   children: React.ReactNode;
 };
 
+// Converte o HTML do editor para HTML com estilos inline portáveis
+function inlineStyles(html: string): string {
+  const parser = new DOMParser();
+  const doc = parser.parseFromString(`<div>${html}</div>`, "text/html");
+  const root = doc.body.firstChild as HTMLElement;
+
+  const walk = (el: Element) => {
+    const tag = el.tagName?.toLowerCase();
+
+    const styleMap: Record<string, string> = {
+      b:          "font-weight:bold",
+      strong:     "font-weight:bold",
+      i:          "font-style:italic",
+      em:         "font-style:italic",
+      u:          "text-decoration:underline",
+      s:          "text-decoration:line-through",
+      strike:     "text-decoration:line-through",
+      ul:         "list-style-type:disc;padding-left:1.5em;margin:0.5em 0",
+      ol:         "list-style-type:decimal;padding-left:1.5em;margin:0.5em 0",
+      li:         "margin:0.25em 0;display:list-item",
+      a:          "color:#2563eb;text-decoration:underline",
+      p:          "margin:0.25em 0",
+      blockquote: "border-left:3px solid #d1d5db;padding-left:1em;color:#6b7280;margin:0.5em 0",
+    };
+
+    if (tag && styleMap[tag]) {
+      const existing = el.getAttribute("style") ?? "";
+      const base = styleMap[tag];
+      // não duplica estilos já existentes
+      el.setAttribute("style", existing ? `${base};${existing}` : base);
+    }
+
+    // alinhamento via align attribute (gerado pelo execCommand justify*)
+    const align = el.getAttribute("align");
+    if (align) {
+      const existing = el.getAttribute("style") ?? "";
+      el.setAttribute("style", `text-align:${align};${existing}`);
+      el.removeAttribute("align");
+    }
+
+    Array.from(el.children).forEach(walk);
+  };
+
+  Array.from(root.children).forEach(walk);
+  return root.innerHTML;
+}
+
 function ToolbarButton({ onClick, active, title, children }: ToolbarButtonProps) {
   return (
     <button
@@ -63,21 +110,29 @@ export function RichTextEditor({
     editorRef.current?.focus();
     document.execCommand(command, false, value);
     syncFormats();
+    syncHidden();
   }
 
   function syncFormats() {
     const active = new Set<string>();
-    const commands = ["bold", "italic", "underline", "strikethrough",
-      "insertUnorderedList", "insertOrderedList"];
+    const commands = [
+      "bold", "italic", "underline", "strikethrough",
+      "insertUnorderedList", "insertOrderedList",
+    ];
     commands.forEach((cmd) => {
       if (document.queryCommandState(cmd)) active.add(cmd);
     });
     setActiveFormats(active);
   }
 
-  function handleInput() {
+  function syncHidden() {
     if (!editorRef.current || !hiddenRef.current) return;
-    hiddenRef.current.value = editorRef.current.innerHTML;
+    hiddenRef.current.value = inlineStyles(editorRef.current.innerHTML);
+  }
+
+  function handleInput() {
+    syncFormats();
+    syncHidden();
   }
 
   function handlePaste(e: React.ClipboardEvent<HTMLDivElement>) {
@@ -100,14 +155,13 @@ export function RichTextEditor({
       <div className="rounded-xl border shadow-sm">
         {/* Toolbar */}
         <div className="bg-muted/50 flex flex-wrap items-center gap-0.5 rounded-t-xl border-b px-2 py-1.5">
-          {/* Formatação de texto */}
-          <ToolbarButton title="Negrito (Ctrl+B)" active={activeFormats.has("bold")} onClick={() => exec("bold")}>
+          <ToolbarButton title="Negrito" active={activeFormats.has("bold")} onClick={() => exec("bold")}>
             <Bold className="size-3.5" />
           </ToolbarButton>
-          <ToolbarButton title="Itálico (Ctrl+I)" active={activeFormats.has("italic")} onClick={() => exec("italic")}>
+          <ToolbarButton title="Itálico" active={activeFormats.has("italic")} onClick={() => exec("italic")}>
             <Italic className="size-3.5" />
           </ToolbarButton>
-          <ToolbarButton title="Sublinhado (Ctrl+U)" active={activeFormats.has("underline")} onClick={() => exec("underline")}>
+          <ToolbarButton title="Sublinhado" active={activeFormats.has("underline")} onClick={() => exec("underline")}>
             <Underline className="size-3.5" />
           </ToolbarButton>
           <ToolbarButton title="Tachado" active={activeFormats.has("strikethrough")} onClick={() => exec("strikethrough")}>
@@ -116,7 +170,6 @@ export function RichTextEditor({
 
           <Divider />
 
-          {/* Alinhamento */}
           <ToolbarButton title="Alinhar à esquerda" onClick={() => exec("justifyLeft")}>
             <AlignLeft className="size-3.5" />
           </ToolbarButton>
@@ -132,7 +185,6 @@ export function RichTextEditor({
 
           <Divider />
 
-          {/* Listas */}
           <ToolbarButton
             title="Lista com marcadores"
             active={activeFormats.has("insertUnorderedList")}
@@ -150,7 +202,6 @@ export function RichTextEditor({
 
           <Divider />
 
-          {/* Link */}
           <ToolbarButton title="Inserir link" onClick={handleLink}>
             <Link className="size-3.5" />
           </ToolbarButton>
@@ -160,16 +211,26 @@ export function RichTextEditor({
 
           <Divider />
 
-          {/* Histórico */}
-          <ToolbarButton title="Desfazer (Ctrl+Z)" onClick={() => exec("undo")}>
+          <ToolbarButton title="Desfazer" onClick={() => exec("undo")}>
             <Undo className="size-3.5" />
           </ToolbarButton>
-          <ToolbarButton title="Refazer (Ctrl+Y)" onClick={() => exec("redo")}>
+          <ToolbarButton title="Refazer" onClick={() => exec("redo")}>
             <Redo className="size-3.5" />
           </ToolbarButton>
         </div>
 
-        {/* Área editável */}
+        {/* Área editável — estilos nativos do browser, sem Tailwind */}
+        <style>{`
+          .rte-editor ul { list-style-type: disc; padding-left: 1.5em; margin: 0.5em 0; }
+          .rte-editor ol { list-style-type: decimal; padding-left: 1.5em; margin: 0.5em 0; }
+          .rte-editor li { margin: 0.25em 0; display: list-item; }
+          .rte-editor a  { color: #2563eb; text-decoration: underline; cursor: pointer; }
+          .rte-editor b, .rte-editor strong { font-weight: bold; }
+          .rte-editor i, .rte-editor em { font-style: italic; }
+          .rte-editor u  { text-decoration: underline; }
+          .rte-editor s, .rte-editor strike { text-decoration: line-through; }
+        `}</style>
+
         <div
           ref={editorRef}
           contentEditable
@@ -180,16 +241,7 @@ export function RichTextEditor({
           onPaste={handlePaste}
           onKeyUp={syncFormats}
           onMouseUp={syncFormats}
-          className={cn(
-            "bg-background min-h-36 w-full rounded-b-xl px-4 py-3 text-sm outline-none",
-            "focus-visible:ring-ring focus-visible:ring-2 focus-visible:ring-inset",
-            // prose para renderizar listas e links corretamente
-            "prose prose-sm dark:prose-invert max-w-none",
-            "prose-ul:list-disc prose-ol:list-decimal prose-li:ml-4",
-            "prose-a:text-primary prose-a:underline",
-            // placeholder via CSS
-            "empty:before:text-muted-foreground empty:before:content-[attr(data-placeholder)]",
-          )}
+          className="rte-editor bg-background min-h-36 w-full rounded-b-xl px-4 py-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring empty:before:text-muted-foreground empty:before:content-[attr(data-placeholder)]"
         />
       </div>
 
