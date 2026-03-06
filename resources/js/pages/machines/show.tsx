@@ -1,23 +1,21 @@
 import { Button } from "@/components/default/button";
 import useSafeBack from "@/hooks/use-safe-back";
 import AppLayout from "@/layouts/app-layout";
+import hardwares from "@/routes/hardwares";
 import machines from "@/routes/machines";
-import { BreadcrumbItem } from "@/types";
+import { BreadcrumbItem, SimpleIdentifier } from "@/types";
 import { Head, Link, router, usePage } from "@inertiajs/react";
 import { ArrowLeftIcon, ClockIcon, PencilIcon, Trash2Icon } from "lucide-react";
 import { useEffect } from "react";
-
-type Option = { id: number; name: string };
-type User = { id: number; name: string };
 
 type HardwareItem = {
   id: number;
   name: string;
   serial_number: string | null;
   inventory_number: string | null;
-  category: Option;
-  manufacturer: Option;
-  status: Option;
+  category: SimpleIdentifier;
+  manufacturer: SimpleIdentifier;
+  status: SimpleIdentifier;
 };
 
 type MachineHardware = {
@@ -30,9 +28,9 @@ type History = {
   action: "attached" | "detached" | "moved";
   notes: string | null;
   created_at: string;
-  hardware: Option;
-  previous_machine: Option | null;
-  created_by: User;
+  hardware: SimpleIdentifier;
+  previous_machine: SimpleIdentifier | null;
+  created_by: SimpleIdentifier;
 };
 
 type Machine = {
@@ -40,10 +38,10 @@ type Machine = {
   name: string;
   serial_number: string | null;
   inventory_number: string | null;
-  manufacturer: Option;
-  status: Option;
-  created_by: User;
-  updated_by: User;
+  manufacturer: SimpleIdentifier;
+  status: SimpleIdentifier;
+  created_by: SimpleIdentifier;
+  updated_by: SimpleIdentifier;
   created_at: string;
   updated_at: string;
   machine_hardwares: MachineHardware[];
@@ -101,8 +99,8 @@ export default function ShowMachine({ machine }: Props) {
                 {machine.name}
               </h2>
               <p className="text-muted-foreground text-sm">
-                Criado por {machine.created_by.name} · Atualizado por{" "}
-                {machine.updated_by.name}
+                Criado por {machine.created_by.name} · Última atualização por{" "}
+                {machine.updated_by.name} em {machine.updated_at}
               </p>
             </div>
           </div>
@@ -149,13 +147,13 @@ export default function ShowMachine({ machine }: Props) {
                 <div>
                   <dt className="text-muted-foreground">Criado em</dt>
                   <dd>
-                    {new Date(machine.created_at).toLocaleString("pt-BR")}
+                    {machine.created_at}
                   </dd>
                 </div>
                 <div>
                   <dt className="text-muted-foreground">Atualizado em</dt>
                   <dd>
-                    {new Date(machine.updated_at).toLocaleString("pt-BR")}
+                    {machine.updated_at}
                   </dd>
                 </div>
               </dl>
@@ -180,9 +178,10 @@ export default function ShowMachine({ machine }: Props) {
               ) : (
                 <div className="space-y-2">
                   {machine.machine_hardwares.map(({ hardware }) => (
-                    <div
+                    <Link
                       key={hardware.id}
-                      className="flex items-start justify-between rounded-md border p-3"
+                      href={hardwares.show(hardware.id).url}
+                      className="flex items-start justify-between rounded-md border p-3 hover:bg-muted/40"
                     >
                       <div>
                         <p className="text-sm font-medium">{hardware.name}</p>
@@ -197,7 +196,7 @@ export default function ShowMachine({ machine }: Props) {
                       <span className="bg-secondary text-secondary-foreground rounded-full px-2 py-0.5 text-xs font-medium">
                         {hardware.status.name}
                       </span>
-                    </div>
+                    </Link>
                   ))}
                 </div>
               )}
@@ -237,7 +236,7 @@ export default function ShowMachine({ machine }: Props) {
                           )}
                         </p>
                         <p className="text-muted-foreground text-xs">
-                          {new Date(h.created_at).toLocaleString("pt-BR")} ·
+                          {h.created_at} ·
                           por {h.created_by.name}
                         </p>
                       </div>

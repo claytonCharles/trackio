@@ -92,10 +92,16 @@ class MachineService
                 ])
                 ->latest('modified_at')
                 ->get();
-
-            $result = array_merge($machine->toArray(), [
-                'hardware_histories' => $histories->toArray(),
-            ]);
+            
+            $result = [
+                ...$machine->toArray(),
+                'created_at' => $machine->created_at->subHour(3)->format('d/m/Y à\s H:i'),
+                'updated_at' => $machine->updated_at->subHour(3)->format('d/m/Y à\s H:i'),
+                'hardware_histories' => $histories->map(fn ($hh) => array_merge(
+                    $hh->toArray(),
+                    ['created_at' => Carbon::parse($hh->modified_at)->subHour(3)->format('d/m/Y à\s H:i')],
+                ))->toArray()
+            ];
         } catch (Exception $exc) {
             LogService::error(
                 "Falhou resgatar as informações completa da máquina #{$machine->id}! ERROR: {$exc->getMessage()}"
