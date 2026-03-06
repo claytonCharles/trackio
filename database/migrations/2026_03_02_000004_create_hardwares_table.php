@@ -27,7 +27,7 @@ return new class extends Migration
             $table->softDeletes();
         });
 
-        Schema::create('history_hardware', function (Blueprint $table) {
+        Schema::create('xht_hardwares', function (Blueprint $table) {
             $table->id();
             $table->foreignId('hardware_id')->constrained('hardwares');
             $table->foreignId('updated_by')->constrained('users');
@@ -47,7 +47,7 @@ return new class extends Migration
                 CREATE OR REPLACE FUNCTION save_old_hardware_version()
                 RETURNS TRIGGER AS $$
                 BEGIN
-                    INSERT INTO history_hardware 
+                    INSERT INTO xht_hardwares 
                         (hardware_id, updated_by, category_id, manufacturer_id, status_id, inventory_number, serial_number, name, description, deleted_at, modified_at)
                     VALUES 
                         (OLD.id, OLD.updated_by, OLD.category_id, OLD.manufacturer_id, OLD.status_id, OLD.inventory_number, OLD.serial_number, OLD.name, OLD.description, OLD.deleted_at, NOW());
@@ -76,7 +76,7 @@ return new class extends Migration
             DB::statement('DROP FUNCTION IF EXISTS save_old_hardware_version()');
         }
 
-        Schema::dropIfExists('history_hardware');
+        Schema::dropIfExists('xht_hardwares');
         Schema::dropIfExists('hardwares');
     }
 };

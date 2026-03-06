@@ -23,7 +23,7 @@ return new class extends Migration
             $table->unique(['machine_id', 'hardware_id']);
         });
 
-        Schema::create('machines_hardwares_history', function (Blueprint $table) {
+        Schema::create('xht_machines_hardwares', function (Blueprint $table) {
             $table->id();
             $table->foreignId('hardware_id')->constrained('hardwares');
             $table->foreignId('machine_id')->nullable()->constrained('machines')->nullOnDelete();
@@ -39,7 +39,7 @@ return new class extends Migration
                 RETURNS TRIGGER AS $$
                 BEGIN
                     IF (TG_OP = 'INSERT') THEN
-                        INSERT INTO machines_hardwares_history
+                        INSERT INTO xht_machines_hardwares
                             (hardware_id, machine_id, previous_machine_id, created_by, action, modified_at)
                         VALUES
                             (NEW.hardware_id, NEW.machine_id, NULL, NEW.created_by, 'attached', NOW());
@@ -47,7 +47,7 @@ return new class extends Migration
                     END IF;
 
                     IF (TG_OP = 'UPDATE' AND NEW.machine_id IS DISTINCT FROM OLD.machine_id) THEN
-                        INSERT INTO machines_hardwares_history
+                        INSERT INTO xht_machines_hardwares
                             (hardware_id, machine_id, previous_machine_id, created_by, action, modified_at)
                         VALUES
                             (NEW.hardware_id, NEW.machine_id, OLD.machine_id, NEW.updated_by, 'moved', NOW());
@@ -55,7 +55,7 @@ return new class extends Migration
                     END IF;
 
                     IF (TG_OP = 'DELETE') THEN
-                        INSERT INTO machines_hardwares_history
+                        INSERT INTO xht_machines_hardwares
                             (hardware_id, machine_id, previous_machine_id, created_by, action, modified_at)
                         VALUES
                             (OLD.hardware_id, NULL, OLD.machine_id, OLD.updated_by, 'detached', NOW());
@@ -100,7 +100,7 @@ return new class extends Migration
         DB::statement('DROP TRIGGER IF EXISTS trg_machine_hardware_delete ON machine_has_hardwares');
         DB::statement('DROP FUNCTION IF EXISTS log_machine_hardware_history()');
 
-        Schema::dropIfExists('machines_hardwares_history');
+        Schema::dropIfExists('xht_machines_hardwares');
         Schema::dropIfExists('machine_has_hardwares');
     }
 };
