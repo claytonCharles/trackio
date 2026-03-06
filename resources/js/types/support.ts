@@ -1,0 +1,1 @@
+export type SimpleIdentifier = { id: number; name: string };

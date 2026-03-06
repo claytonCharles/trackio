@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Hardwares;
 
-use App\Models\Hardwares\Hardware;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -25,12 +24,21 @@ class HardwareStoreRequest extends FormRequest
     {
         return [
             'category_id' => ['required', 'int', 'exists:hardware_categories,id'],
-            'status_id' => ['required', 'int', 'exists:hardware_status,id'],
+            'status_id' => $this->statusRules(),
             'manufacturer_id' => ['required', 'int', 'exists:manufacturers,id'],
-            'inventory_number' => ['nullable', 'string', Rule::unique(Hardware::class)],
-            'serial_number' => ['nullable', 'string', Rule::unique(Hardware::class)],
+            'inventory_number' => ['nullable', 'string', 'unique:hardwares,inventory_number'],
+            'serial_number' => ['nullable', 'string', 'unique:hardwares,serial_number'],
             'name' => ['required', 'string'],
             'description' => ['required', 'string'],
+        ];
+    }
+
+    private function statusRules(): array
+    {
+        return [
+            'required',
+            'int',
+            Rule::exists('hardware_status', 'id')->where(fn ($query) => $query->where('only_system', false)),
         ];
     }
 }

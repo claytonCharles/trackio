@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Manufacturers\Manufacturer;
 use App\Models\User;
+use App\Support\FlashMsg;
 use Carbon\Carbon;
 use Exception;
 
@@ -57,9 +58,9 @@ class ManufacturerService
         return $result;
     }
 
-    public function deactivateManufacturer(string $id, User $user): string
+    public function deactivateManufacturer(string $id, User $user): array
     {
-        $message = 'Não foi possivel realizar a desativação do Fabricante!';
+        $message = FlashMsg::error('Não foi possivel realizar a desativação do Fabricante!');
         try {
             $manufacturer = Manufacturer::findOrFail($id);
             $manufacturer->update([
@@ -67,7 +68,7 @@ class ManufacturerService
                 'deleted_at' => Carbon::now(),
             ]);
 
-            $message = "Desativação do Fabricante#$id realizada com Sucesso!";
+            $message = FlashMsg::success("Desativação do Fabricante#$id realizada com Sucesso!");
             LogService::deactivate("Desativou o Fabricante #$id com Sucesso!");
         } catch (Exception $exc) {
             LogService::error("Falhou em desativar o Fabricante #$id! ERROR: {$exc->getMessage()}");

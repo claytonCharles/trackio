@@ -1,13 +1,16 @@
 import { Button } from "@/components/default/button";
+import useSafeBack from "@/hooks/use-safe-back";
 import AppLayout from "@/layouts/app-layout";
 import hardwares from "@/routes/hardwares";
-import { BreadcrumbItem } from "@/types";
-import { Head, Link, router, usePage } from "@inertiajs/react";
+import { BreadcrumbItem, SimpleIdentifier } from "@/types";
+import { Head, Link, router } from "@inertiajs/react";
 import { ArrowLeftIcon, ClockIcon, CpuIcon, PencilIcon, Trash2Icon } from "lucide-react";
-import { useEffect } from "react";
 
-type Option = { id: number; name: string };
-type User = { id: number; name: string };
+type HardwareStatus = {
+  id: number;
+  name: string;
+  only_system: boolean;
+};
 
 type History = {
   id: number;
@@ -16,10 +19,10 @@ type History = {
   inventory_number: string | null;
   description: string;
   modified_at: string;
-  category: Option;
-  status: Option;
-  manufacturer: Option;
-  updated_by: User;
+  category: SimpleIdentifier;
+  status: SimpleIdentifier;
+  manufacturer: SimpleIdentifier;
+  updated_by: SimpleIdentifier;
 };
 
 
@@ -30,12 +33,12 @@ type Hardware = {
   inventory_number: string | null;
   description: string;
   updated_at_formatted: string;
-  category: Option;
-  status: Option;
-  manufacturer: Option;
-  created_by: User;
-  updated_by: User;
-  machine: { id: number; name: string } | null;
+  category: SimpleIdentifier;
+  status: HardwareStatus;
+  manufacturer: SimpleIdentifier;
+  created_by: SimpleIdentifier;
+  updated_by: SimpleIdentifier;
+  machine: SimpleIdentifier | null;
   histories: History[];
 };
 
@@ -49,12 +52,6 @@ const breadcrumbs: BreadcrumbItem[] = [
 ];
 
 export default function ShowHardware({ hardware }: Props) {
-  const props = usePage().props;
-
-  useEffect(() => {
-    console.log(props);
-  }, []);
-
   function handleDelete() {
     if (!confirm("Tem certeza que deseja remover este hardware?")) return;
     router.delete(hardwares.destroy(hardware.id).url);
@@ -68,11 +65,13 @@ export default function ShowHardware({ hardware }: Props) {
         {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
-            <Link href={hardwares.index().url}>
-              <Button variant="ghost" size="icon">
-                <ArrowLeftIcon className="size-4" />
-              </Button>
-            </Link>
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => useSafeBack(hardwares.index().url)}
+            >
+              <ArrowLeftIcon className="size-4" />
+            </Button>
             <div>
               <h2 className="text-foreground text-2xl font-bold">{hardware.name}</h2>
               <p className="text-muted-foreground text-sm">
@@ -82,16 +81,24 @@ export default function ShowHardware({ hardware }: Props) {
             </div>
           </div>
           <div className="flex gap-2">
-            <Link href={hardwares.edit(hardware.id).url}>
-              <Button variant="outline" size="sm">
-                <PencilIcon className="mr-2 size-4" />
-                Editar
-              </Button>
-            </Link>
-            <Button variant="destructive" size="sm" onClick={handleDelete}>
-              <Trash2Icon className="mr-2 size-4" />
-              Deletar
-            </Button>
+            {
+              hardware.status.only_system
+                ? <>
+                  <p>Hardware Vinculado</p>
+                </>
+                : <>
+                  <Link href={hardwares.edit(hardware.id).url}>
+                    <Button variant="outline" size="sm">
+                      <PencilIcon className="mr-2 size-4" />
+                      Editar
+                    </Button>
+                  </Link>
+                  <Button variant="destructive" size="sm" onClick={handleDelete}>
+                    <Trash2Icon className="mr-2 size-4" />
+                    Deletar
+                  </Button>
+                </>
+            }
           </div>
         </div>
 

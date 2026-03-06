@@ -1,3 +1,4 @@
+import { MetaItem } from "@/components/custom/meta-item";
 import Pagination from "@/components/custom/pagination";
 import { Button } from "@/components/default/button";
 import {
@@ -13,33 +14,38 @@ import { Label } from "@/components/default/label";
 import AppLayout from "@/layouts/app-layout";
 import hardwares from "@/routes/hardwares";
 import { BreadcrumbItem, PaginationProps } from "@/types";
-import { Form, Head, Link } from "@inertiajs/react";
-import { Ellipsis, Eye, Pen, Settings, Trash } from "lucide-react";
+import { Form, Head, Link, router } from "@inertiajs/react";
+import {
+  CpuIcon,
+  Ellipsis,
+  Eye,
+  HashIcon,
+  Pen,
+  PlusIcon,
+  Trash,
+  Trash2Icon,
+} from "lucide-react";
 import { useRef } from "react";
 
+
 type Hardware = {
-  id: number,
-  serial_number: string | null,
-  inventory_number: string | null,
-  name: string,
-  category: {
-    name: string
-  }
-}
+  id: number;
+  name: string;
+  serial_number: string | null;
+  inventory_number: string | null;
+  category: { name: string };
+  status: { name: string };
+  manufacturer: { name: string };
+};
 
 type Props = {
-  listHardwares: Hardware[],
-  pagination: PaginationProps,
-  filters: {
-    search: string;
-  }
-}
+  listHardwares: Hardware[];
+  pagination: PaginationProps;
+  filters: { search: string };
+};
 
 const breadcrumbs: BreadcrumbItem[] = [
-  {
-    title: "Hardwares",
-    href: hardwares.index().url,
-  },
+  { title: "Hardwares", href: hardwares.index().url },
 ];
 
 export default function ListHardwares({
@@ -53,135 +59,171 @@ export default function ListHardwares({
     <AppLayout breadcrumbs={breadcrumbs}>
       <Head title="Hardwares" />
 
-      <div className="w-full flex flex-col justify-center items-center mt-5">
-        <div className="container px-5">
-          <div className="flex w-full justify-between items-center my-2">
-            <Form
-              className="w-[25%]"
-              {...hardwares.index.form()}
-              options={{
-                preserveState: true,
-                preserveScroll: true,
-                replace: true
-              }}
-            >
-              {({ processing, errors }) => (
-                <>
-                  <div className="flex w-full flex-col gap-2">
-                    <div className="flex items-center gap-3">
-                      <Label htmlFor="search">Pesquisar</Label>
-                      <InputError message={errors.name} />
-                    </div>
-                    <Input
-                      id="search"
-                      name="search"
-                      type="text"
-                      autoFocus={true}
-                      defaultValue={filters.search}
-                      placeholder="Digite aqui..."
-                      onChange={(e) => {
-                        const form = e.currentTarget.form;
-                        if (timeout.current) clearTimeout(timeout.current);
+      <div className="mt-5 flex w-full flex-col gap-6 px-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-foreground text-2xl font-bold tracking-tight">
+              Hardwares
+            </h2>
+            <p className="text-muted-foreground mt-1 text-sm">
+              {pagination.totalItems ?? listHardwares.length} hardware(s) cadastrado(s)
+            </p>
+          </div>
+          <Link href={hardwares.create()}>
+            <Button className="gap-2">
+              <PlusIcon className="size-4" />
+              Adicionar
+            </Button>
+          </Link>
+        </div>
 
-                        timeout.current = setTimeout(() => {
-                          form?.requestSubmit();
-                        }, 300);
-                      }}
-                    />
-                  </div>
-                </>
-              )}
-            </Form>
-            <Link className="cursor-pointer" href={hardwares.create()}>
-              <Button>
-                Adicionar
-              </Button>
-            </Link>
+        <Form
+          {...hardwares.index.form()}
+          className="w-full max-w-sm"
+          options={{
+            preserveState: true,
+            preserveScroll: true,
+            replace: true
+          }}
+        >
+          {({ errors }) => (
+            <div className="flex flex-col gap-2">
+              <div className="flex items-center gap-3">
+                <Label htmlFor="search">Pesquisar</Label>
+                <InputError message={errors.name} />
+              </div>
+              <Input
+                id="search"
+                name="search"
+                type="text"
+                defaultValue={filters.search}
+                placeholder="Nome, serial ou tombamento..."
+                onChange={(e) => {
+                  const form = e.currentTarget.form;
+                  if (timeout.current) clearTimeout(timeout.current);
+
+                  timeout.current = setTimeout(() => {
+                    form?.requestSubmit();
+                  }, 300);
+                }}
+              />
+            </div>
+          )}
+        </Form>
+
+        {listHardwares.length === 0 ? (
+          <div className="flex flex-col items-center justify-center rounded-xl border border-dashed py-20 text-center">
+            <CpuIcon className="text-muted-foreground/40 mb-4 size-12" />
+            <p className="text-muted-foreground font-medium">
+              Nenhum hardware encontrado
+            </p>
+            <p className="text-muted-foreground mt-1 text-sm">
+              Tente ajustar o filtro ou cadastre um novo hardware.
+            </p>
           </div>
-        </div>
-        <div className="container px-5 mt-3">
-          <table className="min-w-full text-sm text-center border-collapse">
-            <thead className="text-xs uppercase">
-              <tr className="border">
-                <th className="px-3 py-4 border">Nome</th>
-                <th className="px-3 py-4 border">Tombamento</th>
-                <th className="px-3 py-4 border">Número de Serie</th>
-                <th className="px-3 py-4 border">Categoria</th>
-                <th className="py-3 flex justify-center items-center">
-                  <Settings />
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {
-                listHardwares.length > 0 ? (
-                  listHardwares.map((hardware) => (
-                    <tr key={hardware.id} className="border hover:bg-muted">
-                      <td className="px-3 border py-4 text-start">
-                        {hardware.name}
-                      </td>
-                      <td className="px-3 border py-4 text-start">
-                        {hardware.inventory_number}
-                      </td>
-                      <td className="px-3 border py-4 text-start">
-                        {hardware.serial_number}
-                      </td>
-                      <td className="px-3 border py-4">
-                        {hardware.category.name}
-                      </td>
-                      <td className="py-4">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger>
-                            <Ellipsis className="cursor-pointer" />
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent>
-                            <DropdownMenuItem>
-                              <Link
-                                className="flex gap-2 items-center"
-                                href={hardwares.show(hardware.id)}
-                              >
-                                <Eye className="h-4 w-4" />
-                                Visualizar
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuItem>
-                              <Link
-                                className="flex gap-2 items-center"
-                                href={hardwares.edit(hardware.id)}
-                              >
-                                <Pen className="h-4 w-4" />
-                                Editar
-                              </Link>
-                            </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem variant="destructive">
-                              <Link
-                                className="flex gap-2 items-center"
-                                href={hardwares.destroy(hardware.id)}
-                              >
-                                <Trash className="h-4 w-4" />
-                                Deletar
-                              </Link>
-                            </DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={4}>Nenhum Hardware encontrado!</td>
-                  </tr>
-                )
-              }
-            </tbody>
-          </table>
-          <div className="h-10">
-            <Pagination pagination={pagination}
-            />
+        ) : (
+          <div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+            {listHardwares.map((hardware) => (
+              <HardwareCard key={hardware.id} hardware={hardware} />
+            ))}
           </div>
-        </div>
+        )}
+        <Pagination pagination={pagination} />
       </div>
     </AppLayout>
+  );
+}
+
+function HardwareCard({ hardware }: { hardware: Hardware }) {
+  function handleDelete() {
+    if (!confirm("Tem certeza que deseja remover este hardware?")) return;
+    router.delete(hardwares.destroy(hardware.id).url);
+  }
+
+  return (
+    <div className="group relative flex flex-col gap-4 rounded-xl border bg-card p-5 shadow-sm transition-shadow hover:shadow-md">
+      {/* Topo — nome + dropdown */}
+      <div className="flex items-start justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-3">
+          <div className="bg-muted flex size-9 shrink-0 items-center justify-center rounded-lg">
+            <CpuIcon className="text-muted-foreground size-4" />
+          </div>
+          <div className="min-w-0">
+            <p className="truncate font-semibold leading-tight">{hardware.name}</p>
+            <p className="text-muted-foreground truncate text-xs">
+              {hardware.category.name} · {hardware.manufacturer.name}
+            </p>
+          </div>
+        </div>
+
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="size-8 shrink-0 opacity-60 group-hover:opacity-100"
+            >
+              <Ellipsis className="size-4" />
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            <DropdownMenuItem asChild>
+              <Link
+                className="flex items-center gap-2"
+                href={hardwares.show(hardware.id).url}
+              >
+                <Eye className="size-4" /> Visualizar
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link
+                className="flex items-center gap-2"
+                href={hardwares.edit(hardware.id).url}
+              >
+                <Pen className="size-4" /> Editar
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem variant="destructive" asChild>
+              <span
+                className="flex items-center gap-2"
+                onClick={handleDelete}
+              >
+                <Trash2Icon className="mr-2 size-4" />
+                Desativar
+              </span>
+            </DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+
+      {/* Metadados */}
+      <div className="grid grid-cols-2 gap-2 text-xs">
+        <MetaItem
+          icon={<HashIcon className="size-3" />}
+          label="Tombamento"
+          value={hardware.inventory_number}
+        />
+        <MetaItem
+          icon={<HashIcon className="size-3" />}
+          label="Serial"
+          value={hardware.serial_number}
+        />
+      </div>
+
+      {/* Rodapé — status + link */}
+      <div className="flex items-center justify-between border-t pt-3">
+        <span className="bg-secondary text-secondary-foreground rounded-full px-2.5 py-0.5 text-xs font-medium">
+          {hardware.status.name}
+        </span>
+        <Link
+          href={hardwares.show(hardware.id).url}
+          className="text-muted-foreground hover:text-foreground flex items-center gap-1 text-xs transition-colors"
+        >
+          Ver detalhes →
+        </Link>
+      </div>
+    </div>
   );
 }

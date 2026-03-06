@@ -11,6 +11,16 @@ class HardwareStatus extends Model
     protected $fillable = [
         'created_by',
         'updated_by',
-        'name'
+        'name',
     ];
+
+    public function scopeLinkedStatus($query)
+    {
+        return $query->where('name', 'Vinculado');
+    }
+
+    public function scopeStorageStatus($query)
+    {
+        return $query->where('name', 'Armazenado');
+    }
 }

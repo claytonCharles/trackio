@@ -1,7 +1,7 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition, applyUrlDefaults } from './../../wayfinder'
 /**
 * @see \App\Http\Controllers\Manufacturers\ManufactureController::store
-* @see app/Http/Controllers/Manufacturers/ManufactureController.php:24
+* @see app/Http/Controllers/Manufacturers/ManufactureController.php:25
 * @route '/manufacturer'
 */
 export const store = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -16,7 +16,7 @@ store.definition = {
 
 /**
 * @see \App\Http\Controllers\Manufacturers\ManufactureController::store
-* @see app/Http/Controllers/Manufacturers/ManufactureController.php:24
+* @see app/Http/Controllers/Manufacturers/ManufactureController.php:25
 * @route '/manufacturer'
 */
 store.url = (options?: RouteQueryOptions) => {
@@ -25,7 +25,7 @@ store.url = (options?: RouteQueryOptions) => {
 
 /**
 * @see \App\Http\Controllers\Manufacturers\ManufactureController::store
-* @see app/Http/Controllers/Manufacturers/ManufactureController.php:24
+* @see app/Http/Controllers/Manufacturers/ManufactureController.php:25
 * @route '/manufacturer'
 */
 store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -35,7 +35,7 @@ store.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 
 /**
 * @see \App\Http\Controllers\Manufacturers\ManufactureController::store
-* @see app/Http/Controllers/Manufacturers/ManufactureController.php:24
+* @see app/Http/Controllers/Manufacturers/ManufactureController.php:25
 * @route '/manufacturer'
 */
 const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -45,7 +45,7 @@ const storeForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => 
 
 /**
 * @see \App\Http\Controllers\Manufacturers\ManufactureController::store
-* @see app/Http/Controllers/Manufacturers/ManufactureController.php:24
+* @see app/Http/Controllers/Manufacturers/ManufactureController.php:25
 * @route '/manufacturer'
 */
 storeForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -57,7 +57,7 @@ store.form = storeForm
 
 /**
 * @see \App\Http\Controllers\Manufacturers\ManufactureController::update
-* @see app/Http/Controllers/Manufacturers/ManufactureController.php:38
+* @see app/Http/Controllers/Manufacturers/ManufactureController.php:39
 * @route '/manufacturer/{manufacturer}'
 */
 export const update = (args: { manufacturer: string | number } | [manufacturer: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -72,7 +72,7 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\Manufacturers\ManufactureController::update
-* @see app/Http/Controllers/Manufacturers/ManufactureController.php:38
+* @see app/Http/Controllers/Manufacturers/ManufactureController.php:39
 * @route '/manufacturer/{manufacturer}'
 */
 update.url = (args: { manufacturer: string | number } | [manufacturer: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -99,7 +99,7 @@ update.url = (args: { manufacturer: string | number } | [manufacturer: string | 
 
 /**
 * @see \App\Http\Controllers\Manufacturers\ManufactureController::update
-* @see app/Http/Controllers/Manufacturers/ManufactureController.php:38
+* @see app/Http/Controllers/Manufacturers/ManufactureController.php:39
 * @route '/manufacturer/{manufacturer}'
 */
 update.put = (args: { manufacturer: string | number } | [manufacturer: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -109,7 +109,7 @@ update.put = (args: { manufacturer: string | number } | [manufacturer: string | 
 
 /**
 * @see \App\Http\Controllers\Manufacturers\ManufactureController::update
-* @see app/Http/Controllers/Manufacturers/ManufactureController.php:38
+* @see app/Http/Controllers/Manufacturers/ManufactureController.php:39
 * @route '/manufacturer/{manufacturer}'
 */
 update.patch = (args: { manufacturer: string | number } | [manufacturer: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -119,7 +119,7 @@ update.patch = (args: { manufacturer: string | number } | [manufacturer: string 
 
 /**
 * @see \App\Http\Controllers\Manufacturers\ManufactureController::update
-* @see app/Http/Controllers/Manufacturers/ManufactureController.php:38
+* @see app/Http/Controllers/Manufacturers/ManufactureController.php:39
 * @route '/manufacturer/{manufacturer}'
 */
 const updateForm = (args: { manufacturer: string | number } | [manufacturer: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -134,7 +134,7 @@ const updateForm = (args: { manufacturer: string | number } | [manufacturer: str
 
 /**
 * @see \App\Http\Controllers\Manufacturers\ManufactureController::update
-* @see app/Http/Controllers/Manufacturers/ManufactureController.php:38
+* @see app/Http/Controllers/Manufacturers/ManufactureController.php:39
 * @route '/manufacturer/{manufacturer}'
 */
 updateForm.put = (args: { manufacturer: string | number } | [manufacturer: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -149,7 +149,7 @@ updateForm.put = (args: { manufacturer: string | number } | [manufacturer: strin
 
 /**
 * @see \App\Http\Controllers\Manufacturers\ManufactureController::update
-* @see app/Http/Controllers/Manufacturers/ManufactureController.php:38
+* @see app/Http/Controllers/Manufacturers/ManufactureController.php:39
 * @route '/manufacturer/{manufacturer}'
 */
 updateForm.patch = (args: { manufacturer: string | number } | [manufacturer: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -166,7 +166,7 @@ update.form = updateForm
 
 /**
 * @see \App\Http\Controllers\Manufacturers\ManufactureController::destroy
-* @see app/Http/Controllers/Manufacturers/ManufactureController.php:53
+* @see app/Http/Controllers/Manufacturers/ManufactureController.php:57
 * @route '/manufacturer/{manufacturer}'
 */
 export const destroy = (args: { manufacturer: string | number } | [manufacturer: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -181,7 +181,7 @@ destroy.definition = {
 
 /**
 * @see \App\Http\Controllers\Manufacturers\ManufactureController::destroy
-* @see app/Http/Controllers/Manufacturers/ManufactureController.php:53
+* @see app/Http/Controllers/Manufacturers/ManufactureController.php:57
 * @route '/manufacturer/{manufacturer}'
 */
 destroy.url = (args: { manufacturer: string | number } | [manufacturer: string | number ] | string | number, options?: RouteQueryOptions) => {
@@ -208,7 +208,7 @@ destroy.url = (args: { manufacturer: string | number } | [manufacturer: string |
 
 /**
 * @see \App\Http\Controllers\Manufacturers\ManufactureController::destroy
-* @see app/Http/Controllers/Manufacturers/ManufactureController.php:53
+* @see app/Http/Controllers/Manufacturers/ManufactureController.php:57
 * @route '/manufacturer/{manufacturer}'
 */
 destroy.delete = (args: { manufacturer: string | number } | [manufacturer: string | number ] | string | number, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -218,7 +218,7 @@ destroy.delete = (args: { manufacturer: string | number } | [manufacturer: strin
 
 /**
 * @see \App\Http\Controllers\Manufacturers\ManufactureController::destroy
-* @see app/Http/Controllers/Manufacturers/ManufactureController.php:53
+* @see app/Http/Controllers/Manufacturers/ManufactureController.php:57
 * @route '/manufacturer/{manufacturer}'
 */
 const destroyForm = (args: { manufacturer: string | number } | [manufacturer: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -233,7 +233,7 @@ const destroyForm = (args: { manufacturer: string | number } | [manufacturer: st
 
 /**
 * @see \App\Http\Controllers\Manufacturers\ManufactureController::destroy
-* @see app/Http/Controllers/Manufacturers/ManufactureController.php:53
+* @see app/Http/Controllers/Manufacturers/ManufactureController.php:57
 * @route '/manufacturer/{manufacturer}'
 */
 destroyForm.delete = (args: { manufacturer: string | number } | [manufacturer: string | number ] | string | number, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

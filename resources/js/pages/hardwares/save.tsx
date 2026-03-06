@@ -1,5 +1,11 @@
 import { Button } from "@/components/default/button";
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/default/dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/default/dialog";
 import { Input } from "@/components/default/input";
 import InputError from "@/components/default/input-error";
 import { Label } from "@/components/default/label";
@@ -12,56 +18,38 @@ import {
   SelectValue,
 } from "@/components/default/select";
 import { Spinner } from "@/components/default/spinner";
-import { RichTextEditor } from "@/components/rich-text-editor";
+import { RichTextEditor } from "@/components/custom/rich-text-editor";
 import AppLayout from "@/layouts/app-layout";
 import hardwares from "@/routes/hardwares";
 import manufacturer from "@/routes/manufacturer";
-import { BreadcrumbItem } from "@/types";
-import { Form, Head, usePage, } from "@inertiajs/react";
+import { BreadcrumbItem, SimpleIdentifier } from "@/types";
+import { Form, Head } from "@inertiajs/react";
 import { SelectGroup, SelectLabel } from "@radix-ui/react-select";
-import { useCallback, useState } from "react";
-
-
-type Hardware = {
-  id: string;
-  name: string;
-  serial_number: string | null;
-  inventory_number: string | null;
-  description: string;
-  category: {
-    id: number;
-    name: string;
-  },
-  status: {
-    id: number;
-    name: string;
-  },
-  manufacturer: {
-    id: number;
-    name: string;
-  };
-}
-
-type HardwareCategory = {
-  id: number;
-  name: string;
-};
+import { useState } from "react";
+import { CpuIcon, PlusIcon } from "lucide-react";
 
 type HardwareStatus = {
   id: number;
   name: string;
+  only_system: boolean;
 };
 
-type Manufacturer = {
+type Hardware = {
   id: number;
   name: string;
+  serial_number: string | null;
+  inventory_number: string | null;
+  description: string;
+  category: SimpleIdentifier,
+  status: HardwareStatus,
+  manufacturer: SimpleIdentifier;
 }
 
 type Props = {
   hardware?: Hardware;
-  listCategories: HardwareCategory[];
+  listCategories: SimpleIdentifier[];
   listStatus: HardwareStatus[];
-  listManufacturers: Manufacturer[];
+  listManufacturers: SimpleIdentifier[];
 };
 
 export default function SaveHardware({
@@ -72,38 +60,48 @@ export default function SaveHardware({
 }: Props) {
   const editing = !!hardware;
   const breadcrumbs: BreadcrumbItem[] = [
-    {
-      title: "Hardwares",
-      href: hardwares.index().url,
-    },
-    {
-      title: editing ? "Editando" : "Cadastrando",
-      href: "#",
-    },
+    { title: "Hardwares", href: hardwares.index().url },
+    { title: editing ? "Editando" : "Cadastrando", href: "#" },
   ];
 
   const [showSetupManufacturer, setShowSetupManufacturer] = useState(false);
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title="Hardwares Create" />
-      <div className="mt-5 flex w-full flex-col items-center justify-center">
-        <h2 className="text-foreground mb-6 text-center text-2xl font-bold">
-          {editing ? "Atualização de Hardware" : "Cadastro de Hardware"}
-        </h2>
+      <Head title={editing ? "Editar Hardware" : "Novo Hardware"} />
+
+      <div className="mt-5 flex w-full flex-col gap-6 px-4 sm:px-6">
+        {/* Header */}
+        <div className="flex items-center gap-3">
+          <div className="bg-muted flex size-10 shrink-0 items-center justify-center rounded-lg">
+            <CpuIcon className="text-muted-foreground size-5" />
+          </div>
+          <div>
+            <h2 className="text-foreground text-2xl font-bold tracking-tight">
+              {editing ? "Atualização de Hardware" : "Cadastro de Hardware"}
+            </h2>
+            <p className="text-muted-foreground text-sm">
+              {editing
+                ? `Editando: ${hardware.name}`
+                : "Preencha os dados do novo hardware."}
+            </p>
+          </div>
+        </div>
         <Form
-          action={editing
-            ? hardwares.update(hardware.id).url
-            : hardwares.store().url
-          }
-          method={editing ? 'PUT' : 'POST'}
-          className="flex w-[75%] flex-col gap-6"
+          action={editing ? hardwares.update(hardware.id).url : hardwares.store().url}
+          method={editing ? "PUT" : "POST"}
+          className="flex flex-col gap-6"
         >
           {({ processing, errors }) => (
             <>
-              <div className="grid gap-6">
-                <div className="flex w-full items-center justify-center gap-2">
-                  <div className="flex w-full flex-col gap-2">
+              {/* Card — Identificação */}
+              <div className="rounded-xl border p-5 sm:p-6">
+                <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                  Identificação
+                </h3>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {/* Nome */}
+                  <div className="flex flex-col gap-2 sm:col-span-2">
                     <div className="flex items-center gap-3">
                       <Label htmlFor="name">Nome</Label>
                       <InputError message={errors.name} />
@@ -116,128 +114,155 @@ export default function SaveHardware({
                       autoFocus
                       tabIndex={1}
                       defaultValue={hardware?.name ?? ""}
-                      placeholder="Nome do Hardware"
+                      placeholder="Nome do hardware"
                     />
                   </div>
-                  <div className="flex w-full flex-col gap-2">
+
+                  {/* Tombamento */}
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="inventory_number">Tombamento</Label>
+                    <Input
+                      id="inventory_number"
+                      name="inventory_number"
+                      type="text"
+                      tabIndex={2}
+                      defaultValue={hardware?.inventory_number ?? ""}
+                      placeholder="Número de tombamento"
+                    />
+                    <InputError message={errors.inventory_number} />
+                  </div>
+
+                  {/* Número de série */}
+                  <div className="flex flex-col gap-2">
+                    <Label htmlFor="serial_number">Número de Série</Label>
+                    <Input
+                      id="serial_number"
+                      name="serial_number"
+                      type="text"
+                      tabIndex={3}
+                      defaultValue={hardware?.serial_number ?? ""}
+                      placeholder="Número de série"
+                    />
+                    <InputError message={errors.serial_number} />
+                  </div>
+                </div>
+              </div>
+
+              {/* Card — Classificação */}
+              <div className="rounded-xl border p-5 sm:p-6">
+                <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                  Classificação
+                </h3>
+                <div className="grid gap-4 sm:grid-cols-2">
+                  {/* Categoria */}
+                  <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-3">
                       <Label htmlFor="category_id">Categoria</Label>
                       <InputError message={errors.category_id} />
                     </div>
-                    <Select defaultValue={hardware?.category.id.toString()} name="category_id">
+                    <Select
+                      defaultValue={hardware?.category.id.toString()}
+                      name="category_id"
+                    >
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecione uma opção" />
+                        <SelectValue placeholder="Selecione uma categoria" />
                       </SelectTrigger>
                       <SelectContent>
                         {listCategories.map((category) => (
-                          <SelectItem
-                            key={category.id}
-                            value={`${category.id}`}
-                          >
+                          <SelectItem key={category.id} value={`${category.id}`}>
                             {category.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
-                <div className="flex w-full items-center justify-center gap-2">
-                  <div className="flex w-full flex-col gap-2">
-                    <Label htmlFor="serial_number">Tombamento</Label>
-                    <Input
-                      id="inventory_number"
-                      type="text"
-                      name="inventory_number"
-                      tabIndex={1}
-                      defaultValue={hardware?.inventory_number ?? ""}
-                      placeholder="Tombamento do Hardware"
-                    />
-                    <InputError message={errors.inventory_number} />
-                  </div>
-                  <div className="flex w-full flex-col gap-2">
+
+                  {/* Status */}
+                  <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-3">
                       <Label htmlFor="status_id">Status</Label>
                       <InputError message={errors.status_id} />
                     </div>
-                    <Select defaultValue={hardware?.status.id.toString()} name="status_id">
+                    <Select
+                      defaultValue={hardware?.status.id.toString()}
+                      name="status_id"
+                    >
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecione uma opção" />
+                        <SelectValue placeholder="Selecione um status" />
                       </SelectTrigger>
                       <SelectContent>
-                        {listStatus.map((status) => (
-                          <SelectItem
-                            key={status.id}
-                            value={`${status.id}`}
-                          >
-                            {status.name}
-                          </SelectItem>
-                        ))}
+                        {listStatus.flatMap((status) => {
+                          if (status.only_system) return null;
+                          return (
+                            <SelectItem key={status.id} value={`${status.id}`}>
+                              {status.name}
+                            </SelectItem>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
-                <div className="flex w-full items-center justify-center gap-2">
-                  <div className="flex w-full flex-col gap-2">
-                    <Label htmlFor="serial_number">Número de Serie</Label>
-                    <Input
-                      id="serial_number"
-                      type="text"
-                      name="serial_number"
-                      tabIndex={1}
-                      defaultValue={hardware?.serial_number ?? ""}
-                      placeholder="Nome do Hardware"
-                    />
-                    <InputError message={errors.serial_number} />
-                  </div>
-                  <div className="flex w-full flex-col gap-2">
+
+                  {/* Fabricante */}
+                  <div className="flex flex-col gap-2 sm:col-span-2">
                     <div className="flex items-center gap-3">
-                      <Label htmlFor="manufacturer_id">Fabricantes</Label>
+                      <Label htmlFor="manufacturer_id">Fabricante</Label>
                       <InputError message={errors.manufacturer_id} />
                     </div>
-                    <Select defaultValue={hardware?.manufacturer.id.toString()} name="manufacturer_id">
+                    <Select
+                      defaultValue={hardware?.manufacturer.id.toString()}
+                      name="manufacturer_id"
+                    >
                       <SelectTrigger>
-                        <SelectValue placeholder="Selecione uma opção" />
+                        <SelectValue placeholder="Selecione um fabricante" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectGroup>
                           <SelectLabel>
                             <span
                               onClick={() => setShowSetupManufacturer(true)}
-                              className="border p-1 bg-green-400 cursor-pointer"
+                              className="text-primary flex cursor-pointer items-center gap-1.5 text-sm font-medium"
                             >
-                              Adicionar
+                              <PlusIcon className="size-3" />
+                              Adicionar fabricante
                             </span>
                           </SelectLabel>
                         </SelectGroup>
                         <SelectSeparator />
-                        {listManufacturers.map((manufacturer) => (
-                          <SelectItem
-                            key={manufacturer.id}
-                            value={`${manufacturer.id}`}
-                          >
-                            {manufacturer.name}
+                        {listManufacturers.map((m) => (
+                          <SelectItem key={m.id} value={`${m.id}`}>
+                            {m.name}
                           </SelectItem>
                         ))}
                       </SelectContent>
                     </Select>
                   </div>
                 </div>
-                <div className="grid gap-2">
-                  <RichTextEditor
-                    name="description"
-                    label="Descrição"
-                    defaultValue={hardware?.description ?? ""}
-                    placeholder="Escreva algo..."
-                  />
-                  <InputError message={errors.description} />
-                </div>
+              </div>
 
+              {/* Card — Descrição */}
+              <div className="rounded-xl border p-5 sm:p-6">
+                <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
+                  Descrição
+                </h3>
+                <RichTextEditor
+                  name="description"
+                  defaultValue={hardware?.description ?? ""}
+                  placeholder="Descreva o hardware, especificações, observações..."
+                />
+                <InputError message={errors.description} />
+              </div>
+
+              {/* Ações */}
+              <div className="flex justify-end gap-3 pb-8">
                 <Button
-                  type="submit"
-                  className="mt-4 w-full"
-                  tabIndex={4}
-                  disabled={processing}
+                  type="button"
+                  variant="outline"
+                  onClick={() => window.history.back()}
                 >
+                  Cancelar
+                </Button>
+                <Button type="submit" tabIndex={5} disabled={processing}>
                   {processing && <Spinner />}
                   Salvar
                 </Button>
@@ -271,37 +296,34 @@ function ModalSaveManufacturer({
         <DialogHeader className="flex items-center justify-center">
           <DialogTitle>Cadastro de Fabricante</DialogTitle>
           <DialogDescription className="text-center">
-            Cadastro simplificado de Fabricante.
+            Cadastro simplificado de fabricante.
           </DialogDescription>
         </DialogHeader>
-
         <div className="flex flex-col items-center space-y-5">
           <Form
             {...manufacturer.store.form()}
             onSuccess={() => onClose()}
-            className="flex w-full flex-col gap-6"
+            className="flex w-full flex-col gap-4"
           >
             {({ processing, errors }) => (
-              <div className="flex flex-col">
-                <div className="flex w-full flex-col gap-2">
+              <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-2">
                   <div className="flex items-center gap-3">
-                    <Label htmlFor="name">Nome</Label>
+                    <Label htmlFor="manufacturer-name">Nome</Label>
                     <InputError message={errors.name} />
                   </div>
                   <Input
-                    id="name"
+                    id="manufacturer-name"
                     name="name"
                     type="text"
                     required
                     autoFocus
-                    tabIndex={1}
-                    placeholder="Nome do Fabriante"
+                    placeholder="Nome do fabricante"
                   />
                 </div>
                 <Button
                   type="submit"
-                  className="mt-4 w-[50%] self-center"
-                  tabIndex={4}
+                  className="w-full"
                   disabled={processing}
                 >
                   {processing && <Spinner />}
