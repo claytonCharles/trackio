@@ -17,7 +17,7 @@ class HardwareController extends Controller
 
     public function __construct()
     {
-        $this->middleware('permission:read hardwares')->only(['index']);
+        $this->middleware('permission:read hardwares')->only(['index', 'show']);
         $this->middleware('permission:write hardwares')->only(['create', 'store', 'edit', 'update']);
         $this->middleware('permission:delete hardwares')->only(['destroy']);
 
@@ -32,7 +32,7 @@ class HardwareController extends Controller
         $filters = $request->validated();
         $hardwares = $this->hardwareService->searchHardwares($filters);
 
-        return Inertia::render('hardwares/list', [
+        return Inertia::render('hardwares/index', [
             ...$hardwares,
             'filters' => $filters,
         ]);
