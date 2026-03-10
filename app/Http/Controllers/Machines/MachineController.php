@@ -9,6 +9,7 @@ use App\Http\Requests\Machines\MachineStoreRequest;
 use App\Http\Requests\Machines\MachineUpdateRequest;
 use App\Models\Machines\Machine;
 use App\Services\MachineService;
+use App\Support\FlashMsg;
 use Illuminate\Support\Arr;
 use Inertia\Inertia;
 
@@ -18,7 +19,7 @@ class MachineController extends Controller
 
     public function __construct()
     {
-        $this->middleware('permission:read machines')->only(['index']);
+        $this->middleware('permission:read machines')->only(['index', 'show']);
         $this->middleware('permission:write machines')->only(['create', 'store', 'edit', 'update']);
         $this->middleware('permission:delete machines')->only(['destroy']);
 
@@ -57,12 +58,13 @@ class MachineController extends Controller
     {
         $data = $request->validated();
         $machineProps = Arr::except($data, 'hardware_ids');
-        $message = $this->machineService->storeMachine($machineProps, $data['hardware_ids']);
-        if ($message['type'] != 'success') {
-            return back()->with('flashMsg', $message);
+        $hardwares = $data['hardware_ids'] ?? [];
+        $machine = $this->machineService->storeMachine($machineProps, $hardwares);
+        if (empty($machine)) {
+            return back()->with('flashMsg', FlashMsg::error('Não foi possivel realizar o cadastro da máquina!'));
         }
 
-        return redirect()->route('machines.index')->with('flashMsg', $message);
+        return redirect(route('machines.show', ['machine' => $machine['id']]));
     }
 
     /**
@@ -94,10 +96,14 @@ class MachineController extends Controller
     public function update(MachineUpdateRequest $request, Machine $machine)
     {
         $data = $request->validated();
+        $hardwares = $data['hardware_ids'] ?? [];
         $newProps = Arr::except($data, 'hardware_ids');
-        $result = $this->machineService->updateMachine($newProps, $data['hardware_ids'], $machine);
+        $result = $this->machineService->updateMachine($newProps, $hardwares, $machine);
+        if (empty($result)) {
+            return back()->with('flashMsg', FlashMsg::error('Não foi possivel realizar a atualização da máquina!'));
+        }
 
-        return redirect()->route('machines.show', $machine)->with('flashMsg', $result);
+        return redirect(route('machines.show', ['machine' => $machine['id']]));
     }
 
     /**

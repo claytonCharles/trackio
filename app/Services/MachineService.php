@@ -158,10 +158,10 @@ class MachineService
 
     public function storeMachine(array $propsMachine, array $hardwares = []): array
     {
-        $message = FlashMsg::error('Não foi possivel realizar o cadastro da máquina!');
+        $result = [];
         try {
             $creator = ['created_by' => Auth::id(), 'updated_by' => Auth::id()];
-            $machineId = DB::transaction(function () use ($propsMachine, $creator, $hardwares) {
+            $machine = DB::transaction(function () use ($propsMachine, $creator, $hardwares) {
                 $hwLinkStatus = HardwareStatus::linkedStatus()->first();
                 $machine = Machine::create(array_merge($propsMachine, $creator));
 
@@ -178,21 +178,21 @@ class MachineService
                     'updated_by' => Auth::id(),
                 ]);
 
-                return $machine->id;
+                return $machine;
             });
 
-            $message = FlashMsg::success('Nova máquina cadastrada com sucesso!');
-            LogService::created("Cadastrou uma nova máquina #{$machineId} com Sucesso! ");
+            $result = $machine->toArray();
+            LogService::created("Cadastrou uma nova máquina #{$machine->id} com Sucesso! ");
         } catch (Exception $exc) {
             LogService::error("Falhou em cadastrar uma nova máquina! ERROR: {$exc->getMessage()}");
         }
 
-        return $message;
+        return $result;
     }
 
     public function updateMachine(array $newProps, array $hardwares, Machine $machine): array
     {
-        $message = FlashMsg::error('Não foi possivel realizar a atualização da máquina!');
+        $result = []; 
         try {
             DB::transaction(function () use ($newProps, $hardwares, $machine) {
                 $creator = ['created_by' => Auth::id(), 'updated_by' => Auth::id()];
@@ -208,27 +208,28 @@ class MachineService
 
                 $this->linkMachineHardwares($newHardwares, $machine->id, $creator);
                 $this->unlinkMachineHardwares($hwRemoved, $machine);
+                return $machine;
             });
 
-            $message = FlashMsg::success('Atualização da máquina realizada com sucesso!');
+            $result = $machine->toArray();
             LogService::created("Atualizou a máquina #{$machine->id} com Sucesso! ");
         } catch (Exception $exc) {
             LogService::error("Falhou em atualizar a máquina #{$machine->id}! ERROR: {$exc->getMessage()}");
         }
 
-        return $message;
+        return $result;
     }
 
-    public function deactivateMachine(Machine $machine): string
+    public function deactivateMachine(Machine $machine): array
     {
-        $message = 'Não foi possivel realizar a desativação da Máquina!';
+        $message = FlashMsg::error('Não foi possivel realizar a desativação da Máquina!');
         try {
             $machine->update([
                 'updated_by' => Auth::id(),
                 'deleted_at' => Carbon::now(),
             ]);
 
-            $message = "Desativação da Máquina#{$machine->id} realizada com Sucesso!";
+            $message = FlashMsg::success("Desativação da Máquina#{$machine->id} realizada com Sucesso!");
             LogService::deactivate("Desativou a Máquina #{$machine->id} com Sucesso!");
         } catch (Exception $exc) {
             LogService::error("Falhou em desativar a Máquina #{$machine->id}! ERROR: {$exc->getMessage()}");
