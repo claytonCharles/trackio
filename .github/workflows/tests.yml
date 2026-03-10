@@ -57,13 +57,14 @@ jobs:
       - name: Copy Environment File
         run: cp .env.example .env
 
+      - name: Generate Application Key
+        run: php artisan key:generate
+
       - name: Copy Environment Test File
         run: cp .env.testing.example .env.testing
 
-      - name: Generate Application Key
-        run: 
-          KEY=$(php artisan key:generate --show)
-          echo "APP_KEY=$KEY" >> .env.testing
+      - name: Generate Application Testing Key
+        run: php artisan key:generate --env=testing
 
       - name: Build Assets
         run: npm run build
