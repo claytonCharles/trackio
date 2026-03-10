@@ -45,6 +45,7 @@ return new class extends Migration
             $table->string('name');
             $table->string('guard_name');
             $table->boolean('is_system_role')->default(false);
+            $table->integer('weight')->default(0);
             $table->timestamps();
             if ($teams || config('permission.testing')) {
                 $table->unique([$columnNames['team_foreign_key'], 'name', 'guard_name']);

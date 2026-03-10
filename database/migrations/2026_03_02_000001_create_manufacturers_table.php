@@ -22,7 +22,7 @@ return new class extends Migration
             $table->softDeletes();
         });
 
-        Schema::create('history_manufacturers', function (Blueprint $table) {
+        Schema::create('xht_manufacturers', function (Blueprint $table) {
             $table->id();
             $table->foreignId('manufacturer_id')->constrained('manufacturers');
             $table->foreignId('updated_by')->constrained('users');
@@ -37,7 +37,7 @@ return new class extends Migration
                 CREATE OR REPLACE FUNCTION save_old_manufacturer_version()
                 RETURNS TRIGGER AS $$
                 BEGIN
-                    INSERT INTO history_manufacturers
+                    INSERT INTO xht_manufacturers
                         (manufacturer_id, updated_by, cnpj, name, deleted_at, modified_at)
                     VALUES 
                         (OLD.id, OLD.updated_by, OLD.cnpj, OLD.name, OLD.deleted_at, NOW());
@@ -67,7 +67,7 @@ return new class extends Migration
             DB::statement('DROP FUNCTION IF EXISTS save_old_manufacturer_version()');
         }
 
-        Schema::dropIfExists('history_manufacturers');
+        Schema::dropIfExists('xht_manufacturers');
         Schema::dropIfExists('manufacturers');
     }
 };

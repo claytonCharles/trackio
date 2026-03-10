@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class HardwareHistory extends Model
 {
-    protected $table = 'history_hardware';
+    protected $table = 'xht_hardwares';
 
     public $timestamps = false;
 

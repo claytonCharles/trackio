@@ -6,6 +6,8 @@ use App\Models\Machines\Machine;
 use App\Models\Machines\MachineHardware;
 use App\Models\Manufacturers\Manufacturer;
 use App\Models\User;
+use Database\Factories\Hardwares\HardwareFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -14,7 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Hardware extends Model
 {
-    use SoftDeletes;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'hardwares';
 
@@ -41,6 +43,11 @@ class Hardware extends Model
         return [
             'updated_at' => 'datetime',
         ];
+    }
+
+    protected static function newFactory(): HardwareFactory
+    {
+        return HardwareFactory::new();
     }
 
     public function createdBy(): BelongsTo

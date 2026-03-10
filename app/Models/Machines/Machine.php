@@ -5,6 +5,7 @@ namespace App\Models\Machines;
 use App\Models\Hardwares\Hardware;
 use App\Models\Manufacturers\Manufacturer;
 use App\Models\User;
+use Database\Factories\Machines\MachineFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -27,7 +28,13 @@ class Machine extends Model
         'name',
         'serial_number',
         'inventory_number',
+        'deleted_at'
     ];
+
+    protected static function newFactory(): MachineFactory
+    {
+        return MachineFactory::new();
+    }
 
     public function createdBy(): BelongsTo
     {
