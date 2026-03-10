@@ -167,7 +167,7 @@ export default function ShowHardware({ hardware }: Props) {
             <div className="rounded-lg border p-5">
               <h3 className="mb-4 font-semibold">Descrição</h3>
               <div
-                className="prose dark:prose-invert text-foreground max-w-none text-sm"
+                className="prose dark:prose-invert max-h-125 overflow-y-auto text-foreground max-w-none text-sm"
                 dangerouslySetInnerHTML={{ __html: hardware.description }}
               />
             </div>
