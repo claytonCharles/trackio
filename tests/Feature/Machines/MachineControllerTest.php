@@ -6,6 +6,7 @@ use App\Models\Hardwares\Hardware;
 use App\Models\Hardwares\HardwareCategory;
 use App\Models\Hardwares\HardwareStatus;
 use App\Models\Machines\Machine;
+use App\Models\Machines\MachineCategory;
 use App\Models\Machines\MachineHardware;
 use App\Models\Machines\MachineStatus;
 use App\Models\Manufacturers\Manufacturer;
@@ -30,6 +31,8 @@ class MachineControllerTest extends TestCase
     private User $commonUser;
 
     private MachineStatus $machineStatus;
+
+    private MachineCategory $machineCategory;
 
     private Manufacturer $manufacturer;
 
@@ -60,10 +63,11 @@ class MachineControllerTest extends TestCase
             'updated_by' => $this->adminUser->id,
         ];
 
-        HardwareStatus::create([...$creator, 'name' => 'Vinculado', 'only_system' => true]);
+        HardwareStatus::forceCreate([...$creator, 'name' => 'Vinculado', 'only_system' => true, 'is_binding' => true]);
         HardwareStatus::create([...$creator, 'name' => 'Armazenado']);
-
+        
         $this->machineStatus = MachineStatus::create([...$creator, 'name' => 'Ativo']);
+        $this->machineCategory = MachineCategory::create([...$creator, 'name' => 'Desktop']);
         $this->manufacturer = Manufacturer::create([...$creator, 'name' => 'Dell']);
         $this->hwStatus = HardwareStatus::create([...$creator, 'name' => 'Disponível']);
         $this->hwCategory = HardwareCategory::create([...$creator, 'name' => 'Periférico']);
@@ -137,6 +141,7 @@ class MachineControllerTest extends TestCase
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('machines/save')
+                ->has('categories')
                 ->has('manufacturers')
                 ->has('statuses')
                 ->has('hardwares')
@@ -220,7 +225,7 @@ class MachineControllerTest extends TestCase
     {
         $this->actingAs($this->adminUser)
             ->post(route('machines.store'), [])
-            ->assertSessionHasErrors(['name', 'manufacturer_id', 'status_id']);
+            ->assertSessionHasErrors(['name', 'category_id', 'manufacturer_id', 'status_id']);
     }
 
     public function test_store_fails_with_duplicate_serial_number(): void
@@ -263,6 +268,7 @@ class MachineControllerTest extends TestCase
                 ->has('machine')
                 ->where('machine.id', $machine->id)
                 ->has('machine.machine_hardwares', 1)
+                ->has('machine.category')
                 ->has('machine.manufacturer')
                 ->has('machine.status')
                 ->has('machine.hardware_histories')
@@ -299,6 +305,7 @@ class MachineControllerTest extends TestCase
                 ->component('machines/save')
                 ->has('machine')
                 ->where('machine.id', $machine->id)
+                ->has('categories')
                 ->has('manufacturers')
                 ->has('statuses')
                 ->has('hardwares')
@@ -505,6 +512,7 @@ class MachineControllerTest extends TestCase
             'name' => 'Máquina Teste',
             'serial_number' => null,
             'inventory_number' => null,
+            'category_id' => $this->machineCategory->id,
             'manufacturer_id' => $this->manufacturer->id,
             'status_id' => $this->machineStatus->id,
             'hardware_ids' => [],
@@ -515,6 +523,7 @@ class MachineControllerTest extends TestCase
     {
         return Machine::factory()->create(array_merge([
             ...$this->creatorFields(),
+            'category_id' => $this->machineCategory->id,
             'manufacturer_id' => $this->manufacturer->id,
             'status_id' => $this->machineStatus->id,
         ], $overrides));

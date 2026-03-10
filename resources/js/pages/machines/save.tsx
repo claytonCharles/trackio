@@ -5,7 +5,10 @@ import { Label } from "@/components/default/label";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
+  SelectSeparator,
   SelectTrigger,
   SelectValue,
 } from "@/components/default/select";
@@ -16,7 +19,8 @@ import machines from "@/routes/machines";
 import { BreadcrumbItem, SimpleIdentifier } from "@/types";
 import { Form, Head, router } from "@inertiajs/react";
 import { useEffect, useRef, useState } from "react";
-import { CpuIcon, Loader2Icon, SearchIcon, ServerIcon } from "lucide-react";
+import { CpuIcon, Loader2Icon, PlusIcon, SearchIcon, ServerIcon } from "lucide-react";
+import { ModalSaveManufacturer } from "@/components/custom/modal-save-manufacturer";
 
 type Hardware = {
   id: number;
@@ -32,6 +36,7 @@ type Machine = {
   name: string;
   serial_number: string | null;
   inventory_number: string | null;
+  category: SimpleIdentifier;
   manufacturer: SimpleIdentifier;
   status: SimpleIdentifier;
   machine_hardwares: { hardware_id: number }[];
@@ -39,6 +44,7 @@ type Machine = {
 
 type Props = {
   machine?: Machine;
+  categories: SimpleIdentifier[];
   manufacturers: SimpleIdentifier[];
   statuses: SimpleIdentifier[];
   hardwares: Hardware[];
@@ -48,6 +54,7 @@ type Props = {
 
 export default function SaveMachine({
   machine,
+  categories,
   manufacturers,
   statuses,
   hardwares: initialHardwares,
@@ -61,6 +68,7 @@ export default function SaveMachine({
     { title: editing ? "Editando" : "Cadastrando", href: "#" },
   ];
 
+  const [showSetupManufacturer, setShowSetupManufacturer] = useState(false);
   const currentHardwareIds = machine?.machine_hardwares.map((mh) => mh.hardware_id) ?? [];
   const [selectedIds, setSelectedIds] = useState<number[]>(currentHardwareIds);
   const [hwSearch, setHwSearch] = useState("");
@@ -165,7 +173,7 @@ export default function SaveMachine({
                   {/* Nome */}
                   <div className="flex flex-col gap-2 sm:col-span-2">
                     <div className="flex items-center gap-3">
-                      <Label htmlFor="name">Nome</Label>
+                      <Label htmlFor="name">Modelo</Label>
                       <InputError message={errors.name} />
                     </div>
                     <Input
@@ -216,6 +224,23 @@ export default function SaveMachine({
                   Classificação
                 </h3>
                 <div className="grid gap-4 sm:grid-cols-2">
+                  {/* Categoria */}
+                  <div className="flex flex-col gap-2">
+                    <div className="flex items-center gap-3">
+                      <Label htmlFor="category_id">Categoria</Label>
+                      <InputError message={errors.category_id} />
+                    </div>
+                    <Select defaultValue={machine?.category.id.toString()} name="category_id">
+                      <SelectTrigger>
+                        <SelectValue placeholder="Selecione um categoria" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categories.map((category) => (
+                          <SelectItem key={category.id} value={`${category.id}`}>{category.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
                   {/* Status */}
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-3">
@@ -235,7 +260,7 @@ export default function SaveMachine({
                   </div>
 
                   {/* Fabricante */}
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-2 sm:col-span-2">
                     <div className="flex items-center gap-3">
                       <Label htmlFor="manufacturer_id">Fabricante</Label>
                       <InputError message={errors.manufacturer_id} />
@@ -245,6 +270,18 @@ export default function SaveMachine({
                         <SelectValue placeholder="Selecione um fabricante" />
                       </SelectTrigger>
                       <SelectContent>
+                        <SelectGroup>
+                          <SelectLabel>
+                            <span
+                              onClick={() => setShowSetupManufacturer(true)}
+                              className="text-primary flex cursor-pointer items-center gap-1.5 text-sm font-medium"
+                            >
+                              <PlusIcon className="size-3" />
+                              Adicionar fabricante
+                            </span>
+                          </SelectLabel>
+                        </SelectGroup>
+                        <SelectSeparator />
                         {manufacturers.map((m) => (
                           <SelectItem key={m.id} value={`${m.id}`}>{m.name}</SelectItem>
                         ))}
@@ -315,8 +352,8 @@ export default function SaveMachine({
                         <label
                           key={hw.id}
                           className={`hover:bg-muted/40 flex cursor-pointer items-start gap-3 rounded-lg border p-3 transition-colors ${selectedIds.includes(hw.id)
-                              ? "border-primary/30 bg-primary/5"
-                              : ""
+                            ? "border-primary/30 bg-primary/5"
+                            : ""
                             }`}
                         >
                           <Checkbox
@@ -377,6 +414,11 @@ export default function SaveMachine({
           )}
         </Form>
       </div>
+
+      <ModalSaveManufacturer
+        isOpen={showSetupManufacturer}
+        onClose={() => setShowSetupManufacturer(false)}
+      />
     </AppLayout>
   );
 }

@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Hardwares\Hardware;
 use App\Models\Hardwares\HardwareStatus;
 use App\Models\Machines\Machine;
+use App\Models\Machines\MachineCategory;
 use App\Models\Machines\MachineHardware;
 use App\Models\Machines\MachineHardwareHistory;
 use App\Models\Machines\MachineStatus;
@@ -54,6 +55,7 @@ class MachineService
                 ->paginate($perPage, ['*'], 'page', $page);
 
             $result = [
+                'categories' => MachineCategory::orderBy('name')->get(['id', 'name']),
                 'statuses' => MachineStatus::orderBy('name')->get(['id', 'name']),
                 'manufacturers' => Manufacturer::orderBy('name')->get(['id', 'name']),
                 'hardwares' => $paginated->items(),
@@ -72,8 +74,9 @@ class MachineService
         $result = [];
         try {
             $machine->load([
-                'manufacturer',
-                'status',
+                'category:id,name',
+                'manufacturer:id,name',
+                'status:id,name',
                 'createdBy:id,name',
                 'updatedBy:id,name',
                 'machineHardwares.hardware.category',
@@ -115,7 +118,7 @@ class MachineService
     {
         $result = [];
         try {
-            $machine->load(['machineHardwares.hardware', 'status', 'manufacturer']);
+            $machine->load(['machineHardwares.hardware', 'category', 'status', 'manufacturer']);
 
             $term = strip_tags($filters['hw_search'] ?? '');
             $page = max(1, (int) ($filters['hw_page'] ?? 1));
@@ -143,6 +146,7 @@ class MachineService
 
             $result = [
                 'machine' => $machine,
+                'categories' => MachineCategory::orderBy('name')->get(['id', 'name']),
                 'manufacturers' => Manufacturer::orderBy('name')->get(['id', 'name']),
                 'statuses' => MachineStatus::orderBy('name')->get(['id', 'name']),
                 'hardwares' => $paginated->items(),

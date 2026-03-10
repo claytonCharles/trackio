@@ -38,6 +38,7 @@ type Machine = {
   name: string;
   serial_number: string | null;
   inventory_number: string | null;
+  category: SimpleIdentifier;
   manufacturer: SimpleIdentifier;
   status: SimpleIdentifier;
   created_by: SimpleIdentifier;
@@ -124,6 +125,10 @@ export default function ShowMachine({ machine }: Props) {
             <div className="rounded-lg border p-5">
               <h3 className="mb-4 font-semibold">Informações</h3>
               <dl className="space-y-3 text-sm">
+                <div>
+                  <dt className="text-muted-foreground">Categoria</dt>
+                  <dd className="font-medium">{machine.category.name}</dd>
+                </div>
                 <div>
                   <dt className="text-muted-foreground">Status</dt>
                   <dd>

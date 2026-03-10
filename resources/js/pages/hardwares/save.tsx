@@ -1,11 +1,4 @@
 import { Button } from "@/components/default/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/default/dialog";
 import { Input } from "@/components/default/input";
 import InputError from "@/components/default/input-error";
 import { Label } from "@/components/default/label";
@@ -21,12 +14,12 @@ import { Spinner } from "@/components/default/spinner";
 import { RichTextEditor } from "@/components/custom/rich-text-editor";
 import AppLayout from "@/layouts/app-layout";
 import hardwares from "@/routes/hardwares";
-import manufacturer from "@/routes/manufacturer";
 import { BreadcrumbItem, SimpleIdentifier } from "@/types";
 import { Form, Head } from "@inertiajs/react";
 import { SelectGroup, SelectLabel } from "@radix-ui/react-select";
 import { useState } from "react";
 import { CpuIcon, PlusIcon } from "lucide-react";
+import { ModalSaveManufacturer } from "@/components/custom/modal-save-manufacturer";
 
 type HardwareStatus = {
   id: number;
@@ -277,63 +270,5 @@ export default function SaveHardware({
         onClose={() => setShowSetupManufacturer(false)}
       />
     </AppLayout >
-  );
-}
-
-type ModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-function ModalSaveManufacturer({
-  isOpen,
-  onClose
-}: ModalProps) {
-
-  return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader className="flex items-center justify-center">
-          <DialogTitle>Cadastro de Fabricante</DialogTitle>
-          <DialogDescription className="text-center">
-            Cadastro simplificado de fabricante.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex flex-col items-center space-y-5">
-          <Form
-            {...manufacturer.store.form()}
-            onSuccess={() => onClose()}
-            className="flex w-full flex-col gap-4"
-          >
-            {({ processing, errors }) => (
-              <div className="flex flex-col gap-4">
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-3">
-                    <Label htmlFor="manufacturer-name">Nome</Label>
-                    <InputError message={errors.name} />
-                  </div>
-                  <Input
-                    id="manufacturer-name"
-                    name="name"
-                    type="text"
-                    required
-                    autoFocus
-                    placeholder="Nome do fabricante"
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={processing}
-                >
-                  {processing && <Spinner />}
-                  Salvar
-                </Button>
-              </div>
-            )}
-          </Form>
-        </div>
-      </DialogContent>
-    </Dialog>
   );
 }

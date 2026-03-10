@@ -25,7 +25,7 @@ class HardwareStatus extends Model
 
     public function scopeLinkedStatus($query)
     {
-        return $query->where('name', 'Vinculado');
+        return $query->where('is_binding', true);
     }
 
     public function scopeStorageStatus($query)

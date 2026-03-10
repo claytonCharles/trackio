@@ -23,6 +23,7 @@ class Machine extends Model
     protected $fillable = [
         'created_by',
         'updated_by',
+        'category_id',
         'manufacturer_id',
         'status_id',
         'name',
@@ -44,6 +45,11 @@ class Machine extends Model
     public function updatedBy(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(MachineCategory::class, 'category_id');
     }
 
     public function manufacturer(): BelongsTo
