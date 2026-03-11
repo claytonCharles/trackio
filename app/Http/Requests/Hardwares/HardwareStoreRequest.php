@@ -29,7 +29,7 @@ class HardwareStoreRequest extends FormRequest
             'inventory_number' => ['nullable', 'string', 'unique:hardwares,inventory_number'],
             'serial_number' => ['nullable', 'string', 'unique:hardwares,serial_number'],
             'name' => ['required', 'string'],
-            'description' => ['required', 'string'],
+            'description' => ['nullable', 'string'],
         ];
     }
 

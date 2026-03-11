@@ -20,6 +20,8 @@ import { SelectGroup, SelectLabel } from "@radix-ui/react-select";
 import { useState } from "react";
 import { CpuIcon, PlusIcon } from "lucide-react";
 import { ModalSaveManufacturer } from "@/components/custom/modal-save-manufacturer";
+import { UnsavedChangesDialog } from "@/components/custom/unsaved-changes-dialog";
+import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
 
 type HardwareStatus = {
   id: number;
@@ -58,6 +60,7 @@ export default function SaveHardware({
   ];
 
   const [showSetupManufacturer, setShowSetupManufacturer] = useState(false);
+  const { showDialog, confirm, cancel } = useUnsavedChanges(true);
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
@@ -96,7 +99,7 @@ export default function SaveHardware({
                   {/* Nome */}
                   <div className="flex flex-col gap-2 sm:col-span-2">
                     <div className="flex items-center gap-3">
-                      <Label htmlFor="name">Nome</Label>
+                      <Label htmlFor="name">Modelo *</Label>
                       <InputError message={errors.name} />
                     </div>
                     <Input
@@ -107,7 +110,7 @@ export default function SaveHardware({
                       autoFocus
                       tabIndex={1}
                       defaultValue={hardware?.name ?? ""}
-                      placeholder="Nome do hardware"
+                      placeholder="Modelo do hardware"
                     />
                   </div>
 
@@ -150,7 +153,7 @@ export default function SaveHardware({
                   {/* Categoria */}
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-3">
-                      <Label htmlFor="category_id">Categoria</Label>
+                      <Label htmlFor="category_id">Categoria *</Label>
                       <InputError message={errors.category_id} />
                     </div>
                     <Select
@@ -173,7 +176,7 @@ export default function SaveHardware({
                   {/* Status */}
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-3">
-                      <Label htmlFor="status_id">Status</Label>
+                      <Label htmlFor="status_id">Status *</Label>
                       <InputError message={errors.status_id} />
                     </div>
                     <Select
@@ -199,7 +202,7 @@ export default function SaveHardware({
                   {/* Fabricante */}
                   <div className="flex flex-col gap-2 sm:col-span-2">
                     <div className="flex items-center gap-3">
-                      <Label htmlFor="manufacturer_id">Fabricante</Label>
+                      <Label htmlFor="manufacturer_id">Fabricante *</Label>
                       <InputError message={errors.manufacturer_id} />
                     </div>
                     <Select
@@ -236,7 +239,7 @@ export default function SaveHardware({
               {/* Card — Descrição */}
               <div className="rounded-xl border p-5 sm:p-6">
                 <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                  Descrição
+                  Detalhes
                 </h3>
                 <RichTextEditor
                   name="description"
@@ -264,6 +267,12 @@ export default function SaveHardware({
           )}
         </Form>
       </div>
+
+      <UnsavedChangesDialog
+        open={showDialog}
+        onConfirm={confirm}
+        onCancel={cancel}
+      />
 
       <ModalSaveManufacturer
         isOpen={showSetupManufacturer}

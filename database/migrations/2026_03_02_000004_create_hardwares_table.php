@@ -22,7 +22,7 @@ return new class extends Migration
             $table->string('inventory_number')->nullable()->unique();
             $table->string('serial_number')->nullable()->unique();
             $table->string('name');
-            $table->text('description');
+            $table->text('description')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
@@ -37,7 +37,7 @@ return new class extends Migration
             $table->string('inventory_number')->nullable();
             $table->string('serial_number')->nullable();
             $table->string('name');
-            $table->text('description');
+            $table->text('description')->nullable();
             $table->softDeletes();
             $table->timestamp('modified_at');
         });
