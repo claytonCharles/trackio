@@ -5,7 +5,7 @@ import hardwares from "@/routes/hardwares";
 import machines from "@/routes/machines";
 import { BreadcrumbItem, SimpleIdentifier } from "@/types";
 import { Head, Link, router, usePage } from "@inertiajs/react";
-import { ArrowLeftIcon, ClockIcon, PencilIcon, Trash2Icon } from "lucide-react";
+import { ArrowLeftIcon, ClockIcon, MessageSquareIcon, PencilIcon, Trash2Icon } from "lucide-react";
 import { useEffect } from "react";
 
 type HardwareItem = {
@@ -235,14 +235,21 @@ export default function ShowMachine({ machine }: Props) {
                           <span className="font-medium">{h.hardware.name}</span>
                           {h.previous_machine && (
                             <span className="text-muted-foreground">
-                              {" "}
-                              ← {h.previous_machine.name}
+                              {" "}← {h.previous_machine.name}
                             </span>
                           )}
                         </p>
                         <p className="text-muted-foreground text-xs">
-                          {h.created_at} ·
-                          por {h.created_by.name}
+                          {h.created_at} · por {h.created_by.name}
+                          {h.notes && (
+                            <span
+                              title={h.notes}
+                              className="border-muted-foreground/40 text-muted-foreground ml-2 inline-flex cursor-help items-center gap-1 rounded-md border px-1.5 py-0.5 text-xs transition-colors hover:border-current"
+                            >
+                              <MessageSquareIcon className="size-3 shrink-0" />
+                              Observação
+                            </span>
+                          )}
                         </p>
                       </div>
                     </li>

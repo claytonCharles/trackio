@@ -219,7 +219,7 @@ store.form = storeForm
 
 /**
 * @see \App\Http\Controllers\Machines\MachineController::show
-* @see app/Http/Controllers/Machines/MachineController.php:73
+* @see app/Http/Controllers/Machines/MachineController.php:75
 * @route '/machines/{machine}'
 */
 export const show = (args: { machine: number | { id: number } } | [machine: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -234,7 +234,7 @@ show.definition = {
 
 /**
 * @see \App\Http\Controllers\Machines\MachineController::show
-* @see app/Http/Controllers/Machines/MachineController.php:73
+* @see app/Http/Controllers/Machines/MachineController.php:75
 * @route '/machines/{machine}'
 */
 show.url = (args: { machine: number | { id: number } } | [machine: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -267,7 +267,7 @@ show.url = (args: { machine: number | { id: number } } | [machine: number | { id
 
 /**
 * @see \App\Http\Controllers\Machines\MachineController::show
-* @see app/Http/Controllers/Machines/MachineController.php:73
+* @see app/Http/Controllers/Machines/MachineController.php:75
 * @route '/machines/{machine}'
 */
 show.get = (args: { machine: number | { id: number } } | [machine: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -277,7 +277,7 @@ show.get = (args: { machine: number | { id: number } } | [machine: number | { id
 
 /**
 * @see \App\Http\Controllers\Machines\MachineController::show
-* @see app/Http/Controllers/Machines/MachineController.php:73
+* @see app/Http/Controllers/Machines/MachineController.php:75
 * @route '/machines/{machine}'
 */
 show.head = (args: { machine: number | { id: number } } | [machine: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -287,7 +287,7 @@ show.head = (args: { machine: number | { id: number } } | [machine: number | { i
 
 /**
 * @see \App\Http\Controllers\Machines\MachineController::show
-* @see app/Http/Controllers/Machines/MachineController.php:73
+* @see app/Http/Controllers/Machines/MachineController.php:75
 * @route '/machines/{machine}'
 */
 const showForm = (args: { machine: number | { id: number } } | [machine: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -297,7 +297,7 @@ const showForm = (args: { machine: number | { id: number } } | [machine: number 
 
 /**
 * @see \App\Http\Controllers\Machines\MachineController::show
-* @see app/Http/Controllers/Machines/MachineController.php:73
+* @see app/Http/Controllers/Machines/MachineController.php:75
 * @route '/machines/{machine}'
 */
 showForm.get = (args: { machine: number | { id: number } } | [machine: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -307,7 +307,7 @@ showForm.get = (args: { machine: number | { id: number } } | [machine: number | 
 
 /**
 * @see \App\Http\Controllers\Machines\MachineController::show
-* @see app/Http/Controllers/Machines/MachineController.php:73
+* @see app/Http/Controllers/Machines/MachineController.php:75
 * @route '/machines/{machine}'
 */
 showForm.head = (args: { machine: number | { id: number } } | [machine: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -324,7 +324,7 @@ show.form = showForm
 
 /**
 * @see \App\Http\Controllers\Machines\MachineController::edit
-* @see app/Http/Controllers/Machines/MachineController.php:85
+* @see app/Http/Controllers/Machines/MachineController.php:87
 * @route '/machines/{machine}/edit'
 */
 export const edit = (args: { machine: number | { id: number } } | [machine: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -339,7 +339,7 @@ edit.definition = {
 
 /**
 * @see \App\Http\Controllers\Machines\MachineController::edit
-* @see app/Http/Controllers/Machines/MachineController.php:85
+* @see app/Http/Controllers/Machines/MachineController.php:87
 * @route '/machines/{machine}/edit'
 */
 edit.url = (args: { machine: number | { id: number } } | [machine: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -372,7 +372,7 @@ edit.url = (args: { machine: number | { id: number } } | [machine: number | { id
 
 /**
 * @see \App\Http\Controllers\Machines\MachineController::edit
-* @see app/Http/Controllers/Machines/MachineController.php:85
+* @see app/Http/Controllers/Machines/MachineController.php:87
 * @route '/machines/{machine}/edit'
 */
 edit.get = (args: { machine: number | { id: number } } | [machine: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'get'> => ({
@@ -382,7 +382,7 @@ edit.get = (args: { machine: number | { id: number } } | [machine: number | { id
 
 /**
 * @see \App\Http\Controllers\Machines\MachineController::edit
-* @see app/Http/Controllers/Machines/MachineController.php:85
+* @see app/Http/Controllers/Machines/MachineController.php:87
 * @route '/machines/{machine}/edit'
 */
 edit.head = (args: { machine: number | { id: number } } | [machine: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'head'> => ({
@@ -392,7 +392,7 @@ edit.head = (args: { machine: number | { id: number } } | [machine: number | { i
 
 /**
 * @see \App\Http\Controllers\Machines\MachineController::edit
-* @see app/Http/Controllers/Machines/MachineController.php:85
+* @see app/Http/Controllers/Machines/MachineController.php:87
 * @route '/machines/{machine}/edit'
 */
 const editForm = (args: { machine: number | { id: number } } | [machine: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -402,7 +402,7 @@ const editForm = (args: { machine: number | { id: number } } | [machine: number 
 
 /**
 * @see \App\Http\Controllers\Machines\MachineController::edit
-* @see app/Http/Controllers/Machines/MachineController.php:85
+* @see app/Http/Controllers/Machines/MachineController.php:87
 * @route '/machines/{machine}/edit'
 */
 editForm.get = (args: { machine: number | { id: number } } | [machine: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -412,7 +412,7 @@ editForm.get = (args: { machine: number | { id: number } } | [machine: number | 
 
 /**
 * @see \App\Http\Controllers\Machines\MachineController::edit
-* @see app/Http/Controllers/Machines/MachineController.php:85
+* @see app/Http/Controllers/Machines/MachineController.php:87
 * @route '/machines/{machine}/edit'
 */
 editForm.head = (args: { machine: number | { id: number } } | [machine: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'get'> => ({
@@ -429,7 +429,7 @@ edit.form = editForm
 
 /**
 * @see \App\Http\Controllers\Machines\MachineController::update
-* @see app/Http/Controllers/Machines/MachineController.php:96
+* @see app/Http/Controllers/Machines/MachineController.php:98
 * @route '/machines/{machine}'
 */
 export const update = (args: { machine: number | { id: number } } | [machine: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -444,7 +444,7 @@ update.definition = {
 
 /**
 * @see \App\Http\Controllers\Machines\MachineController::update
-* @see app/Http/Controllers/Machines/MachineController.php:96
+* @see app/Http/Controllers/Machines/MachineController.php:98
 * @route '/machines/{machine}'
 */
 update.url = (args: { machine: number | { id: number } } | [machine: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -477,7 +477,7 @@ update.url = (args: { machine: number | { id: number } } | [machine: number | { 
 
 /**
 * @see \App\Http\Controllers\Machines\MachineController::update
-* @see app/Http/Controllers/Machines/MachineController.php:96
+* @see app/Http/Controllers/Machines/MachineController.php:98
 * @route '/machines/{machine}'
 */
 update.put = (args: { machine: number | { id: number } } | [machine: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'put'> => ({
@@ -487,7 +487,7 @@ update.put = (args: { machine: number | { id: number } } | [machine: number | { 
 
 /**
 * @see \App\Http\Controllers\Machines\MachineController::update
-* @see app/Http/Controllers/Machines/MachineController.php:96
+* @see app/Http/Controllers/Machines/MachineController.php:98
 * @route '/machines/{machine}'
 */
 update.patch = (args: { machine: number | { id: number } } | [machine: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'patch'> => ({
@@ -497,7 +497,7 @@ update.patch = (args: { machine: number | { id: number } } | [machine: number | 
 
 /**
 * @see \App\Http\Controllers\Machines\MachineController::update
-* @see app/Http/Controllers/Machines/MachineController.php:96
+* @see app/Http/Controllers/Machines/MachineController.php:98
 * @route '/machines/{machine}'
 */
 const updateForm = (args: { machine: number | { id: number } } | [machine: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -512,7 +512,7 @@ const updateForm = (args: { machine: number | { id: number } } | [machine: numbe
 
 /**
 * @see \App\Http\Controllers\Machines\MachineController::update
-* @see app/Http/Controllers/Machines/MachineController.php:96
+* @see app/Http/Controllers/Machines/MachineController.php:98
 * @route '/machines/{machine}'
 */
 updateForm.put = (args: { machine: number | { id: number } } | [machine: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -527,7 +527,7 @@ updateForm.put = (args: { machine: number | { id: number } } | [machine: number 
 
 /**
 * @see \App\Http\Controllers\Machines\MachineController::update
-* @see app/Http/Controllers/Machines/MachineController.php:96
+* @see app/Http/Controllers/Machines/MachineController.php:98
 * @route '/machines/{machine}'
 */
 updateForm.patch = (args: { machine: number | { id: number } } | [machine: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -544,7 +544,7 @@ update.form = updateForm
 
 /**
 * @see \App\Http\Controllers\Machines\MachineController::destroy
-* @see app/Http/Controllers/Machines/MachineController.php:112
+* @see app/Http/Controllers/Machines/MachineController.php:116
 * @route '/machines/{machine}'
 */
 export const destroy = (args: { machine: number | { id: number } } | [machine: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -559,7 +559,7 @@ destroy.definition = {
 
 /**
 * @see \App\Http\Controllers\Machines\MachineController::destroy
-* @see app/Http/Controllers/Machines/MachineController.php:112
+* @see app/Http/Controllers/Machines/MachineController.php:116
 * @route '/machines/{machine}'
 */
 destroy.url = (args: { machine: number | { id: number } } | [machine: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions) => {
@@ -592,7 +592,7 @@ destroy.url = (args: { machine: number | { id: number } } | [machine: number | {
 
 /**
 * @see \App\Http\Controllers\Machines\MachineController::destroy
-* @see app/Http/Controllers/Machines/MachineController.php:112
+* @see app/Http/Controllers/Machines/MachineController.php:116
 * @route '/machines/{machine}'
 */
 destroy.delete = (args: { machine: number | { id: number } } | [machine: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteDefinition<'delete'> => ({
@@ -602,7 +602,7 @@ destroy.delete = (args: { machine: number | { id: number } } | [machine: number 
 
 /**
 * @see \App\Http\Controllers\Machines\MachineController::destroy
-* @see app/Http/Controllers/Machines/MachineController.php:112
+* @see app/Http/Controllers/Machines/MachineController.php:116
 * @route '/machines/{machine}'
 */
 const destroyForm = (args: { machine: number | { id: number } } | [machine: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -617,7 +617,7 @@ const destroyForm = (args: { machine: number | { id: number } } | [machine: numb
 
 /**
 * @see \App\Http\Controllers\Machines\MachineController::destroy
-* @see app/Http/Controllers/Machines/MachineController.php:112
+* @see app/Http/Controllers/Machines/MachineController.php:116
 * @route '/machines/{machine}'
 */
 destroyForm.delete = (args: { machine: number | { id: number } } | [machine: number | { id: number } ] | number | { id: number }, options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

@@ -30,6 +30,7 @@ class MachineUpdateRequest extends FormRequest
             'name' => ['required', 'string', 'max:255'],
             'serial_number' => ['nullable', 'string', 'max:255', "unique:machines,serial_number,{$machineId}"],
             'inventory_number' => ['nullable', 'string', 'max:255', "unique:machines,inventory_number,{$machineId}"],
+            'notes' => ['nullable', 'string', 'max:1000'],
             'hardware_ids' => ['nullable', 'array'],
             'hardware_ids.*' => ['exists:hardwares,id'],
         ];

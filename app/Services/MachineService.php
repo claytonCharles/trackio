@@ -3,6 +3,7 @@
 namespace App\Services;
 
 use App\Models\Hardwares\Hardware;
+use App\Models\Hardwares\HardwareHistory;
 use App\Models\Hardwares\HardwareStatus;
 use App\Models\Machines\Machine;
 use App\Models\Machines\MachineCategory;
@@ -95,7 +96,7 @@ class MachineService
                 ])
                 ->latest('modified_at')
                 ->get();
-            
+
             $result = [
                 ...$machine->toArray(),
                 'created_at' => $machine->created_at->subHour(3)->format('d/m/Y à\s H:i'),
@@ -103,7 +104,7 @@ class MachineService
                 'hardware_histories' => $histories->map(fn ($hh) => array_merge(
                     $hh->toArray(),
                     ['created_at' => Carbon::parse($hh->modified_at)->subHour(3)->format('d/m/Y à\s H:i')],
-                ))->toArray()
+                ))->toArray(),
             ];
         } catch (Exception $exc) {
             LogService::error(
@@ -160,27 +161,17 @@ class MachineService
         return $result;
     }
 
-    public function storeMachine(array $propsMachine, array $hardwares = []): array
+    public function storeMachine(array $propsMachine, array $hardwares = [], ?string $notes = null): array
     {
         $result = [];
         try {
             $creator = ['created_by' => Auth::id(), 'updated_by' => Auth::id()];
-            $machine = DB::transaction(function () use ($propsMachine, $creator, $hardwares) {
-                $hwLinkStatus = HardwareStatus::linkedStatus()->first();
+            $machine = DB::transaction(function () use ($propsMachine, $creator, $hardwares, $notes) {
                 $machine = Machine::create(array_merge($propsMachine, $creator));
 
-                foreach ($hardwares as $hardwareId) {
-                    MachineHardware::create([
-                        'machine_id' => $machine->id,
-                        'hardware_id' => $hardwareId,
-                        ...$creator,
-                    ]);
+                if (! empty($hardwares)) {
+                    $this->linkMachineHardwares(collect($hardwares), $machine->id, $creator, $notes);
                 }
-
-                Hardware::whereIn('id', $hardwares)->update([
-                    'status_id' => $hwLinkStatus->id,
-                    'updated_by' => Auth::id(),
-                ]);
 
                 return $machine;
             });
@@ -194,24 +185,27 @@ class MachineService
         return $result;
     }
 
-    public function updateMachine(array $newProps, array $hardwares, Machine $machine): array
+    public function updateMachine(array $newProps, array $hardwares, Machine $machine, ?string $notes = null): array
     {
-        $result = []; 
+        $result = [];
         try {
-            DB::transaction(function () use ($newProps, $hardwares, $machine) {
+            DB::transaction(function () use ($newProps, $hardwares, $machine, $notes) {
                 $creator = ['created_by' => Auth::id(), 'updated_by' => Auth::id()];
-                $machine->update([
-                    ...$newProps,
-                    'updated_by' => Auth::id(),
-                ]);
+                $machine->update([...$newProps, 'updated_by' => Auth::id()]);
 
                 $hardwares = collect($hardwares ?? []);
                 $currentHardwares = $machine->machineHardwares()->pluck('hardware_id');
-                $newHardwares = $hardwares->diff($currentHardwares);
-                $hwRemoved = $currentHardwares->diff($hardwares)->toArray();
+                $toLink = $hardwares->diff($currentHardwares);
+                $toUnlink = $currentHardwares->diff($hardwares)->toArray();
 
-                $this->linkMachineHardwares($newHardwares, $machine->id, $creator);
-                $this->unlinkMachineHardwares($hwRemoved, $machine);
+                if ($toLink->isNotEmpty()) {
+                    $this->linkMachineHardwares($toLink, $machine->id, $creator, $notes);
+                }
+
+                if (! empty($toUnlink)) {
+                    $this->unlinkMachineHardwares($toUnlink, $machine, $notes);
+                }
+
                 return $machine;
             });
 
@@ -245,16 +239,20 @@ class MachineService
     /**
      * Função apenas para isolar logica, nunca deve ser usada solta ou fora de uma transaction!!!
      */
-    private function linkMachineHardwares(Collection $hardwaresIds, int $machineId, array $creator)
-    {
+    private function linkMachineHardwares(
+        Collection $hardwaresIds,
+        int $machineId,
+        array $creator,
+        ?string $notes = null
+    ): void {
+        DB::statement("SELECT set_config('app.hardware_notes', ?, true)", [$notes ?? '']);
+        
         $hwLinkStatus = HardwareStatus::linkedStatus()->first();
-        $data = $hardwaresIds->map(function ($id) use ($machineId, $creator) {
-            return [
-                'machine_id' => $machineId,
-                'hardware_id' => $id,
-                ...$creator,
-            ];
-        })->toArray();
+        $data = $hardwaresIds->map(fn ($id) => [
+            'machine_id' => $machineId,
+            'hardware_id' => $id,
+            ...$creator,
+        ])->toArray();
 
         MachineHardware::insert($data);
         Hardware::whereIn('id', $hardwaresIds)->update([
@@ -266,11 +264,13 @@ class MachineService
     /**
      * Função apenas para isolar logica, nunca deve ser usada solta ou fora de uma transaction!!!
      */
-    private function unlinkMachineHardwares(array $hardwareIds, Machine $machine)
+    private function unlinkMachineHardwares(array $hardwaresIds, Machine $machine, ?string $notes = null): void
     {
+        DB::statement("SELECT set_config('app.hardware_notes', ?, true)", [$notes ?? '']);
+
         $storageStatus = HardwareStatus::storageStatus()->first();
-        $machine->machineHardwares()->whereIn('hardware_id', $hardwareIds)->delete();
-        Hardware::whereIn('id', $hardwareIds)->update([
+        $machine->machineHardwares()->whereIn('hardware_id', $hardwaresIds)->delete();
+        Hardware::whereIn('id', $hardwaresIds)->update([
             'status_id' => $storageStatus->id,
             'updated_by' => Auth::id(),
         ]);

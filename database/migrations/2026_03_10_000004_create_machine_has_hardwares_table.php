@@ -30,64 +30,75 @@ return new class extends Migration
             $table->foreignId('previous_machine_id')->nullable()->constrained('machines')->nullOnDelete();
             $table->foreignId('created_by')->constrained('users');
             $table->string('action');
+            $table->text('notes')->nullable();
             $table->timestamp('modified_at')->useCurrent();
         });
 
-        if (DB::getDriverName() === 'pgsql') {
-            DB::statement("
-                CREATE OR REPLACE FUNCTION log_machine_hardware_history()
-                RETURNS TRIGGER AS $$
+        DB::statement("
+            CREATE OR REPLACE FUNCTION log_machine_hardware_history()
+            RETURNS TRIGGER AS $$
+            DECLARE
+                v_notes TEXT;
+            BEGIN
                 BEGIN
-                    IF (TG_OP = 'INSERT') THEN
-                        INSERT INTO xht_machines_hardwares
-                            (hardware_id, machine_id, previous_machine_id, created_by, action, modified_at)
-                        VALUES
-                            (NEW.hardware_id, NEW.machine_id, NULL, NEW.created_by, 'attached', NOW());
-                        RETURN NEW;
+                    v_notes := current_setting('app.hardware_notes', true);
+                    IF v_notes = '' THEN
+                        v_notes := NULL;
                     END IF;
-
-                    IF (TG_OP = 'UPDATE' AND NEW.machine_id IS DISTINCT FROM OLD.machine_id) THEN
-                        INSERT INTO xht_machines_hardwares
-                            (hardware_id, machine_id, previous_machine_id, created_by, action, modified_at)
-                        VALUES
-                            (NEW.hardware_id, NEW.machine_id, OLD.machine_id, NEW.updated_by, 'moved', NOW());
-                        RETURN NEW;
-                    END IF;
-
-                    IF (TG_OP = 'DELETE') THEN
-                        INSERT INTO xht_machines_hardwares
-                            (hardware_id, machine_id, previous_machine_id, created_by, action, modified_at)
-                        VALUES
-                            (OLD.hardware_id, NULL, OLD.machine_id, OLD.updated_by, 'detached', NOW());
-                        RETURN OLD;
-                    END IF;
-
-                    RETURN NEW;
+                EXCEPTION WHEN OTHERS THEN
+                    v_notes := NULL;
                 END;
-                $$ LANGUAGE plpgsql;
-            ");
+                
+                IF (TG_OP = 'INSERT') THEN
+                    INSERT INTO xht_machines_hardwares
+                        (hardware_id, machine_id, previous_machine_id, created_by, action, notes, modified_at)
+                    VALUES
+                        (NEW.hardware_id, NEW.machine_id, NULL, NEW.created_by, 'attached', v_notes, NOW());
+                    RETURN NEW;
+                END IF;
 
-            DB::statement('
-                CREATE TRIGGER trg_machine_hardware_insert
-                AFTER INSERT ON machine_has_hardwares
-                FOR EACH ROW
-                EXECUTE FUNCTION log_machine_hardware_history();
-            ');
+                IF (TG_OP = 'UPDATE' AND NEW.machine_id IS DISTINCT FROM OLD.machine_id) THEN
+                    INSERT INTO xht_machines_hardwares
+                        (hardware_id, machine_id, previous_machine_id, created_by, action, notes, modified_at)
+                    VALUES
+                        (NEW.hardware_id, NEW.machine_id, OLD.machine_id, NEW.updated_by, 'moved', v_notes, NOW());
+                    RETURN NEW;
+                END IF;
 
-            DB::statement('
-                CREATE TRIGGER trg_machine_hardware_update
-                AFTER UPDATE ON machine_has_hardwares
-                FOR EACH ROW
-                EXECUTE FUNCTION log_machine_hardware_history();
-            ');
+                IF (TG_OP = 'DELETE') THEN
+                    INSERT INTO xht_machines_hardwares
+                        (hardware_id, machine_id, previous_machine_id, created_by, action, notes, modified_at)
+                    VALUES
+                        (OLD.hardware_id, NULL, OLD.machine_id, OLD.updated_by, 'detached', v_notes, NOW());
+                    RETURN OLD;
+                END IF;
 
-            DB::statement('
-                CREATE TRIGGER trg_machine_hardware_delete
-                AFTER DELETE ON machine_has_hardwares
-                FOR EACH ROW
-                EXECUTE FUNCTION log_machine_hardware_history();
-            ');
-        }
+                RETURN NEW;
+            END;
+            $$ LANGUAGE plpgsql;
+        ");
+
+        DB::statement('
+            CREATE TRIGGER trg_machine_hardware_insert
+            AFTER INSERT ON machine_has_hardwares
+            FOR EACH ROW
+            EXECUTE FUNCTION log_machine_hardware_history();
+        ');
+
+        DB::statement('
+            CREATE TRIGGER trg_machine_hardware_update
+            AFTER UPDATE ON machine_has_hardwares
+            FOR EACH ROW
+            EXECUTE FUNCTION log_machine_hardware_history();
+        ');
+
+        DB::statement('
+            CREATE TRIGGER trg_machine_hardware_delete
+            AFTER DELETE ON machine_has_hardwares
+            FOR EACH ROW
+            EXECUTE FUNCTION log_machine_hardware_history();
+        ');
+
     }
 
     /**

@@ -38,32 +38,43 @@ return new class extends Migration
             $table->string('serial_number')->nullable();
             $table->string('name');
             $table->text('description')->nullable();
+            $table->text('notes')->nullable();
             $table->softDeletes();
             $table->timestamp('modified_at');
         });
 
-        if (DB::getDriverName() === 'pgsql') {
-            DB::statement('
-                CREATE OR REPLACE FUNCTION save_old_hardware_version()
-                RETURNS TRIGGER AS $$
+        DB::statement("
+            CREATE OR REPLACE FUNCTION save_old_hardware_version()
+            RETURNS TRIGGER AS $$
+            DECLARE
+                v_notes TEXT;
+            BEGIN
                 BEGIN
-                    INSERT INTO xht_hardwares 
-                        (hardware_id, updated_by, category_id, manufacturer_id, status_id, inventory_number, serial_number, name, description, deleted_at, modified_at)
-                    VALUES 
-                        (OLD.id, OLD.updated_by, OLD.category_id, OLD.manufacturer_id, OLD.status_id, OLD.inventory_number, OLD.serial_number, OLD.name, OLD.description, OLD.deleted_at, NOW());
-                    RETURN NEW;
+                    v_notes := current_setting('app.hardware_notes', true);
+                    IF v_notes = '' THEN
+                        v_notes := NULL;
+                    END IF;
+                EXCEPTION WHEN OTHERS THEN
+                    v_notes := NULL;
                 END;
-                $$ LANGUAGE plpgsql;
-            ');
 
-            DB::statement('
-                CREATE TRIGGER before_updated_hardware
-                BEFORE UPDATE ON hardwares
-                FOR EACH ROW
-                EXECUTE FUNCTION save_old_hardware_version();
-            ');
-        }
+                INSERT INTO xht_hardwares
+                    (hardware_id, updated_by, category_id, status_id, manufacturer_id, inventory_number, 
+                    serial_number, name, description, notes, deleted_at, modified_at)
+                VALUES
+                    (OLD.id, OLD.updated_by, OLD.category_id, OLD.status_id, OLD.manufacturer_id, 
+                    OLD.inventory_number, OLD.serial_number, OLD.name, OLD.description, v_notes, OLD.deleted_at, NOW());
+                RETURN NEW;
+            END;
+            $$ LANGUAGE plpgsql;
+        ");
 
+        DB::statement("
+            CREATE TRIGGER before_updated_hardware
+            BEFORE UPDATE ON hardwares
+            FOR EACH ROW
+            EXECUTE FUNCTION save_old_hardware_version();
+        ");
     }
 
     /**
@@ -71,10 +82,8 @@ return new class extends Migration
      */
     public function down(): void
     {
-        if (DB::getDriverName() === 'pgsql') {
-            DB::statement('DROP TRIGGER IF EXISTS before_updated_hardware ON hardwares');
-            DB::statement('DROP FUNCTION IF EXISTS save_old_hardware_version()');
-        }
+        DB::statement('DROP TRIGGER IF EXISTS before_updated_hardware ON hardwares');
+        DB::statement('DROP FUNCTION IF EXISTS save_old_hardware_version()');
 
         Schema::dropIfExists('xht_hardwares');
         Schema::dropIfExists('hardwares');

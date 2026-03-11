@@ -23,6 +23,7 @@ class HardwareHistory extends Model
         'serial_number',
         'name',
         'description',
+        'notes',
         'modified_at',
     ];
 

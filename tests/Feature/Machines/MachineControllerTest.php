@@ -65,7 +65,7 @@ class MachineControllerTest extends TestCase
 
         HardwareStatus::forceCreate([...$creator, 'name' => 'Vinculado', 'only_system' => true, 'is_binding' => true]);
         HardwareStatus::create([...$creator, 'name' => 'Armazenado']);
-        
+
         $this->machineStatus = MachineStatus::create([...$creator, 'name' => 'Ativo']);
         $this->machineCategory = MachineCategory::create([...$creator, 'name' => 'Desktop']);
         $this->manufacturer = Manufacturer::create([...$creator, 'name' => 'Dell']);
@@ -211,6 +211,144 @@ class MachineControllerTest extends TestCase
         $this->assertDatabaseHas('machines', [
             'created_by' => $this->adminUser->id,
             'updated_by' => $this->adminUser->id,
+        ]);
+    }
+
+    public function test_store_with_notes_fills_hardware_history(): void
+    {
+        $hardware = $this->createHardware();
+
+        $this->actingAs($this->adminUser)
+            ->post(route('machines.store'), $this->validPayload([
+                'hardware_ids' => [$hardware->id],
+                'notes' => 'Vinculado para uso no setor de TI.',
+            ]));
+
+        $this->assertDatabaseHas('xht_hardwares', [
+            'hardware_id' => $hardware->id,
+            'notes' => 'Vinculado para uso no setor de TI.',
+        ]);
+    }
+
+    public function test_store_with_notes_fills_machine_hardware_history(): void
+    {
+        $hardware = $this->createHardware();
+
+        $this->actingAs($this->adminUser)
+            ->post(route('machines.store'), $this->validPayload([
+                'hardware_ids' => [$hardware->id],
+                'notes' => 'Vinculado para uso no setor de TI.',
+            ]));
+
+        $this->assertDatabaseHas('xht_machines_hardwares', [
+            'hardware_id' => $hardware->id,
+            'action' => 'attached',
+            'notes' => 'Vinculado para uso no setor de TI.',
+        ]);
+    }
+
+    public function test_update_link_with_notes_propagates_to_hardware_history(): void
+    {
+        $machine = $this->createMachine();
+        $hardware = $this->createHardware();
+
+        $this->actingAs($this->adminUser)
+            ->put(route('machines.update', $machine), $this->validPayload([
+                'hardware_ids' => [$hardware->id],
+                'notes' => 'Realocado após manutenção.',
+            ]));
+
+        $this->assertDatabaseHas('xht_hardwares', [
+            'hardware_id' => $hardware->id,
+            'notes' => 'Realocado após manutenção.',
+        ]);
+    }
+
+    public function test_update_unlink_with_notes_propagates_to_hardware_history(): void
+    {
+        $machine = $this->createMachine();
+        $hardware = $this->createHardware();
+
+        MachineHardware::create([
+            'machine_id' => $machine->id,
+            'hardware_id' => $hardware->id,
+            ...$this->creatorFields(),
+        ]);
+
+        $this->actingAs($this->adminUser)
+            ->put(route('machines.update', $machine), $this->validPayload([
+                'hardware_ids' => [],
+                'notes' => 'Hardware devolvido ao estoque para reparos.',
+            ]));
+
+        $this->assertDatabaseHas('xht_hardwares', [
+            'hardware_id' => $hardware->id,
+            'notes' => 'Hardware devolvido ao estoque para reparos.',
+        ]);
+    }
+
+    public function test_without_notes_saves_null_in_both_histories(): void
+    {
+        $hardware = $this->createHardware();
+
+        $this->actingAs($this->adminUser)
+            ->post(route('machines.store'), $this->validPayload([
+                'hardware_ids' => [$hardware->id],
+            ]));
+
+        $this->assertDatabaseHas('xht_machines_hardwares', [
+            'hardware_id' => $hardware->id,
+            'notes' => null,
+        ]);
+
+        $this->assertDatabaseHas('xht_hardwares', [
+            'hardware_id' => $hardware->id,
+            'notes' => null,
+        ]);
+    }
+
+    public function test_link_hardware_changes_status_to_linked(): void
+    {
+        $hardware = $this->createHardware();
+
+        $this->actingAs($this->adminUser)
+            ->post(route('machines.store'), $this->validPayload([
+                'hardware_ids' => [$hardware->id],
+            ]));
+
+        $linkedStatus = HardwareStatus::linkedStatus()->first();
+        $this->assertDatabaseHas('hardwares', [
+            'id' => $hardware->id,
+            'status_id' => $linkedStatus->id,
+        ]);
+    }
+
+    public function test_unlink_with_notes_fills_both_histories(): void
+    {
+        $machine = $this->createMachine();
+        $hardware = $this->createHardware();
+
+        MachineHardware::create([
+            'machine_id' => $machine->id,
+            'hardware_id' => $hardware->id,
+            ...$this->creatorFields(),
+        ]);
+
+        $this->actingAs($this->adminUser)
+            ->put(route('machines.update', $machine), $this->validPayload([
+                'hardware_ids' => [],
+                'notes' => 'Removido para manutenção.',
+            ]));
+
+        $this->assertDatabaseHas('xht_machines_hardwares', [
+            'hardware_id' => $hardware->id,
+            'action' => 'detached',
+            'notes' => 'Removido para manutenção.',
+        ]);
+
+        $this->assertDatabaseHas('xht_hardwares', [
+            'hardware_id' => $hardware->id,
+            'notes' => 'Removido para manutenção.',
         ]);
     }
 

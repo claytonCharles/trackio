@@ -165,11 +165,21 @@ export default function ShowHardware({ hardware }: Props) {
           <div className="space-y-6 lg:col-span-2">
             {/* Descrição */}
             <div className="rounded-lg border p-5">
-              <h3 className="mb-4 font-semibold">Descrição</h3>
-              <div
-                className="prose dark:prose-invert max-h-125 overflow-y-auto text-foreground max-w-none text-sm"
-                dangerouslySetInnerHTML={{ __html: hardware.description }}
-              />
+              <h3 className="mb-4 font-semibold">Detalhes</h3>
+              {
+                hardware.description
+                  ? (
+                    <div
+                      className="prose dark:prose-invert max-h-125 overflow-y-auto text-foreground max-w-none text-sm"
+                      dangerouslySetInnerHTML={{ __html: hardware.description }}
+                    />
+                  ) : (
+                    <p className="text-muted-foreground text-sm">
+                      Nenhum detalhe registrado.
+                    </p>
+                  )
+              }
+
             </div>
 
             {/* Histórico de alterações */}
