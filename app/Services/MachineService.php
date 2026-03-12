@@ -2,8 +2,8 @@
 
 namespace App\Services;
 
+use App\Jobs\Machines\CloneMachineJob;
 use App\Models\Hardwares\Hardware;
-use App\Models\Hardwares\HardwareHistory;
 use App\Models\Hardwares\HardwareStatus;
 use App\Models\Machines\Machine;
 use App\Models\Machines\MachineCategory;
@@ -11,11 +11,15 @@ use App\Models\Machines\MachineHardware;
 use App\Models\Machines\MachineHardwareHistory;
 use App\Models\Machines\MachineStatus;
 use App\Models\Manufacturers\Manufacturer;
+use App\Models\User;
+use App\Notifications\Machines\MachineCloneBatchFinished;
 use App\Support\FlashMsg;
 use Carbon\Carbon;
 use Exception;
+use Illuminate\Bus\Batch;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\DB;
 
 class MachineService
@@ -236,6 +240,65 @@ class MachineService
         return $message;
     }
 
+
+    public function searchMachinesForTemplate(array $filters): array
+    {
+        $result = [];
+        try {
+            $term = strip_tags($filters['search'] ?? '');
+            $paginated = Machine::query()
+                ->with(['manufacturer', 'status', 'category'])
+                ->withCount('machineHardwares')
+                ->search($term)
+                ->latest()
+                ->paginate(10);
+
+            $result = [
+                'listMachines' => $paginated->items(),
+                'pagination' => [
+                    'currentPage' => $paginated->currentPage(),
+                    'lastPage' => $paginated->lastPage(),
+                    'perPage' => $paginated->perPage(),
+                    'totalItems' => $paginated->total(),
+                ],
+            ];
+        } catch (Exception $exc) {
+            LogService::error("Falhou ao buscar máquinas para template! ERROR: {$exc->getMessage()}");
+        }
+
+        return $result;
+    }
+
+    public function dispatchCloneBatch(Machine $source, int $copies): bool
+    {
+        try {
+            $userId = Auth::id();
+            $jobs = collect(range(1, $copies))
+                ->map(fn () => new CloneMachineJob($source->id, $userId))
+                ->toArray();
+
+            $machineName = $source->name;
+
+            Bus::batch($jobs)
+                ->name("clone-machine-{$source->id}")
+                ->finally(function (Batch $batch) use ($userId, $machineName) {
+                    $user = User::find($userId);
+                    $user?->notify(new MachineCloneBatchFinished(
+                        $machineName,
+                        $batch->totalJobs,
+                        $batch->failedJobs,
+                    ));
+                })
+                ->dispatch();
+
+            return true;
+        } catch (Exception $e) {
+            LogService::error("Falhou ao despachar batch de clonagem da máquina #{$source->id}! ERROR: {$e->getMessage()}");
+
+            return false;
+        }
+    }
+
     /**
      * Função apenas para isolar logica, nunca deve ser usada solta ou fora de uma transaction!!!
      */
@@ -246,7 +309,7 @@ class MachineService
         ?string $notes = null
     ): void {
         DB::statement("SELECT set_config('app.hardware_notes', ?, true)", [$notes ?? '']);
-        
+
         $hwLinkStatus = HardwareStatus::linkedStatus()->first();
         $data = $hardwaresIds->map(fn ($id) => [
             'machine_id' => $machineId,

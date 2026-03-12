@@ -37,6 +37,7 @@ class DatabaseSeeder extends Seeder
         Permission::create(['name' => 'read machines', 'resource' => 'machine']);
         Permission::create(['name' => 'write machines', 'resource' => 'machine']);
         Permission::create(['name' => 'delete machines', 'resource' => 'machine']);
+        Permission::create(['name' => 'clone machines', 'resource' => 'machine']);
 
         Role::create(['name' => 'admin', 'is_system_role' => true])->givePermissionTo(Permission::all());
 
