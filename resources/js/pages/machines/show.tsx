@@ -5,7 +5,7 @@ import hardwares from "@/routes/hardwares";
 import machines from "@/routes/machines";
 import { BreadcrumbItem, SimpleIdentifier } from "@/types";
 import { Head, Link, router, usePage } from "@inertiajs/react";
-import { ArrowLeftIcon, ClockIcon, MessageSquareIcon, PencilIcon, Trash2Icon } from "lucide-react";
+import { ArrowLeftIcon, ClockIcon, Eye, MessageSquareIcon, PencilIcon, Trash2Icon } from "lucide-react";
 import { useEffect } from "react";
 
 type HardwareItem = {
@@ -250,6 +250,13 @@ export default function ShowMachine({ machine }: Props) {
                               Observação
                             </span>
                           )}
+                          <Link
+                            href={hardwares.show(h.hardware.id)}
+                            className="border-muted-foreground/40 text-muted-foreground ml-2 inline-flex cursor-pointer items-center gap-1 rounded-md border px-1.5 py-0.5 text-xs transition-colors hover:border-current"
+                          >
+                            <Eye className="size-3 shrink-0" />
+                            Ver Hardware
+                          </Link>
                         </p>
                       </div>
                     </li>

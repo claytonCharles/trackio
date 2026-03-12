@@ -38,7 +38,6 @@ return new class extends Migration
             $table->string('serial_number')->nullable();
             $table->string('name');
             $table->text('description')->nullable();
-            $table->text('notes')->nullable();
             $table->softDeletes();
             $table->timestamp('modified_at');
         });
@@ -46,24 +45,13 @@ return new class extends Migration
         DB::statement("
             CREATE OR REPLACE FUNCTION save_old_hardware_version()
             RETURNS TRIGGER AS $$
-            DECLARE
-                v_notes TEXT;
             BEGIN
-                BEGIN
-                    v_notes := current_setting('app.hardware_notes', true);
-                    IF v_notes = '' THEN
-                        v_notes := NULL;
-                    END IF;
-                EXCEPTION WHEN OTHERS THEN
-                    v_notes := NULL;
-                END;
-
                 INSERT INTO xht_hardwares
                     (hardware_id, updated_by, category_id, status_id, manufacturer_id, inventory_number, 
-                    serial_number, name, description, notes, deleted_at, modified_at)
+                    serial_number, name, description, deleted_at, modified_at)
                 VALUES
                     (OLD.id, OLD.updated_by, OLD.category_id, OLD.status_id, OLD.manufacturer_id, 
-                    OLD.inventory_number, OLD.serial_number, OLD.name, OLD.description, v_notes, OLD.deleted_at, NOW());
+                    OLD.inventory_number, OLD.serial_number, OLD.name, OLD.description, OLD.deleted_at, NOW());
                 RETURN NEW;
             END;
             $$ LANGUAGE plpgsql;

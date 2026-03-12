@@ -214,22 +214,6 @@ class MachineControllerTest extends TestCase
         ]);
     }
 
-    public function test_store_with_notes_fills_hardware_history(): void
-    {
-        $hardware = $this->createHardware();
-
-        $this->actingAs($this->adminUser)
-            ->post(route('machines.store'), $this->validPayload([
-                'hardware_ids' => [$hardware->id],
-                'notes' => 'Vinculado para uso no setor de TI.',
-            ]));
-
-        $this->assertDatabaseHas('xht_hardwares', [
-            'hardware_id' => $hardware->id,
-            'notes' => 'Vinculado para uso no setor de TI.',
-        ]);
-    }
-
     public function test_store_with_notes_fills_machine_hardware_history(): void
     {
         $hardware = $this->createHardware();
@@ -247,7 +231,7 @@ class MachineControllerTest extends TestCase
         ]);
     }
 
-    public function test_update_link_with_notes_propagates_to_hardware_history(): void
+    public function test_update_link_with_notes(): void
     {
         $machine = $this->createMachine();
         $hardware = $this->createHardware();
@@ -258,13 +242,14 @@ class MachineControllerTest extends TestCase
                 'notes' => 'Realocado após manutenção.',
             ]));
 
-        $this->assertDatabaseHas('xht_hardwares', [
+        $this->assertDatabaseHas('xht_machines_hardwares', [
+            'machine_id' => $machine->id,
             'hardware_id' => $hardware->id,
             'notes' => 'Realocado após manutenção.',
         ]);
     }
 
-    public function test_update_unlink_with_notes_propagates_to_hardware_history(): void
+    public function test_update_unlink_with_notes(): void
     {
         $machine = $this->createMachine();
         $hardware = $this->createHardware();
@@ -281,7 +266,8 @@ class MachineControllerTest extends TestCase
                 'notes' => 'Hardware devolvido ao estoque para reparos.',
             ]));
 
-        $this->assertDatabaseHas('xht_hardwares', [
+        $this->assertDatabaseHas('xht_machines_hardwares', [
+            'previous_machine_id' => $machine->id,
             'hardware_id' => $hardware->id,
             'notes' => 'Hardware devolvido ao estoque para reparos.',
         ]);
@@ -297,11 +283,6 @@ class MachineControllerTest extends TestCase
             ]));
 
         $this->assertDatabaseHas('xht_machines_hardwares', [
-            'hardware_id' => $hardware->id,
-            'notes' => null,
-        ]);
-
-        $this->assertDatabaseHas('xht_hardwares', [
             'hardware_id' => $hardware->id,
             'notes' => null,
         ]);
@@ -343,11 +324,6 @@ class MachineControllerTest extends TestCase
         $this->assertDatabaseHas('xht_machines_hardwares', [
             'hardware_id' => $hardware->id,
             'action' => 'detached',
-            'notes' => 'Removido para manutenção.',
-        ]);
-
-        $this->assertDatabaseHas('xht_hardwares', [
-            'hardware_id' => $hardware->id,
             'notes' => 'Removido para manutenção.',
         ]);
     }

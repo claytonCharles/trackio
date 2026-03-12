@@ -6,6 +6,7 @@ use App\Models\Hardwares\HardwareCategory;
 use App\Models\Hardwares\HardwareStatus;
 use App\Models\Machines\MachineCategory;
 use App\Models\Machines\MachineStatus;
+use App\Models\Manufacturers\Manufacturer;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -71,5 +72,14 @@ class DatabaseSeeder extends Seeder
         MachineCategory::create([...$creator, 'name' => 'Notebook', 'is_system_category' => true]);
         MachineCategory::create([...$creator, 'name' => 'Microcomputador', 'is_system_category' => true]);
         MachineCategory::create([...$creator, 'name' => 'Workstation', 'is_system_category' => true]);
+
+        Manufacturer::create([...$creator, 'name' => 'AMD']);
+        Manufacturer::create([...$creator, 'name' => 'INTEL']);
+        Manufacturer::create([...$creator, 'name' => 'NVIDIA']);
+        Manufacturer::create([...$creator, 'name' => 'SAMSUNG']);
+        Manufacturer::create([...$creator, 'name' => 'DELL']);
+        Manufacturer::create([...$creator, 'name' => 'POSITIVO']);
+        Manufacturer::create([...$creator, 'name' => 'LENOVO']);
+        Manufacturer::create([...$creator, 'name' => 'GENÉRICO']);
     }
 }

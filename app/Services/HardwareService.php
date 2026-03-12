@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Hardwares\Hardware;
 use App\Models\Hardwares\HardwareCategory;
 use App\Models\Hardwares\HardwareStatus;
+use App\Models\Machines\MachineHardwareHistory;
 use App\Models\Manufacturers\Manufacturer;
 use App\Models\User;
 use App\Support\FlashMsg;
@@ -145,6 +146,17 @@ class HardwareService
                 'histories.updatedBy:id,name',
             ]);
 
+            $histories = MachineHardwareHistory::query()
+                ->where('hardware_id', $hardware->id)
+                ->with([
+                    'hardware:id,name',
+                    'machine:id,name',
+                    'previousMachine:id,name',
+                    'createdBy:id,name',
+                ])
+                ->latest('modified_at')
+                ->get();
+
             $result = [
                 ...$hardware->toArray(),
                 'updated_at_formatted' => $hardware->updated_at->subHour(3)->format('d/m/Y à\s H:i'),
@@ -163,6 +175,10 @@ class HardwareService
                     'manufacturer' => $h->manufacturer,
                     'updated_by' => $h->updatedBy,
                 ]),
+                'moveHistories' => $histories->map(fn ($hh) => array_merge(
+                    $hh->toArray(),
+                    ['created_at' => Carbon::parse($hh->modified_at)->subHour(3)->format('d/m/Y à\s H:i')],
+                ))->toArray(),
             ];
         } catch (Exception $exc) {
             LogService::error(
@@ -200,7 +216,7 @@ class HardwareService
         $result = false;
         try {
             $hardware->load(['status:id,name,only_system']);
-            $result = !$hardware->status->only_system;
+            $result = ! $hardware->status->only_system;
         } catch (Exception $exc) {
             LogService::error(
                 "Falhou em validar o vinculo de Hardware #{$hardware->id}! ERROR: {$exc->getMessage()}"
