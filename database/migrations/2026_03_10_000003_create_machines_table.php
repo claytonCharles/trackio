@@ -16,6 +16,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('created_by')->constrained('users');
             $table->foreignId('updated_by')->constrained('users');
+            $table->foreignId('category_id')->constrained('machine_categories');
             $table->foreignId('manufacturer_id')->constrained('manufacturers');
             $table->foreignId('status_id')->constrained('machine_status');
             $table->string('name');
@@ -29,6 +30,7 @@ return new class extends Migration
             $table->id();
             $table->foreignId('machine_id')->constrained('machines');
             $table->foreignId('updated_by')->constrained('users');
+            $table->foreignId('category_id')->constrained('machine_categories');
             $table->foreignId('manufacturer_id')->constrained('manufacturers');
             $table->foreignId('status_id')->constrained('machine_status');
             $table->string('name');
@@ -44,9 +46,9 @@ return new class extends Migration
                 RETURNS TRIGGER AS $$
                 BEGIN
                     INSERT INTO xht_machines 
-                        (machine_id, updated_by, manufacturer_id, status_id, name, inventory_number, serial_number, deleted_at, modified_at)
+                        (machine_id, updated_by, category_id, manufacturer_id, status_id, name, inventory_number, serial_number, deleted_at, modified_at)
                     VALUES 
-                        (OLD.id, OLD.updated_by, OLD.manufacturer_id, OLD.status_id, OLD.name, OLD.inventory_number, OLD.serial_number, OLD.deleted_at, NOW());
+                        (OLD.id, OLD.updated_by, OLD.category_id, OLD.manufacturer_id, OLD.status_id, OLD.name, OLD.inventory_number, OLD.serial_number, OLD.deleted_at, NOW());
                     RETURN NEW;
                 END;
                 $$ LANGUAGE plpgsql;
@@ -69,6 +71,7 @@ return new class extends Migration
         DB::statement('DROP TRIGGER IF EXISTS trg_machine_update ON machines');
         DB::statement('DROP FUNCTION IF EXISTS log_machine_history()');
 
+        Schema::dropIfExists('xht_machines');
         Schema::dropIfExists('machines');
     }
 };

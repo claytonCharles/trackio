@@ -1,11 +1,4 @@
 import { Button } from "@/components/default/button";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/default/dialog";
 import { Input } from "@/components/default/input";
 import InputError from "@/components/default/input-error";
 import { Label } from "@/components/default/label";
@@ -21,12 +14,14 @@ import { Spinner } from "@/components/default/spinner";
 import { RichTextEditor } from "@/components/custom/rich-text-editor";
 import AppLayout from "@/layouts/app-layout";
 import hardwares from "@/routes/hardwares";
-import manufacturer from "@/routes/manufacturer";
 import { BreadcrumbItem, SimpleIdentifier } from "@/types";
 import { Form, Head } from "@inertiajs/react";
 import { SelectGroup, SelectLabel } from "@radix-ui/react-select";
 import { useState } from "react";
 import { CpuIcon, PlusIcon } from "lucide-react";
+import { ModalSaveManufacturer } from "@/components/custom/modal-save-manufacturer";
+import { UnsavedChangesDialog } from "@/components/custom/unsaved-changes-dialog";
+import { useUnsavedChanges } from "@/hooks/use-unsaved-changes";
 
 type HardwareStatus = {
   id: number;
@@ -65,6 +60,7 @@ export default function SaveHardware({
   ];
 
   const [showSetupManufacturer, setShowSetupManufacturer] = useState(false);
+  const { showDialog, confirm, cancel } = useUnsavedChanges(true);
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
@@ -103,7 +99,7 @@ export default function SaveHardware({
                   {/* Nome */}
                   <div className="flex flex-col gap-2 sm:col-span-2">
                     <div className="flex items-center gap-3">
-                      <Label htmlFor="name">Nome</Label>
+                      <Label htmlFor="name">Modelo *</Label>
                       <InputError message={errors.name} />
                     </div>
                     <Input
@@ -114,7 +110,7 @@ export default function SaveHardware({
                       autoFocus
                       tabIndex={1}
                       defaultValue={hardware?.name ?? ""}
-                      placeholder="Nome do hardware"
+                      placeholder="Modelo do hardware"
                     />
                   </div>
 
@@ -157,7 +153,7 @@ export default function SaveHardware({
                   {/* Categoria */}
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-3">
-                      <Label htmlFor="category_id">Categoria</Label>
+                      <Label htmlFor="category_id">Categoria *</Label>
                       <InputError message={errors.category_id} />
                     </div>
                     <Select
@@ -180,7 +176,7 @@ export default function SaveHardware({
                   {/* Status */}
                   <div className="flex flex-col gap-2">
                     <div className="flex items-center gap-3">
-                      <Label htmlFor="status_id">Status</Label>
+                      <Label htmlFor="status_id">Status *</Label>
                       <InputError message={errors.status_id} />
                     </div>
                     <Select
@@ -206,7 +202,7 @@ export default function SaveHardware({
                   {/* Fabricante */}
                   <div className="flex flex-col gap-2 sm:col-span-2">
                     <div className="flex items-center gap-3">
-                      <Label htmlFor="manufacturer_id">Fabricante</Label>
+                      <Label htmlFor="manufacturer_id">Fabricante *</Label>
                       <InputError message={errors.manufacturer_id} />
                     </div>
                     <Select
@@ -243,7 +239,7 @@ export default function SaveHardware({
               {/* Card — Descrição */}
               <div className="rounded-xl border p-5 sm:p-6">
                 <h3 className="mb-4 text-sm font-semibold uppercase tracking-wide text-muted-foreground">
-                  Descrição
+                  Detalhes
                 </h3>
                 <RichTextEditor
                   name="description"
@@ -272,68 +268,16 @@ export default function SaveHardware({
         </Form>
       </div>
 
+      <UnsavedChangesDialog
+        open={showDialog}
+        onConfirm={confirm}
+        onCancel={cancel}
+      />
+
       <ModalSaveManufacturer
         isOpen={showSetupManufacturer}
         onClose={() => setShowSetupManufacturer(false)}
       />
     </AppLayout >
-  );
-}
-
-type ModalProps = {
-  isOpen: boolean;
-  onClose: () => void;
-}
-
-function ModalSaveManufacturer({
-  isOpen,
-  onClose
-}: ModalProps) {
-
-  return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader className="flex items-center justify-center">
-          <DialogTitle>Cadastro de Fabricante</DialogTitle>
-          <DialogDescription className="text-center">
-            Cadastro simplificado de fabricante.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="flex flex-col items-center space-y-5">
-          <Form
-            {...manufacturer.store.form()}
-            onSuccess={() => onClose()}
-            className="flex w-full flex-col gap-4"
-          >
-            {({ processing, errors }) => (
-              <div className="flex flex-col gap-4">
-                <div className="flex flex-col gap-2">
-                  <div className="flex items-center gap-3">
-                    <Label htmlFor="manufacturer-name">Nome</Label>
-                    <InputError message={errors.name} />
-                  </div>
-                  <Input
-                    id="manufacturer-name"
-                    name="name"
-                    type="text"
-                    required
-                    autoFocus
-                    placeholder="Nome do fabricante"
-                  />
-                </div>
-                <Button
-                  type="submit"
-                  className="w-full"
-                  disabled={processing}
-                >
-                  {processing && <Spinner />}
-                  Salvar
-                </Button>
-              </div>
-            )}
-          </Form>
-        </div>
-      </DialogContent>
-    </Dialog>
   );
 }

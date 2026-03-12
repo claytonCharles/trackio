@@ -6,6 +6,7 @@ use App\Models\Hardwares\Hardware;
 use App\Models\Hardwares\HardwareCategory;
 use App\Models\Hardwares\HardwareStatus;
 use App\Models\Machines\Machine;
+use App\Models\Machines\MachineCategory;
 use App\Models\Machines\MachineHardware;
 use App\Models\Machines\MachineStatus;
 use App\Models\Manufacturers\Manufacturer;
@@ -30,6 +31,8 @@ class MachineControllerTest extends TestCase
     private User $commonUser;
 
     private MachineStatus $machineStatus;
+
+    private MachineCategory $machineCategory;
 
     private Manufacturer $manufacturer;
 
@@ -60,10 +63,11 @@ class MachineControllerTest extends TestCase
             'updated_by' => $this->adminUser->id,
         ];
 
-        HardwareStatus::create([...$creator, 'name' => 'Vinculado', 'only_system' => true]);
+        HardwareStatus::forceCreate([...$creator, 'name' => 'Vinculado', 'only_system' => true, 'is_binding' => true]);
         HardwareStatus::create([...$creator, 'name' => 'Armazenado']);
 
         $this->machineStatus = MachineStatus::create([...$creator, 'name' => 'Ativo']);
+        $this->machineCategory = MachineCategory::create([...$creator, 'name' => 'Desktop']);
         $this->manufacturer = Manufacturer::create([...$creator, 'name' => 'Dell']);
         $this->hwStatus = HardwareStatus::create([...$creator, 'name' => 'Disponível']);
         $this->hwCategory = HardwareCategory::create([...$creator, 'name' => 'Periférico']);
@@ -137,6 +141,7 @@ class MachineControllerTest extends TestCase
             ->assertOk()
             ->assertInertia(fn (Assert $page) => $page
                 ->component('machines/save')
+                ->has('categories')
                 ->has('manufacturers')
                 ->has('statuses')
                 ->has('hardwares')
@@ -178,7 +183,7 @@ class MachineControllerTest extends TestCase
     {
         $this->actingAs($this->adminUser)
             ->post(route('machines.store'), $this->validPayload())
-            ->assertRedirect(route('machines.show', ['machine' => 6]));
+            ->assertRedirect(route('machines.show', ['machine' => 23]));
 
         $this->assertDatabaseHas('machines', ['name' => 'Máquina Teste']);
         $this->assertDatabaseCount('machine_has_hardwares', 0);
@@ -193,7 +198,7 @@ class MachineControllerTest extends TestCase
             ->post(route('machines.store'), $this->validPayload([
                 'hardware_ids' => [$hw1->id, $hw2->id],
             ]))
-            ->assertRedirect(route('machines.show', ['machine' => 7]));
+            ->assertRedirect(route('machines.show', ['machine' => 24]));
 
         $this->assertDatabaseCount('machine_has_hardwares', 2);
     }
@@ -209,6 +214,120 @@ class MachineControllerTest extends TestCase
         ]);
     }
 
+    public function test_store_with_notes_fills_machine_hardware_history(): void
+    {
+        $hardware = $this->createHardware();
+
+        $this->actingAs($this->adminUser)
+            ->post(route('machines.store'), $this->validPayload([
+                'hardware_ids' => [$hardware->id],
+                'notes' => 'Vinculado para uso no setor de TI.',
+            ]));
+
+        $this->assertDatabaseHas('xht_machines_hardwares', [
+            'hardware_id' => $hardware->id,
+            'action' => 'attached',
+            'notes' => 'Vinculado para uso no setor de TI.',
+        ]);
+    }
+
+    public function test_update_link_with_notes(): void
+    {
+        $machine = $this->createMachine();
+        $hardware = $this->createHardware();
+
+        $this->actingAs($this->adminUser)
+            ->put(route('machines.update', $machine), $this->validPayload([
+                'hardware_ids' => [$hardware->id],
+                'notes' => 'Realocado após manutenção.',
+            ]));
+
+        $this->assertDatabaseHas('xht_machines_hardwares', [
+            'machine_id' => $machine->id,
+            'hardware_id' => $hardware->id,
+            'notes' => 'Realocado após manutenção.',
+        ]);
+    }
+
+    public function test_update_unlink_with_notes(): void
+    {
+        $machine = $this->createMachine();
+        $hardware = $this->createHardware();
+
+        MachineHardware::create([
+            'machine_id' => $machine->id,
+            'hardware_id' => $hardware->id,
+            ...$this->creatorFields(),
+        ]);
+
+        $this->actingAs($this->adminUser)
+            ->put(route('machines.update', $machine), $this->validPayload([
+                'hardware_ids' => [],
+                'notes' => 'Hardware devolvido ao estoque para reparos.',
+            ]));
+
+        $this->assertDatabaseHas('xht_machines_hardwares', [
+            'previous_machine_id' => $machine->id,
+            'hardware_id' => $hardware->id,
+            'notes' => 'Hardware devolvido ao estoque para reparos.',
+        ]);
+    }
+
+    public function test_without_notes_saves_null_in_both_histories(): void
+    {
+        $hardware = $this->createHardware();
+
+        $this->actingAs($this->adminUser)
+            ->post(route('machines.store'), $this->validPayload([
+                'hardware_ids' => [$hardware->id],
+            ]));
+
+        $this->assertDatabaseHas('xht_machines_hardwares', [
+            'hardware_id' => $hardware->id,
+            'notes' => null,
+        ]);
+    }
+
+    public function test_link_hardware_changes_status_to_linked(): void
+    {
+        $hardware = $this->createHardware();
+
+        $this->actingAs($this->adminUser)
+            ->post(route('machines.store'), $this->validPayload([
+                'hardware_ids' => [$hardware->id],
+            ]));
+
+        $linkedStatus = HardwareStatus::linkedStatus()->first();
+        $this->assertDatabaseHas('hardwares', [
+            'id' => $hardware->id,
+            'status_id' => $linkedStatus->id,
+        ]);
+    }
+
+    public function test_unlink_with_notes_fills_both_histories(): void
+    {
+        $machine = $this->createMachine();
+        $hardware = $this->createHardware();
+
+        MachineHardware::create([
+            'machine_id' => $machine->id,
+            'hardware_id' => $hardware->id,
+            ...$this->creatorFields(),
+        ]);
+
+        $this->actingAs($this->adminUser)
+            ->put(route('machines.update', $machine), $this->validPayload([
+                'hardware_ids' => [],
+                'notes' => 'Removido para manutenção.',
+            ]));
+
+        $this->assertDatabaseHas('xht_machines_hardwares', [
+            'hardware_id' => $hardware->id,
+            'action' => 'detached',
+            'notes' => 'Removido para manutenção.',
+        ]);
+    }
+
     public function test_store_is_forbidden_without_permission(): void
     {
         $this->actingAs($this->commonUser)
@@ -220,7 +339,7 @@ class MachineControllerTest extends TestCase
     {
         $this->actingAs($this->adminUser)
             ->post(route('machines.store'), [])
-            ->assertSessionHasErrors(['name', 'manufacturer_id', 'status_id']);
+            ->assertSessionHasErrors(['name', 'category_id', 'manufacturer_id', 'status_id']);
     }
 
     public function test_store_fails_with_duplicate_serial_number(): void
@@ -263,6 +382,7 @@ class MachineControllerTest extends TestCase
                 ->has('machine')
                 ->where('machine.id', $machine->id)
                 ->has('machine.machine_hardwares', 1)
+                ->has('machine.category')
                 ->has('machine.manufacturer')
                 ->has('machine.status')
                 ->has('machine.hardware_histories')
@@ -299,6 +419,7 @@ class MachineControllerTest extends TestCase
                 ->component('machines/save')
                 ->has('machine')
                 ->where('machine.id', $machine->id)
+                ->has('categories')
                 ->has('manufacturers')
                 ->has('statuses')
                 ->has('hardwares')
@@ -505,6 +626,7 @@ class MachineControllerTest extends TestCase
             'name' => 'Máquina Teste',
             'serial_number' => null,
             'inventory_number' => null,
+            'category_id' => $this->machineCategory->id,
             'manufacturer_id' => $this->manufacturer->id,
             'status_id' => $this->machineStatus->id,
             'hardware_ids' => [],
@@ -515,6 +637,7 @@ class MachineControllerTest extends TestCase
     {
         return Machine::factory()->create(array_merge([
             ...$this->creatorFields(),
+            'category_id' => $this->machineCategory->id,
             'manufacturer_id' => $this->manufacturer->id,
             'status_id' => $this->machineStatus->id,
         ], $overrides));

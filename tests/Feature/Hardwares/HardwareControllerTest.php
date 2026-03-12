@@ -167,7 +167,7 @@ class HardwareControllerTest extends TestCase
     {
         $this->actingAs($this->adminUser)
             ->post(route('hardwares.store'), [])
-            ->assertSessionHasErrors(['name', 'category_id', 'description', 'status_id', 'manufacturer_id']);
+            ->assertSessionHasErrors(['name', 'category_id', 'status_id', 'manufacturer_id']);
     }
 
     public function test_store_fails_with_nonexistent_relations(): void

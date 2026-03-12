@@ -5,7 +5,7 @@ import hardwares from "@/routes/hardwares";
 import machines from "@/routes/machines";
 import { BreadcrumbItem, SimpleIdentifier } from "@/types";
 import { Head, Link, router, usePage } from "@inertiajs/react";
-import { ArrowLeftIcon, ClockIcon, PencilIcon, Trash2Icon } from "lucide-react";
+import { ArrowLeftIcon, ClockIcon, Eye, MessageSquareIcon, PencilIcon, Trash2Icon } from "lucide-react";
 import { useEffect } from "react";
 
 type HardwareItem = {
@@ -38,6 +38,7 @@ type Machine = {
   name: string;
   serial_number: string | null;
   inventory_number: string | null;
+  category: SimpleIdentifier;
   manufacturer: SimpleIdentifier;
   status: SimpleIdentifier;
   created_by: SimpleIdentifier;
@@ -124,6 +125,10 @@ export default function ShowMachine({ machine }: Props) {
             <div className="rounded-lg border p-5">
               <h3 className="mb-4 font-semibold">Informações</h3>
               <dl className="space-y-3 text-sm">
+                <div>
+                  <dt className="text-muted-foreground">Categoria</dt>
+                  <dd className="font-medium">{machine.category.name}</dd>
+                </div>
                 <div>
                   <dt className="text-muted-foreground">Status</dt>
                   <dd>
@@ -230,14 +235,28 @@ export default function ShowMachine({ machine }: Props) {
                           <span className="font-medium">{h.hardware.name}</span>
                           {h.previous_machine && (
                             <span className="text-muted-foreground">
-                              {" "}
-                              ← {h.previous_machine.name}
+                              {" "}← {h.previous_machine.name}
                             </span>
                           )}
                         </p>
                         <p className="text-muted-foreground text-xs">
-                          {h.created_at} ·
-                          por {h.created_by.name}
+                          {h.created_at} · por {h.created_by.name}
+                          {h.notes && (
+                            <span
+                              title={h.notes}
+                              className="border-muted-foreground/40 text-muted-foreground ml-2 inline-flex cursor-help items-center gap-1 rounded-md border px-1.5 py-0.5 text-xs transition-colors hover:border-current"
+                            >
+                              <MessageSquareIcon className="size-3 shrink-0" />
+                              Observação
+                            </span>
+                          )}
+                          <Link
+                            href={hardwares.show(h.hardware.id)}
+                            className="border-muted-foreground/40 text-muted-foreground ml-2 inline-flex cursor-pointer items-center gap-1 rounded-md border px-1.5 py-0.5 text-xs transition-colors hover:border-current"
+                          >
+                            <Eye className="size-3 shrink-0" />
+                            Ver Hardware
+                          </Link>
                         </p>
                       </div>
                     </li>

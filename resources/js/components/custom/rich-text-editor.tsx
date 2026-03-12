@@ -241,7 +241,7 @@ export function RichTextEditor({
           onPaste={handlePaste}
           onKeyUp={syncFormats}
           onMouseUp={syncFormats}
-          className="rte-editor bg-background min-h-36 w-full rounded-b-xl px-4 py-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring empty:before:text-muted-foreground empty:before:content-[attr(data-placeholder)]"
+          className="rte-editor bg-background min-h-36 max-h-125 overflow-y-auto w-full rounded-b-xl px-4 py-3 text-sm outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-ring empty:before:text-muted-foreground empty:before:content-[attr(data-placeholder)]"
         />
       </div>
 

@@ -23,10 +23,12 @@ class MachineStoreRequest extends FormRequest
     {
         return [
             'manufacturer_id' => ['required', 'exists:manufacturers,id'],
+            'category_id' => ['required', 'exists:machine_categories,id'],
             'status_id' => ['required', 'exists:machine_status,id'],
             'name' => ['required', 'string', 'max:255'],
             'serial_number' => ['nullable', 'string', 'max:255', 'unique:machines,serial_number'],
             'inventory_number' => ['nullable', 'string', 'max:255', 'unique:machines,inventory_number'],
+            'notes' => ['nullable', 'string', 'max:1000'],
             'hardware_ids' => ['nullable', 'array'],
             'hardware_ids.*' => ['exists:hardwares,id'],
         ];

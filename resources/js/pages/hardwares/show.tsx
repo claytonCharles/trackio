@@ -4,7 +4,7 @@ import AppLayout from "@/layouts/app-layout";
 import hardwares from "@/routes/hardwares";
 import { BreadcrumbItem, SimpleIdentifier } from "@/types";
 import { Head, Link, router } from "@inertiajs/react";
-import { ArrowLeftIcon, ClockIcon, CpuIcon, PencilIcon, Trash2Icon } from "lucide-react";
+import { ArrowLeftIcon, ClockIcon, CpuIcon, MessageSquareIcon, PencilIcon, Trash2Icon } from "lucide-react";
 
 type HardwareStatus = {
   id: number;
@@ -25,6 +25,17 @@ type History = {
   updated_by: SimpleIdentifier;
 };
 
+type MoveHistory = {
+  id: number;
+  action: "attached" | "detached" | "moved";
+  notes: string | null;
+  created_at: string;
+  hardware: SimpleIdentifier;
+  machine: SimpleIdentifier | null;
+  previous_machine: SimpleIdentifier | null;
+  created_by: SimpleIdentifier;
+};
+
 
 type Hardware = {
   id: number;
@@ -40,6 +51,7 @@ type Hardware = {
   updated_by: SimpleIdentifier;
   machine: SimpleIdentifier | null;
   histories: History[];
+  moveHistories: MoveHistory[];
 };
 
 type Props = {
@@ -50,6 +62,18 @@ const breadcrumbs: BreadcrumbItem[] = [
   { title: "Hardwares", href: hardwares.index().url },
   { title: "Visualização", href: "#" },
 ];
+
+const actionLabel: Record<string, string> = {
+  attached: "Vinculado",
+  detached: "Desvinculado",
+  moved: "Movido",
+};
+
+const actionClass: Record<string, string> = {
+  attached: "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300",
+  detached: "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300",
+  moved: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300",
+};
 
 export default function ShowHardware({ hardware }: Props) {
   function handleDelete() {
@@ -165,11 +189,67 @@ export default function ShowHardware({ hardware }: Props) {
           <div className="space-y-6 lg:col-span-2">
             {/* Descrição */}
             <div className="rounded-lg border p-5">
-              <h3 className="mb-4 font-semibold">Descrição</h3>
-              <div
-                className="prose dark:prose-invert text-foreground max-w-none text-sm"
-                dangerouslySetInnerHTML={{ __html: hardware.description }}
-              />
+              <h3 className="mb-4 font-semibold">Detalhes</h3>
+              {
+                hardware.description
+                  ? (
+                    <div
+                      className="prose dark:prose-invert max-h-125 overflow-y-auto text-foreground max-w-none text-sm"
+                      dangerouslySetInnerHTML={{ __html: hardware.description }}
+                    />
+                  ) : (
+                    <p className="text-muted-foreground text-sm">
+                      Nenhum detalhe registrado.
+                    </p>
+                  )
+              }
+
+            </div>
+
+            {/* Histórico de movimentações */}
+            <div className="rounded-lg border p-5">
+              <h3 className="mb-4 flex items-center gap-2 font-semibold">
+                <ClockIcon className="size-4" />
+                Histórico de Movimentações
+              </h3>
+
+              {hardware.moveHistories.length === 0 ? (
+                <p className="text-muted-foreground text-sm">
+                  Nenhuma movimentação registrada.
+                </p>
+              ) : (
+                <ol className="space-y-3">
+                  {hardware.moveHistories.map((h) => (
+                    <li key={h.id} className="flex gap-3 text-sm">
+                      <div className="mt-0.5 shrink-0">
+                        <span
+                          className={`rounded-full px-2 py-0.5 text-xs font-medium ${actionClass[h.action] ?? "bg-secondary text-secondary-foreground"
+                            }`}
+                        >
+                          {actionLabel[h.action] ?? h.action}
+                        </span>
+                      </div>
+                      <div className="flex-1">
+                        <span>
+                          → {h.machine?.name ?? h.previous_machine?.name}
+                        </span>
+                        <p className="text-muted-foreground text-xs">
+                          {h.created_at} · por {h.created_by.name}
+                          {h.notes && (
+                            <span
+                              title={h.notes}
+                              className="border-muted-foreground/40 text-muted-foreground ml-2 inline-flex cursor-help items-center gap-1 rounded-md border px-1.5 py-0.5 text-xs transition-colors hover:border-current"
+                            >
+                              <MessageSquareIcon className="size-3 shrink-0" />
+                              Observação
+                            </span>
+                          )}
+                        </p>
+                      </div>
+                    </li>
+                  ))}
+                </ol>
+              )}
             </div>
 
             {/* Histórico de alterações */}

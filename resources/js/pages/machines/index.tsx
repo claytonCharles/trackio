@@ -12,6 +12,7 @@ import { Input } from "@/components/default/input";
 import InputError from "@/components/default/input-error";
 import { Label } from "@/components/default/label";
 import AppLayout from "@/layouts/app-layout";
+import machineClone from "@/routes/machine-clone";
 import machines from "@/routes/machines";
 import { BreadcrumbItem, PaginationProps, SimpleIdentifier } from "@/types";
 import { Form, Head, Link, router } from "@inertiajs/react";
@@ -23,7 +24,6 @@ import {
   Pen,
   PlusIcon,
   ServerIcon,
-  Trash,
   Trash2Icon,
 } from "lucide-react";
 import { useRef } from "react";
@@ -70,12 +70,20 @@ export default function MachinesIndex({
               {pagination.totalItems ?? listMachines.length} máquina(s) cadastrada(s)
             </p>
           </div>
-          <Link href={machines.create().url}>
-            <Button className="gap-2">
-              <PlusIcon className="size-4" />
-              Adicionar
-            </Button>
-          </Link>
+          <div className="flex items-center gap-4">
+            <Link href={machineClone.index().url}>
+              <Button className="gap-2">
+                <PlusIcon className="size-4" />
+                Espelhar em Lote
+              </Button>
+            </Link>
+            <Link href={machines.create().url}>
+              <Button className="gap-2">
+                <PlusIcon className="size-4" />
+                Adicionar
+              </Button>
+            </Link>
+          </div>
         </div>
 
         {/* Search */}

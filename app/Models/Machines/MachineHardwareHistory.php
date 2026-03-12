@@ -19,6 +19,7 @@ class MachineHardwareHistory extends Model
         'previous_machine_id',
         'created_by',
         'action',
+        'notes',
         'modified_at',
     ];
 

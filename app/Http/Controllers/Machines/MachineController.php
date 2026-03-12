@@ -57,9 +57,11 @@ class MachineController extends Controller
     public function store(MachineStoreRequest $request)
     {
         $data = $request->validated();
-        $machineProps = Arr::except($data, 'hardware_ids');
         $hardwares = $data['hardware_ids'] ?? [];
-        $machine = $this->machineService->storeMachine($machineProps, $hardwares);
+        $notes = $data['notes'] ?? null;
+        $machineProps = Arr::except($data, ['hardware_ids', 'notes']);
+
+        $machine = $this->machineService->storeMachine($machineProps, $hardwares, $notes);
         if (empty($machine)) {
             return back()->with('flashMsg', FlashMsg::error('Não foi possivel realizar o cadastro da máquina!'));
         }
@@ -97,8 +99,10 @@ class MachineController extends Controller
     {
         $data = $request->validated();
         $hardwares = $data['hardware_ids'] ?? [];
-        $newProps = Arr::except($data, 'hardware_ids');
-        $result = $this->machineService->updateMachine($newProps, $hardwares, $machine);
+        $notes = $data['notes'] ?? null;
+        $newProps = Arr::except($data, ['hardware_ids', 'notes']);
+
+        $result = $this->machineService->updateMachine($newProps, $hardwares, $machine, $notes);
         if (empty($result)) {
             return back()->with('flashMsg', FlashMsg::error('Não foi possivel realizar a atualização da máquina!'));
         }

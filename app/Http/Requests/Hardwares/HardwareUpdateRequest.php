@@ -31,7 +31,7 @@ class HardwareUpdateRequest extends FormRequest
             'inventory_number' => ['nullable', 'string', "unique:hardwares,inventory_number,{$hardwareId}"],
             'serial_number' => ['nullable', 'string', "unique:hardwares,serial_number,{$hardwareId}"],
             'name' => ['required', 'string'],
-            'description' => ['required', 'string'],
+            'description' => ['nullable', 'string'],
         ];
     }
 
