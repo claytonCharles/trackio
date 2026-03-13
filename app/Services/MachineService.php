@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Events\Machines\MachineCloneBatchFinished;
 use App\Jobs\Machines\CloneMachineJob;
 use App\Models\Hardwares\Hardware;
 use App\Models\Hardwares\HardwareStatus;
@@ -11,8 +12,6 @@ use App\Models\Machines\MachineHardware;
 use App\Models\Machines\MachineHardwareHistory;
 use App\Models\Machines\MachineStatus;
 use App\Models\Manufacturers\Manufacturer;
-use App\Models\User;
-use App\Notifications\Machines\MachineCloneBatchFinished;
 use App\Support\FlashMsg;
 use Carbon\Carbon;
 use Exception;
@@ -240,7 +239,7 @@ class MachineService
         return $message;
     }
 
-
+    
     public function searchMachinesForTemplate(array $filters): array
     {
         $result = [];
@@ -282,11 +281,11 @@ class MachineService
             Bus::batch($jobs)
                 ->name("clone-machine-{$source->id}")
                 ->finally(function (Batch $batch) use ($userId, $machineName) {
-                    $user = User::find($userId);
-                    $user?->notify(new MachineCloneBatchFinished(
-                        $machineName,
-                        $batch->totalJobs,
-                        $batch->failedJobs,
+                    broadcast(new MachineCloneBatchFinished(
+                        userId: $userId,
+                        machineName: $machineName,
+                        total: $batch->totalJobs,
+                        failed: $batch->failedJobs,
                     ));
                 })
                 ->dispatch();

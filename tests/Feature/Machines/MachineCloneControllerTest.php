@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\Machines;
 
+use App\Events\Machines\MachineCloneBatchFinished;
 use App\Jobs\Machines\CloneMachineJob;
 use App\Models\Hardwares\Hardware;
 use App\Models\Hardwares\HardwareCategory;
@@ -12,10 +13,9 @@ use App\Models\Machines\MachineHardware;
 use App\Models\Machines\MachineStatus;
 use App\Models\Manufacturers\Manufacturer;
 use App\Models\User;
-use App\Notifications\Machines\MachineCloneBatchFinished;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Bus;
-use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Event;
 use Inertia\Testing\AssertableInertia as Assert;
 use Spatie\Permission\Models\Permission;
 use Tests\TestCase;
@@ -237,25 +237,52 @@ class MachineCloneControllerTest extends TestCase
         $this->assertEquals($source->category_id, $clone->category_id);
     }
 
-    public function test_job_sends_notification_on_batch_finish(): void
+    public function test_job_broadcasts_event_on_batch_finish(): void
     {
-        Notification::fake();
+        Event::fake([MachineCloneBatchFinished::class]);
 
         $source = $this->createMachine();
 
-        // Roda o job diretamente para testar a notificação via callback
-        $job = new CloneMachineJob($source->id, $this->adminUser->id);
-        $job->handle();
+        broadcast(new MachineCloneBatchFinished(
+            userId: $this->adminUser->id,
+            machineName: $source->name,
+            total: 1,
+            failed: 0,
+        ));
 
-        // Dispara manualmente o callback finally do batch
-        $this->adminUser->notify(
-            new MachineCloneBatchFinished($source->name, 1, 0)
+        Event::assertDispatched(MachineCloneBatchFinished::class, fn ($event) => $event->userId === $this->adminUser->id &&
+            $event->machineName === $source->name &&
+            $event->total === 1 &&
+            $event->failed === 0
         );
+    }
 
-        Notification::assertSentTo($this->adminUser,
-            MachineCloneBatchFinished::class,
-            fn ($n) => $n->toDatabase($this->adminUser)['type'] === 'success'
-        );
+    public function test_broadcast_payload_is_success_when_no_failures(): void
+    {
+        $event = new MachineCloneBatchFinished($this->adminUser->id, 'Máquina X', 5, 0);
+        $payload = $event->broadcastWith();
+
+        $this->assertEquals('success', $payload['type']);
+        $this->assertStringContainsString('5', $payload['message']);
+    }
+
+    public function test_broadcast_payload_is_warning_when_has_failures(): void
+    {
+        $event = new MachineCloneBatchFinished($this->adminUser->id, 'Máquina X', 5, 2);
+        $payload = $event->broadcastWith();
+
+        $this->assertEquals('warning', $payload['type']);
+        $this->assertStringContainsString('2', $payload['message']);
+    }
+
+    public function test_broadcast_channel_is_private_user_channel(): void
+    {
+        $event = new MachineCloneBatchFinished($this->adminUser->id, 'Máquina X', 1, 0);
+        $channels = $event->broadcastOn();
+
+        $this->assertCount(1, $channels);
+        $this->assertInstanceOf(\Illuminate\Broadcasting\PrivateChannel::class, $channels[0]);
+        $this->assertStringContainsString((string) $this->adminUser->id, $channels[0]->name);
     }
 
     /**

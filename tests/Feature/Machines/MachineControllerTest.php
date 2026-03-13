@@ -183,7 +183,7 @@ class MachineControllerTest extends TestCase
     {
         $this->actingAs($this->adminUser)
             ->post(route('machines.store'), $this->validPayload())
-            ->assertRedirect(route('machines.show', ['machine' => 23]));
+            ->assertRedirect(route('machines.show', ['machine' => 22]));
 
         $this->assertDatabaseHas('machines', ['name' => 'Máquina Teste']);
         $this->assertDatabaseCount('machine_has_hardwares', 0);
@@ -198,7 +198,7 @@ class MachineControllerTest extends TestCase
             ->post(route('machines.store'), $this->validPayload([
                 'hardware_ids' => [$hw1->id, $hw2->id],
             ]))
-            ->assertRedirect(route('machines.show', ['machine' => 24]));
+            ->assertRedirect(route('machines.show', ['machine' => 23]));
 
         $this->assertDatabaseCount('machine_has_hardwares', 2);
     }

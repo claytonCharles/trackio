@@ -4,6 +4,11 @@ import { createRoot } from 'react-dom/client';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import '../css/app.css';
 import { ToastProvider } from './hooks/use-toast';
+import { configureEcho } from '@laravel/echo-react';
+
+configureEcho({
+	broadcaster: 'reverb',
+});
 
 const appName = import.meta.env.VITE_APP_NAME || 'Laravel';
 
