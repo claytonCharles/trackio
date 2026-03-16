@@ -17,7 +17,7 @@ return new class extends Migration
             $table->foreignId('created_by')->constrained('users');
             $table->foreignId('updated_by')->constrained('users');
             $table->boolean('only_system')->default(false);
-            $table->boolean('is_binding')->default(false);
+            $table->boolean('is_room_binding')->default(false);
             $table->string('name');
             $table->timestamps();
             $table->softDeletes();
@@ -25,8 +25,8 @@ return new class extends Migration
 
         DB::statement('
             CREATE UNIQUE INDEX ms_only_one_binding_true
-            ON machine_status (is_binding)
-            WHERE is_binding = true
+            ON machine_status (is_room_binding)
+            WHERE is_room_binding = true
         ');
     }
 
