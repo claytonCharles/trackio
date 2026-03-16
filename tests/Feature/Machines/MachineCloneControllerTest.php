@@ -58,7 +58,7 @@ class MachineCloneControllerTest extends TestCase
             'updated_by' => $this->adminUser->id,
         ];
 
-        HardwareStatus::forceCreate([...$creator, 'name' => 'Vinculado', 'only_system' => true, 'is_binding' => true]);
+        HardwareStatus::forceCreate([...$creator, 'name' => 'Vinculado', 'only_system' => true, 'is_machine_binding' => true]);
         HardwareStatus::create([...$creator, 'name' => 'Armazenado']);
 
         $this->machineStatus = MachineStatus::create([...$creator, 'name' => 'Ativo']);

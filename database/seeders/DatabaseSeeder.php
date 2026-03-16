@@ -57,13 +57,13 @@ class DatabaseSeeder extends Seeder
         HardwareCategory::create([...$creator, 'name' => 'Rede sem Fio', 'is_system_category' => true]);
         HardwareCategory::create([...$creator, 'name' => 'Acessórios', 'is_system_category' => true]);
 
-        HardwareStatus::create([...$creator, 'name' => 'Vinculado', 'only_system' => true, 'is_binding' => true]);
+        HardwareStatus::create([...$creator, 'name' => 'Vinculado', 'only_system' => true, 'is_machine_binding' => true]);
         HardwareStatus::create([...$creator, 'name' => 'Armazenado']);
         HardwareStatus::create([...$creator, 'name' => 'Defeituoso']);
         HardwareStatus::create([...$creator, 'name' => 'Em Análise']);
         HardwareStatus::create([...$creator, 'name' => 'Em Garantia']);
 
-        MachineStatus::create([...$creator, 'name' => 'Vinculado', 'only_system' => true, 'is_binding' => true]);
+        MachineStatus::create([...$creator, 'name' => 'Vinculado', 'only_system' => true, 'is_room_binding' => true]);
         MachineStatus::create([...$creator, 'name' => 'Armazenado']);
         MachineStatus::create([...$creator, 'name' => 'Defeituoso']);
         MachineStatus::create([...$creator, 'name' => 'Em Espera']);

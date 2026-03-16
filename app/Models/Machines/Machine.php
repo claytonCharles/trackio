@@ -2,6 +2,8 @@
 
 namespace App\Models\Machines;
 
+use App\Models\Departments\Room;
+use App\Models\Departments\RoomMachine;
 use App\Models\Hardwares\Hardware;
 use App\Models\Manufacturers\Manufacturer;
 use App\Models\User;
@@ -75,6 +77,23 @@ class Machine extends Model
             'id',
             'id',
             'hardware_id'
+        );
+    }
+
+    public function roomMachine()
+    {
+        return $this->hasOne(RoomMachine::class);
+    }
+
+    public function room()
+    {
+        return $this->hasOneThrough(
+            Room::class,
+            RoomMachine::class,
+            'machine_id',
+            'id',
+            'id',
+            'room_id'
         );
     }
 

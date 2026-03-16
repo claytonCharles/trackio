@@ -15,11 +15,16 @@ class MachineStatus extends Model
     protected $fillable = [
         'created_by',
         'updated_by',
-        'name'
+        'name',
     ];
 
     protected static function newFactory(): MachineStatusFactory
     {
         return MachineStatusFactory::new();
+    }
+
+    public function scopeRoomStatus($query)
+    {
+        return $query->where('is_room_binding', true);
     }
 }
