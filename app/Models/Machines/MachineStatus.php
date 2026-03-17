@@ -23,8 +23,26 @@ class MachineStatus extends Model
         return MachineStatusFactory::new();
     }
 
-    public function scopeRoomStatus($query)
+    public function scopeLinkedStatus($query)
     {
-        return $query->where('is_room_binding', true);
+        return $query->where('tag', 'linked');
+    }
+
+    public function scopeStorageStatus($query)
+    {
+        return $query->where('tag', 'storage');
+
+    }
+
+    public function scopeBrokenStatus($query)
+    {
+        return $query->where('tag', 'broken');
+
+    }
+
+    public function scopeGuaranteeStatus($query)
+    {
+        return $query->where('tag', 'guarantee');
+
     }
 }

@@ -2,12 +2,14 @@
 
 namespace App\Models\Departments;
 
+use App\Models\Machines\Machine;
 use App\Models\User;
 use Database\Factories\Departments\DepartmentFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Department extends Model
@@ -40,14 +42,21 @@ class Department extends Model
         return $this->belongsTo(User::class, 'updated_by');
     }
 
-    public function responsible(): BelongsTo
+    public function departmentMachines(): HasMany
     {
-        return $this->belongsTo(User::class, 'responsible_id');
+        return $this->hasMany(DepartmentMachine::class);
     }
 
-    public function rooms(): HasMany
+    public function machines(): HasManyThrough
     {
-        return $this->hasMany(Room::class);
+        return $this->hasManyThrough(
+            Machine::class,
+            DepartmentMachine::class,
+            'department_id',
+            'id',
+            'id',
+            'machine_id'
+        );
     }
 
     public function scopeSearch($query, ?string $search)
@@ -58,8 +67,7 @@ class Department extends Model
 
         return $query->where(function ($q) use ($search) {
             $q->where('name', 'ilike', "%{$search}%")
-                ->orWhere('location', 'ilike', "%{$search}%")
-                ->orWhereRelation('rooms', 'name', 'ilike', "%{$search}%");
+                ->orWhere('location', 'ilike', "%{$search}%");
         });
     }
 }
