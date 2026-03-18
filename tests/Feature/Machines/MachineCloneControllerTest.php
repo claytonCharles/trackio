@@ -61,7 +61,7 @@ class MachineCloneControllerTest extends TestCase
         HardwareStatus::forceCreate([...$creator, 'name' => 'Vinculado', 'only_system' => true, 'is_machine_binding' => true]);
         HardwareStatus::create([...$creator, 'name' => 'Armazenado']);
 
-        $this->machineStatus = MachineStatus::create([...$creator, 'name' => 'Ativo']);
+        $this->machineStatus = MachineStatus::forceCreate(['name' => 'Armazenado', 'tag' => 'storage']);
         $this->machineCategory = MachineCategory::create([...$creator, 'name' => 'Desktop']);
         $this->manufacturer = Manufacturer::create([...$creator, 'name' => 'Dell']);
         $this->hwStatus = HardwareStatus::create([...$creator, 'name' => 'Disponível']);

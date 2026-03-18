@@ -1,6 +1,6 @@
 import { queryParams, type RouteQueryOptions, type RouteDefinition, type RouteFormDefinition } from './../../wayfinder'
 /**
-* @see routes/web.php:29
+* @see routes/web.php:38
 * @route '/notifications/read'
 */
 export const read = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -14,7 +14,7 @@ read.definition = {
 } satisfies RouteDefinition<["post"]>
 
 /**
-* @see routes/web.php:29
+* @see routes/web.php:38
 * @route '/notifications/read'
 */
 read.url = (options?: RouteQueryOptions) => {
@@ -22,7 +22,7 @@ read.url = (options?: RouteQueryOptions) => {
 }
 
 /**
-* @see routes/web.php:29
+* @see routes/web.php:38
 * @route '/notifications/read'
 */
 read.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
@@ -31,7 +31,7 @@ read.post = (options?: RouteQueryOptions): RouteDefinition<'post'> => ({
 })
 
 /**
-* @see routes/web.php:29
+* @see routes/web.php:38
 * @route '/notifications/read'
 */
 const readForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({
@@ -40,7 +40,7 @@ const readForm = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => (
 })
 
 /**
-* @see routes/web.php:29
+* @see routes/web.php:38
 * @route '/notifications/read'
 */
 readForm.post = (options?: RouteQueryOptions): RouteFormDefinition<'post'> => ({

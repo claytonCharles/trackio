@@ -12,12 +12,6 @@ class MachineStatus extends Model
 
     protected $table = 'machine_status';
 
-    protected $fillable = [
-        'created_by',
-        'updated_by',
-        'name',
-    ];
-
     protected static function newFactory(): MachineStatusFactory
     {
         return MachineStatusFactory::new();

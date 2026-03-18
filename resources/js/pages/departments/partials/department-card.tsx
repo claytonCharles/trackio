@@ -19,6 +19,7 @@ import {
   Server,
   Trash2Icon
 } from "lucide-react";
+import { Department } from "../types/department";
 
 export function DepartmentCard({
   department,

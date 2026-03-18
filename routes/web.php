@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Departments\DepartmentController;
+use App\Http\Controllers\Departments\DepartmentMachineController;
 use App\Http\Controllers\Hardwares\HardwareController;
 use App\Http\Controllers\Machines\MachineCloneController;
 use App\Http\Controllers\Machines\MachineController;
@@ -22,6 +24,13 @@ Route::middleware(['auth'])->group(function () {
     Route::resource('hardwares', HardwareController::class);
     Route::resource('manufacturer', ManufactureController::class)->only(['store', 'update', 'destroy']);
     Route::resource('machines', MachineController::class);
+    Route::resource('departments', DepartmentController::class);
+
+    Route::prefix('departments/{department}/machines')->group(function () {
+        Route::get('/', [DepartmentMachineController::class, 'index'])->name('department-machines.index');
+        Route::post('/', [DepartmentMachineController::class, 'store'])->name('department-machines.store');
+        Route::delete('{machine}', [DepartmentMachineController::class, 'destroy'])->name('department-machines.destroy');
+    });
 
     Route::get('machine-clone', [MachineCloneController::class, 'index'])->name('machine-clone.index');
     Route::post('machine-clone/{machine}', [MachineCloneController::class, 'store'])->name('machine-clone.store');
@@ -33,4 +42,4 @@ Route::middleware(['auth'])->group(function () {
     })->name('notifications.read');
 });
 
-require __DIR__ . '/settings.php';
+require __DIR__.'/settings.php';

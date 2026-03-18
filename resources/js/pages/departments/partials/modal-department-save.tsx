@@ -12,6 +12,7 @@ import { Spinner } from "@/components/default/spinner";
 import { cn } from "@/lib/utils";
 import departments from "@/routes/departments";
 import { Form } from "@inertiajs/react";
+import { Department } from "../types/department";
 
 type Props = {
   open: boolean,

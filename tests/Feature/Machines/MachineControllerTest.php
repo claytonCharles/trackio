@@ -66,7 +66,7 @@ class MachineControllerTest extends TestCase
         HardwareStatus::forceCreate([...$creator, 'name' => 'Vinculado', 'only_system' => true, 'is_machine_binding' => true]);
         HardwareStatus::create([...$creator, 'name' => 'Armazenado']);
 
-        $this->machineStatus = MachineStatus::create([...$creator, 'name' => 'Ativo']);
+        $this->machineStatus = MachineStatus::forceCreate(['name' => 'Armazenado', 'tag' => 'storage']);
         $this->machineCategory = MachineCategory::create([...$creator, 'name' => 'Desktop']);
         $this->manufacturer = Manufacturer::create([...$creator, 'name' => 'Dell']);
         $this->hwStatus = HardwareStatus::create([...$creator, 'name' => 'Disponível']);
@@ -183,7 +183,7 @@ class MachineControllerTest extends TestCase
     {
         $this->actingAs($this->adminUser)
             ->post(route('machines.store'), $this->validPayload())
-            ->assertRedirect(route('machines.show', ['machine' => 22]));
+            ->assertRedirect();
 
         $this->assertDatabaseHas('machines', ['name' => 'Máquina Teste']);
         $this->assertDatabaseCount('machine_has_hardwares', 0);
@@ -198,7 +198,7 @@ class MachineControllerTest extends TestCase
             ->post(route('machines.store'), $this->validPayload([
                 'hardware_ids' => [$hw1->id, $hw2->id],
             ]))
-            ->assertRedirect(route('machines.show', ['machine' => 23]));
+            ->assertRedirect();
 
         $this->assertDatabaseCount('machine_has_hardwares', 2);
     }

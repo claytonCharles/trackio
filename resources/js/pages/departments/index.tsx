@@ -15,6 +15,7 @@ import { useRef, useState } from "react";
 import { DepartmentCard } from "./partials/department-card";
 import { ModalDepartmentSave } from "./partials/modal-department-save";
 import { cn } from "@/lib/utils";
+import { Department } from "./types/department";
 
 type Props = {
   listDepartments: Department[];
@@ -72,7 +73,6 @@ export default function DepartmentsIndex({
           </div>
         </div>
 
-        {/* Search */}
         <Form
           {...departments.index.form()}
           className="w-full max-w-sm"
