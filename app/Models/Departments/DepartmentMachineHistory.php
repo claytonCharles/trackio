@@ -2,6 +2,7 @@
 
 namespace App\Models\Departments;
 
+use App\Casts\BrasilDataCast;
 use App\Models\Machines\Machine;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
@@ -10,6 +11,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class DepartmentMachineHistory extends Model
 {
     protected $table = 'xht_departments_machines';
+
+    protected $casts = [
+        'modified_at' => BrasilDataCast::class
+    ];
 
     public $timestamps = false;
 

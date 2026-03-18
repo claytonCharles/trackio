@@ -2,6 +2,7 @@
 
 namespace App\Models\Departments;
 
+use App\Casts\BrasilDataCast;
 use App\Models\Machines\Machine;
 use App\Models\User;
 use Database\Factories\Departments\DepartmentFactory;
@@ -25,6 +26,11 @@ class Department extends Model
         'description',
         'location',
         'deleted_at',
+    ];
+
+    protected $casts = [
+        'created_at' => BrasilDataCast::class,
+        'updated_at' => BrasilDataCast::class,
     ];
 
     protected static function newFactory(): DepartmentFactory
