@@ -43,14 +43,12 @@ type Hardware = {
 type Props = {
   hardware?: Hardware;
   listCategories: SimpleIdentifier[];
-  listStatus: HardwareStatus[];
   listManufacturers: SimpleIdentifier[];
 };
 
 export default function SaveHardware({
   hardware,
   listCategories,
-  listStatus,
   listManufacturers
 }: Props) {
   const editing = !!hardware;
@@ -115,7 +113,7 @@ export default function SaveHardware({
                   </div>
 
                   {/* Tombamento */}
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-2 sm:col-span-2">
                     <Label htmlFor="inventory_number">Tombamento</Label>
                     <Input
                       id="inventory_number"
@@ -129,7 +127,7 @@ export default function SaveHardware({
                   </div>
 
                   {/* Número de série */}
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-2 sm:col-span-2">
                     <Label htmlFor="serial_number">Número de Série</Label>
                     <Input
                       id="serial_number"
@@ -151,7 +149,7 @@ export default function SaveHardware({
                 </h3>
                 <div className="grid gap-4 sm:grid-cols-2">
                   {/* Categoria */}
-                  <div className="flex flex-col gap-2">
+                  <div className="flex flex-col gap-2 sm:col-span-2">
                     <div className="flex items-center gap-3">
                       <Label htmlFor="category_id">Categoria *</Label>
                       <InputError message={errors.category_id} />
@@ -169,32 +167,6 @@ export default function SaveHardware({
                             {category.name}
                           </SelectItem>
                         ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {/* Status */}
-                  <div className="flex flex-col gap-2">
-                    <div className="flex items-center gap-3">
-                      <Label htmlFor="status_id">Status *</Label>
-                      <InputError message={errors.status_id} />
-                    </div>
-                    <Select
-                      defaultValue={hardware?.status.id.toString()}
-                      name="status_id"
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Selecione um status" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {listStatus.flatMap((status) => {
-                          if (status.only_system) return null;
-                          return (
-                            <SelectItem key={status.id} value={`${status.id}`}>
-                              {status.name}
-                            </SelectItem>
-                          );
-                        })}
                       </SelectContent>
                     </Select>
                   </div>

@@ -24,21 +24,11 @@ class HardwareStoreRequest extends FormRequest
     {
         return [
             'category_id' => ['required', 'int', 'exists:hardware_categories,id'],
-            'status_id' => $this->statusRules(),
             'manufacturer_id' => ['required', 'int', 'exists:manufacturers,id'],
             'inventory_number' => ['nullable', 'string', 'unique:hardwares,inventory_number'],
             'serial_number' => ['nullable', 'string', 'unique:hardwares,serial_number'],
             'name' => ['required', 'string'],
             'description' => ['nullable', 'string'],
-        ];
-    }
-
-    private function statusRules(): array
-    {
-        return [
-            'required',
-            'int',
-            Rule::exists('hardware_status', 'id')->where(fn ($query) => $query->where('only_system', false)),
         ];
     }
 }

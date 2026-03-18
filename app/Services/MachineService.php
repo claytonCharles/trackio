@@ -86,9 +86,7 @@ class MachineService
                 'machineHardwares.hardware.category',
                 'machineHardwares.hardware.manufacturer',
                 'machineHardwares.hardware.status',
-            ]);
-
-            $histories = MachineHardwareHistory::query()
+            ])->setRelation('hardware_histories', MachineHardwareHistory::query()
                 ->where('machine_id', $machine->id)
                 ->orWhere('previous_machine_id', $machine->id)
                 ->with([
@@ -98,17 +96,10 @@ class MachineService
                     'createdBy:id,name',
                 ])
                 ->latest('modified_at')
-                ->get();
+                ->get());
 
-            $result = [
-                ...$machine->toArray(),
-                'created_at' => $machine->created_at->subHour(3)->format('d/m/Y à\s H:i'),
-                'updated_at' => $machine->updated_at->subHour(3)->format('d/m/Y à\s H:i'),
-                'hardware_histories' => $histories->map(fn ($hh) => array_merge(
-                    $hh->toArray(),
-                    ['created_at' => Carbon::parse($hh->modified_at)->subHour(3)->format('d/m/Y à\s H:i')],
-                ))->toArray(),
-            ];
+
+            $result = $machine->toArray();
         } catch (Exception $exc) {
             LogService::error(
                 "Falhou resgatar as informações completa da máquina #{$machine->id}! ERROR: {$exc->getMessage()}"

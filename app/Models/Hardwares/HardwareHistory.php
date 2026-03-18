@@ -2,6 +2,7 @@
 
 namespace App\Models\Hardwares;
 
+use App\Casts\BrasilDataCast;
 use App\Models\Manufacturers\Manufacturer;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
@@ -25,6 +26,10 @@ class HardwareHistory extends Model
         'description',
         'notes',
         'modified_at',
+    ];
+
+    protected $casts = [
+        'modified_at' => BrasilDataCast::class
     ];
 
     public function updatedBy(): BelongsTo

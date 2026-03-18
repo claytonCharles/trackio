@@ -10,6 +10,7 @@ use App\Models\Manufacturers\Manufacturer;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Spatie\Permission\Guard;
 use Spatie\Permission\Models\Permission;
 use Spatie\Permission\Models\Role;
 
@@ -22,26 +23,12 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        Permission::create(['name' => 'read roles', 'resource' => 'role']);
-        Permission::create(['name' => 'write roles', 'resource' => 'role']);
-        Permission::create(['name' => 'delete roles', 'resource' => 'role']);
+        $permissions = ['roles', 'manufacturers', 'hardwares', 'departments'];
 
-        Permission::create(['name' => 'read manufacturers', 'resource' => 'manufacturer']);
-        Permission::create(['name' => 'write manufacturers', 'resource' => 'manufacturer']);
-        Permission::create(['name' => 'delete manufacturers', 'resource' => 'manufacturer']);
-
-        Permission::create(['name' => 'read hardwares', 'resource' => 'hardware']);
-        Permission::create(['name' => 'write hardwares', 'resource' => 'hardware']);
-        Permission::create(['name' => 'delete hardwares', 'resource' => 'hardware']);
-
-        Permission::create(['name' => 'read machines', 'resource' => 'machine']);
-        Permission::create(['name' => 'write machines', 'resource' => 'machine']);
-        Permission::create(['name' => 'delete machines', 'resource' => 'machine']);
-        Permission::create(['name' => 'clone machines', 'resource' => 'machine']);
-
-        Permission::create(['name' => 'read departments', 'resource' => 'department']);
-        Permission::create(['name' => 'write departments', 'resource' => 'department']);
-        Permission::create(['name' => 'delete departments', 'resource' => 'department']);
+        $this->setupHardwareStatus();
+        $this->setupMachineStatus();
+        $this->setupPermissions($permissions);
+        $this->setupPermissions(['machines'], ['clone']);
 
         Role::create(['name' => 'admin', 'is_system_role' => true])->givePermissionTo(Permission::all());
 
@@ -61,17 +48,6 @@ class DatabaseSeeder extends Seeder
         HardwareCategory::create([...$creator, 'name' => 'Rede sem Fio', 'is_system_category' => true]);
         HardwareCategory::create([...$creator, 'name' => 'Acessórios', 'is_system_category' => true]);
 
-        HardwareStatus::create([...$creator, 'name' => 'Vinculado', 'only_system' => true, 'is_machine_binding' => true]);
-        HardwareStatus::create([...$creator, 'name' => 'Armazenado']);
-        HardwareStatus::create([...$creator, 'name' => 'Defeituoso']);
-        HardwareStatus::create([...$creator, 'name' => 'Em Análise']);
-        HardwareStatus::create([...$creator, 'name' => 'Em Garantia']);
-
-        MachineStatus::create(['name' => 'Vinculado', 'only_system' => true, 'tag' => 'linked']);
-        MachineStatus::create(['name' => 'Armazenado', 'only_system' => true, 'tag' => 'storage']);
-        MachineStatus::create(['name' => 'Defeituoso', 'only_system' => true, 'tag' => 'broken']);
-        MachineStatus::create(['name' => 'Em Garantia', 'only_system' => true, 'tag' => 'guarantee']);
-
         MachineCategory::create([...$creator, 'name' => 'Desktop', 'is_system_category' => true]);
         MachineCategory::create([...$creator, 'name' => 'Notebook', 'is_system_category' => true]);
         MachineCategory::create([...$creator, 'name' => 'Microcomputador', 'is_system_category' => true]);
@@ -85,5 +61,47 @@ class DatabaseSeeder extends Seeder
         Manufacturer::create([...$creator, 'name' => 'POSITIVO']);
         Manufacturer::create([...$creator, 'name' => 'LENOVO']);
         Manufacturer::create([...$creator, 'name' => 'GENÉRICO']);
+    }
+
+    private function setupHardwareStatus(): void
+    {
+        $data = [
+            ['name' => 'Vinculado', 'tag' => 'linked'],
+            ['name' => 'Armazenado', 'tag' => 'storage'],
+            ['name' => 'Defeituoso', 'tag' => 'broken'],
+            ['name' => 'Em Garantia', 'tag' => 'guarantee'],
+        ];
+
+        HardwareStatus::insert($data);
+    }
+
+    private function setupMachineStatus(): void
+    {
+        $data = [
+            ['name' => 'Vinculado', 'only_system' => true, 'tag' => 'linked'],
+            ['name' => 'Armazenado', 'only_system' => true, 'tag' => 'storage'],
+            ['name' => 'Defeituoso', 'only_system' => true, 'tag' => 'broken'],
+            ['name' => 'Em Garantia', 'only_system' => true, 'tag' => 'guarantee'],
+        ];
+
+        MachineStatus::insert($data);
+    }
+
+    private function setupPermissions(array $permissions, array $extraPrefixs = []): void
+    {
+        $prefix = array_merge(['read', 'write', 'delete'], $extraPrefixs);
+
+        $data = [];
+        foreach ($permissions as $permission) {
+            foreach ($prefix as $rule) {
+                $data[] = [
+                    'name' => "$rule $permission",
+                    'resource' => $permission,
+                    'guard_name' => Guard::getDefaultName(static::class),
+                ];
+            }
+        }
+
+        Permission::insert($data);
     }
 }

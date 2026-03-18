@@ -7,7 +7,6 @@ use App\Models\Hardwares\HardwareCategory;
 use App\Models\Hardwares\HardwareStatus;
 use App\Models\Machines\MachineHardwareHistory;
 use App\Models\Manufacturers\Manufacturer;
-use App\Models\User;
 use App\Support\FlashMsg;
 use Carbon\Carbon;
 use Exception;
@@ -42,22 +41,18 @@ class HardwareService
     /**
      * Cadastro de um Hardware no sistema.
      */
-    public function storeHardware(array $data, User $user): array
+    public function storeHardware(array $data): array
     {
         $result = [];
         try {
-            $hardware = Hardware::create([
-                'created_by' => $user->id,
-                'updated_by' => $user->id,
-                'category_id' => $data['category_id'],
-                'status_id' => $data['status_id'],
-                'manufacturer_id' => $data['manufacturer_id'],
-                'inventory_number' => $data['inventory_number'],
-                'serial_number' => $data['serial_number'],
-                'name' => $data['name'],
-                'description' => $data['description'],
+            $storageStatus = HardwareStatus::storageStatus()->firstOrFail();
+            $props = array_merge($data, [
+                'created_by' => Auth::id(),
+                'updated_by' => Auth::id(),
+                'status_id' => $storageStatus->id,
             ]);
 
+            $hardware = Hardware::create($props);
             $result = $hardware->toArray();
             LogService::created("Cadastrou um novo Hardware #{$result['id']} com Sucesso! ");
         } catch (Exception $exc) {
@@ -70,22 +65,18 @@ class HardwareService
     /**
      * Atualiza um hardware existente no sistema.
      */
-    public function updateHardware(array $data, Hardware $hardware): array
+    public function updateHardware(array $data, Hardware $hardware): ?Hardware
     {
-        $result = [];
         try {
-            $hardware->update([
-                ...$data,
-                'updated_by' => Auth::id(),
-            ]);
+            $hardware->update([...$data, 'updated_by' => Auth::id()]);
+            LogService::updated("Atualizou o Hardware #{$hardware->id}!");
 
-            $result = $hardware->toArray();
-            LogService::updated("Atualizou o Hardware #{$hardware->id} com Sucesso!");
+            return $hardware;
         } catch (Exception $exc) {
             LogService::error("Falhou em atualizar o Hardware #{$hardware->id}! ERROR: {$exc->getMessage()}");
-        }
 
-        return $result;
+            return null;
+        }
     }
 
     /**
@@ -117,7 +108,6 @@ class HardwareService
             $result = [
                 'listCategories' => HardwareCategory::all(['id', 'name'])->toArray(),
                 'listManufacturers' => Manufacturer::all(['id', 'name'])->toArray(),
-                'listStatus' => HardwareStatus::all(['id', 'name', 'only_system'])->toArray(),
             ];
         } catch (Exception $exc) {
             LogService::error("Falhou resgatar a listagem de Categorias de Hardware! ERROR: {$exc->getMessage()}");
@@ -129,13 +119,12 @@ class HardwareService
     /**
      * Carrega os dados completos do hardware desejado.
      */
-    public function loadFullHardware(Hardware $hardware): array
+    public function loadFullHardware(Hardware $hardware): ?Hardware
     {
-        $result = [];
         try {
-            $hardware->load([
+            return $hardware->load([
                 'category:id,name',
-                'status:id,name,only_system',
+                'status:id,name',
                 'manufacturer:id,name',
                 'createdBy:id,name',
                 'updatedBy:id,name',
@@ -144,9 +133,7 @@ class HardwareService
                 'histories.status:id,name',
                 'histories.manufacturer:id,name',
                 'histories.updatedBy:id,name',
-            ]);
-
-            $histories = MachineHardwareHistory::query()
+            ])->setRelation('moveHistories', MachineHardwareHistory::query()
                 ->where('hardware_id', $hardware->id)
                 ->with([
                     'hardware:id,name',
@@ -155,74 +142,40 @@ class HardwareService
                     'createdBy:id,name',
                 ])
                 ->latest('modified_at')
-                ->get();
-
-            $result = [
-                ...$hardware->toArray(),
-                'updated_at_formatted' => $hardware->updated_at->subHour(3)->format('d/m/Y à\s H:i'),
-                'machine' => $hardware->machineHardware?->machine
-                    ? ['id' => $hardware->machineHardware->machine->id, 'name' => $hardware->machineHardware->machine->name]
-                    : null,
-                'histories' => $hardware->histories->map(fn ($h) => [
-                    'id' => $h->id,
-                    'name' => $h->name,
-                    'serial_number' => $h->serial_number,
-                    'inventory_number' => $h->inventory_number,
-                    'description' => $h->description,
-                    'modified_at' => Carbon::parse($h->modified_at)->subHour(3)->format('d/m/Y à\s H:i'),
-                    'category' => $h->category,
-                    'status' => $h->status,
-                    'manufacturer' => $h->manufacturer,
-                    'updated_by' => $h->updatedBy,
-                ]),
-                'moveHistories' => $histories->map(fn ($hh) => array_merge(
-                    $hh->toArray(),
-                    ['created_at' => Carbon::parse($hh->modified_at)->subHour(3)->format('d/m/Y à\s H:i')],
-                ))->toArray(),
-            ];
+                ->get());
         } catch (Exception $exc) {
             LogService::error(
-                "Falhou resgatar as informações completa do Hardware #{$hardware->id}! ERROR: {$exc->getMessage()}"
+                "Falhou em carregar as informações completa do Hardware #{$hardware->id}! ERROR: {$exc->getMessage()}"
             );
-        }
 
-        return $result;
+            return null;
+        }
     }
 
-    public function loadDataEditHardware(Hardware $hardware)
+    public function loadDataEditHardware(Hardware $hardware): ?Hardware
     {
-        $result = [];
         try {
-            $hardware->load([
+            return $hardware->load([
                 'category:id,name',
-                'status:id,name,only_system',
+                'status:id,name',
                 'manufacturer:id,name',
                 'createdBy:id,name',
                 'updatedBy:id,name',
             ]);
 
-            $result = $hardware->toArray();
         } catch (Exception $exc) {
             LogService::error(
                 "Falhou em carregar as informações do Hardware #{$hardware->id}! ERROR: {$exc->getMessage()}"
             );
-        }
 
-        return $result;
+            return null;
+        }
     }
 
-    public function canUpdateHardware(Hardware $hardware)
+    public function checkUpdateEnable(Hardware $hardware): bool
     {
-        $result = false;
-        try {
-            $hardware->load(['status:id,name,only_system']);
-            $result = ! $hardware->status->only_system;
-        } catch (Exception $exc) {
-            LogService::error(
-                "Falhou em validar o vinculo de Hardware #{$hardware->id}! ERROR: {$exc->getMessage()}"
-            );
-        }
+        $linkedStatus = HardwareStatus::linkedStatus()->firstOrFail();
 
-        return $result;
+        return $hardware->status_id === $linkedStatus->id;
     }
 }

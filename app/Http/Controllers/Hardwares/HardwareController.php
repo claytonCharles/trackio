@@ -13,15 +13,11 @@ use Inertia\Inertia;
 
 class HardwareController extends Controller
 {
-    private HardwareService $hardwareService;
-
-    public function __construct()
+    public function __construct(private HardwareService $hardwareService)
     {
         $this->middleware('permission:read hardwares')->only(['index', 'show']);
         $this->middleware('permission:write hardwares')->only(['create', 'store', 'edit', 'update']);
         $this->middleware('permission:delete hardwares')->only(['destroy']);
-
-        $this->hardwareService = new HardwareService;
     }
 
     /**
@@ -54,7 +50,7 @@ class HardwareController extends Controller
     public function store(HardwareStoreRequest $request)
     {
         $data = $request->validated();
-        $hardware = $this->hardwareService->storeHardware($data, $request->user());
+        $hardware = $this->hardwareService->storeHardware($data);
         if (empty($hardware)) {
             return back()->with('flashMsg', FlashMsg::error('Não foi possivel realizar o cadastro do Hardware!'));
         }
@@ -68,12 +64,13 @@ class HardwareController extends Controller
     public function show(Hardware $hardware)
     {
         $hardware = $this->hardwareService->loadFullHardware($hardware);
-        if (empty($hardware)) {
+        if (! $hardware) {
             abort(404);
         }
 
         return Inertia::render('hardwares/show', [
             'hardware' => $hardware,
+            'linked' => $this->hardwareService->checkUpdateEnable($hardware)
         ]);
     }
 
@@ -82,12 +79,16 @@ class HardwareController extends Controller
      */
     public function edit(Hardware $hardware)
     {
-        $hardware = $this->hardwareService->loadDataEditHardware($hardware);
-        if ($hardware['status']['only_system']) {
+        $linked = $this->hardwareService->checkUpdateEnable($hardware);
+        if ($linked) {
             return back()->with('flashMsg', FlashMsg::warning('Não e possivel editar um hardware que está em uso!'));
         }
 
         $complements = $this->hardwareService->getAllCreationComplements();
+        $hardware = $this->hardwareService->loadDataEditHardware($hardware);
+        if (! $hardware) {
+            abort(404);
+        }
 
         return Inertia::render('hardwares/save', [
             'hardware' => $hardware,
@@ -101,15 +102,15 @@ class HardwareController extends Controller
     public function update(HardwareUpdateRequest $request, Hardware $hardware)
     {
         $data = $request->validated();
-        $check = $this->hardwareService->canUpdateHardware($hardware);
-        if (! $check) {
-            return back()->with('flashMsg', FlashMsg::error('Não é possível editar um hardware em uso!'));
+        $linked = $this->hardwareService->checkUpdateEnable($hardware);
+        if ($linked) {
+            return back()->with('flashMsg', FlashMsg::warning('Não e possivel editar um hardware que está em uso!'));
         }
 
         $data = array_filter($data, fn ($value) => ! is_null($value));
         $hardware = $this->hardwareService->updateHardware($data, $hardware);
         if (empty($hardware)) {
-            return back()->with('flashMsg', FlashMsg::error('Não foi possivel realizar a atualização do Hardware!'));
+            return back()->with('flashMsg', FlashMsg::warning('Não foi possivel realizar a atualização do Hardware!'));
         }
 
         return redirect(route('hardwares.show', ['hardware' => $hardware['id']]));
@@ -120,9 +121,12 @@ class HardwareController extends Controller
      */
     public function destroy(Hardware $hardware)
     {
-        $check = $this->hardwareService->canUpdateHardware($hardware);
-        if (! $check) {
-            return back()->with('flashMsg', FlashMsg::error('Não é possível desativar um hardware vinculado!'));
+        $linked = $this->hardwareService->checkUpdateEnable($hardware);
+        if ($linked) {
+            return back()->with(
+                'flashMsg',
+                FlashMsg::warning('Não e possivel desativar um hardware que está em uso!')
+            );
         }
 
         $result = $this->hardwareService->deactivateHardware($hardware);

@@ -12,12 +12,6 @@ class HardwareStatus extends Model
 
     protected $table = 'hardware_status';
 
-    protected $fillable = [
-        'created_by',
-        'updated_by',
-        'name',
-    ];
-
     protected static function newFactory(): HardwareStatusFactory
     {
         return HardwareStatusFactory::new();
@@ -25,11 +19,21 @@ class HardwareStatus extends Model
 
     public function scopeLinkedStatus($query)
     {
-        return $query->where('is_machine_binding', true);
+        return $query->where('tag', 'linked');
     }
 
     public function scopeStorageStatus($query)
     {
-        return $query->where('name', 'Armazenado');
+        return $query->where('tag', 'storage');
+    }
+
+    public function scopeBrokenStatus($query)
+    {
+        return $query->where('tag', 'broken');
+    }
+
+    public function scopeGuaranteeStatus($query)
+    {
+        return $query->where('tag', 'guarantee');
     }
 }

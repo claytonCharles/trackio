@@ -2,6 +2,7 @@
 
 namespace App\Models\Hardwares;
 
+use App\Casts\BrasilDataCast;
 use App\Models\Machines\Machine;
 use App\Models\Machines\MachineHardware;
 use App\Models\Manufacturers\Manufacturer;
@@ -33,17 +34,10 @@ class Hardware extends Model
         'deleted_at',
     ];
 
-    /**
-     * Get the attributes that should be cast.
-     *
-     * @return array<string, string>
-     */
-    protected function casts(): array
-    {
-        return [
-            'updated_at' => 'datetime',
-        ];
-    }
+    protected $casts = [
+        'created_at' => BrasilDataCast::class,
+        'updated_at' => BrasilDataCast::class,
+    ];
 
     protected static function newFactory(): HardwareFactory
     {

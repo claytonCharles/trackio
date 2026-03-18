@@ -2,6 +2,7 @@
 
 namespace App\Models\Machines;
 
+use App\Casts\BrasilDataCast;
 use App\Models\Hardwares\Hardware;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
@@ -21,6 +22,10 @@ class MachineHardwareHistory extends Model
         'action',
         'notes',
         'modified_at',
+    ];
+
+    protected $casts = [
+        'modified_at' => BrasilDataCast::class,
     ];
 
     public function createdBy(): BelongsTo

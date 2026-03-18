@@ -2,60 +2,15 @@ import { Button } from "@/components/default/button";
 import useSafeBack from "@/hooks/use-safe-back";
 import AppLayout from "@/layouts/app-layout";
 import hardwares from "@/routes/hardwares";
-import { BreadcrumbItem, SimpleIdentifier } from "@/types";
-import { Head, Link, router } from "@inertiajs/react";
+import { BreadcrumbItem } from "@/types";
+import { Head, Link, router, usePage } from "@inertiajs/react";
 import { ArrowLeftIcon, ClockIcon, CpuIcon, MessageSquareIcon, PencilIcon, Trash2Icon } from "lucide-react";
-
-type HardwareStatus = {
-  id: number;
-  name: string;
-  only_system: boolean;
-};
-
-type History = {
-  id: number;
-  name: string;
-  serial_number: string | null;
-  inventory_number: string | null;
-  description: string;
-  modified_at: string;
-  category: SimpleIdentifier;
-  status: SimpleIdentifier;
-  manufacturer: SimpleIdentifier;
-  updated_by: SimpleIdentifier;
-};
-
-type MoveHistory = {
-  id: number;
-  action: "attached" | "detached" | "moved";
-  notes: string | null;
-  created_at: string;
-  hardware: SimpleIdentifier;
-  machine: SimpleIdentifier | null;
-  previous_machine: SimpleIdentifier | null;
-  created_by: SimpleIdentifier;
-};
-
-
-type Hardware = {
-  id: number;
-  name: string;
-  serial_number: string | null;
-  inventory_number: string | null;
-  description: string;
-  updated_at_formatted: string;
-  category: SimpleIdentifier;
-  status: HardwareStatus;
-  manufacturer: SimpleIdentifier;
-  created_by: SimpleIdentifier;
-  updated_by: SimpleIdentifier;
-  machine: SimpleIdentifier | null;
-  histories: History[];
-  moveHistories: MoveHistory[];
-};
+import { Hardware } from "./types/hardware";
+import { ActionTag } from "@/components/custom/action-tag";
 
 type Props = {
   hardware: Hardware;
+  linked: boolean;
 };
 
 const breadcrumbs: BreadcrumbItem[] = [
@@ -63,19 +18,9 @@ const breadcrumbs: BreadcrumbItem[] = [
   { title: "Visualização", href: "#" },
 ];
 
-const actionLabel: Record<string, string> = {
-  attached: "Vinculado",
-  detached: "Desvinculado",
-  moved: "Movido",
-};
+export default function ShowHardware({ hardware, linked }: Props) {
+  console.log(usePage().props)
 
-const actionClass: Record<string, string> = {
-  attached: "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300",
-  detached: "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300",
-  moved: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300",
-};
-
-export default function ShowHardware({ hardware }: Props) {
   function handleDelete() {
     if (!confirm("Tem certeza que deseja remover este hardware?")) return;
     router.delete(hardwares.destroy(hardware.id).url);
@@ -86,7 +31,6 @@ export default function ShowHardware({ hardware }: Props) {
       <Head title={hardware.name} />
 
       <div className="mt-5 flex w-full flex-col gap-6 px-6">
-        {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
             <Button
@@ -97,20 +41,24 @@ export default function ShowHardware({ hardware }: Props) {
               <ArrowLeftIcon className="size-4" />
             </Button>
             <div>
-              <h2 className="text-foreground text-2xl font-bold">{hardware.name}</h2>
+              <h2 className="text-foreground text-2xl font-bold">
+                {hardware.name}
+              </h2>
               <p className="text-muted-foreground text-sm">
-                Criado por {hardware.created_by.name} · Última atualização por{" "}
-                {hardware.updated_by.name} em {hardware.updated_at_formatted}
+                Criado por {hardware.created_by.name} ·
+                Última atualização por{" "}
+                {hardware.updated_by.name} em {hardware.updated_at}
               </p>
             </div>
           </div>
           <div className="flex gap-2">
             {
-              hardware.status.only_system
-                ? <>
-                  <p>Hardware Vinculado</p>
-                </>
-                : <>
+              linked ? (
+                <span >
+                  Hardware Vinculado
+                </span>
+              ) : (
+                <>
                   <Link href={hardwares.edit(hardware.id).url}>
                     <Button variant="outline" size="sm">
                       <PencilIcon className="mr-2 size-4" />
@@ -122,7 +70,9 @@ export default function ShowHardware({ hardware }: Props) {
                     Deletar
                   </Button>
                 </>
+              )
             }
+
           </div>
         </div>
 
@@ -157,8 +107,8 @@ export default function ShowHardware({ hardware }: Props) {
                   <dd>{hardware.serial_number ?? "—"}</dd>
                 </div>
                 <div>
-                  <dt className="text-muted-foreground">Última Atualização</dt>
-                  <dd>{hardware.updated_at_formatted}</dd>
+                  <dt className="text-muted-foreground">Criação</dt>
+                  <dd>{hardware.created_at}</dd>
                 </div>
               </dl>
             </div>
@@ -169,12 +119,12 @@ export default function ShowHardware({ hardware }: Props) {
                 <CpuIcon className="size-4" />
                 Máquina Vinculada
               </h3>
-              {hardware.machine ? (
+              {hardware.machine_hardware ? (
                 <Link
-                  href={`/machines/${hardware.machine.id}`}
+                  href={`/machines/${hardware.machine_hardware.machine.id}`}
                   className="hover:bg-muted/40 flex items-center justify-between rounded-md border p-3 transition-colors"
                 >
-                  <span className="text-sm font-medium">{hardware.machine.name}</span>
+                  <span className="text-sm font-medium">{hardware.machine_hardware.machine.name}</span>
                   <ArrowLeftIcon className="text-muted-foreground size-4 rotate-180" />
                 </Link>
               ) : (
@@ -213,28 +163,21 @@ export default function ShowHardware({ hardware }: Props) {
                 Histórico de Movimentações
               </h3>
 
-              {hardware.moveHistories.length === 0 ? (
+              {hardware.move_histories.length === 0 ? (
                 <p className="text-muted-foreground text-sm">
                   Nenhuma movimentação registrada.
                 </p>
               ) : (
                 <ol className="space-y-3">
-                  {hardware.moveHistories.map((h) => (
+                  {hardware.move_histories.map((h) => (
                     <li key={h.id} className="flex gap-3 text-sm">
-                      <div className="mt-0.5 shrink-0">
-                        <span
-                          className={`rounded-full px-2 py-0.5 text-xs font-medium ${actionClass[h.action] ?? "bg-secondary text-secondary-foreground"
-                            }`}
-                        >
-                          {actionLabel[h.action] ?? h.action}
-                        </span>
-                      </div>
+                      <ActionTag action={h.action} />
                       <div className="flex-1">
                         <span>
                           → {h.machine?.name ?? h.previous_machine?.name}
                         </span>
                         <p className="text-muted-foreground text-xs">
-                          {h.created_at} · por {h.created_by.name}
+                          {h.modified_at} · por {h.created_by.name}
                           {h.notes && (
                             <span
                               title={h.notes}
@@ -330,6 +273,6 @@ export default function ShowHardware({ hardware }: Props) {
           </div>
         </div>
       </div>
-    </AppLayout>
+    </AppLayout >
   );
 }
