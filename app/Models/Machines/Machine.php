@@ -2,11 +2,12 @@
 
 namespace App\Models\Machines;
 
+use App\Models\Departments\Department;
+use App\Models\Departments\DepartmentMachine;
 use App\Models\Hardwares\Hardware;
 use App\Models\Manufacturers\Manufacturer;
 use App\Models\User;
 use Database\Factories\Machines\MachineFactory;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -29,7 +30,7 @@ class Machine extends Model
         'name',
         'serial_number',
         'inventory_number',
-        'deleted_at'
+        'deleted_at',
     ];
 
     protected static function newFactory(): MachineFactory
@@ -70,23 +71,42 @@ class Machine extends Model
     public function hardwares(): HasManyThrough
     {
         return $this->hasManyThrough(
-            Hardware::class, 
+            Hardware::class,
             MachineHardware::class,
-            'machine_id', 
-            'id', 
-            'id', 
+            'machine_id',
+            'id',
+            'id',
             'hardware_id'
+        );
+    }
+
+    public function departmentMachine()
+    {
+        return $this->hasOne(DepartmentMachine::class);
+    }
+
+    public function department()
+    {
+        return $this->hasOneThrough(
+            Department::class,
+            DepartmentMachine::class,
+            'machine_id',
+            'id',
+            'id',
+            'department_id'
         );
     }
 
     public function scopeSearch($query, ?string $search)
     {
-        if (blank($search)) return $query;
+        if (blank($search)) {
+            return $query;
+        }
 
-        return $query->where(fn($q) =>
-            $q->where('name', 'ilike', "%{$search}%")
-              ->orWhere('serial_number', 'ilike', "%{$search}%")
-              ->orWhere('inventory_number', 'ilike', "%{$search}%")
+        return $query->where(fn ($q) => $q->where('machines.name', 'ilike', "%{$search}%")
+            ->orWhere('serial_number', 'ilike', "%{$search}%")
+            ->orWhere('inventory_number', 'ilike', "%{$search}%")
+            ->orWhereRelation('hardwares', 'name', 'ilike', "%{$search}%")
         );
     }
 }

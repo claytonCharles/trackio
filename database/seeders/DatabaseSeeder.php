@@ -39,6 +39,10 @@ class DatabaseSeeder extends Seeder
         Permission::create(['name' => 'delete machines', 'resource' => 'machine']);
         Permission::create(['name' => 'clone machines', 'resource' => 'machine']);
 
+        Permission::create(['name' => 'read departments', 'resource' => 'department']);
+        Permission::create(['name' => 'write departments', 'resource' => 'department']);
+        Permission::create(['name' => 'delete departments', 'resource' => 'department']);
+
         Role::create(['name' => 'admin', 'is_system_role' => true])->givePermissionTo(Permission::all());
 
         $userAdmin = User::factory()->create(['name' => 'Admin System', 'email' => 'admin@admin.com'])->assignRole('admin');
@@ -57,17 +61,16 @@ class DatabaseSeeder extends Seeder
         HardwareCategory::create([...$creator, 'name' => 'Rede sem Fio', 'is_system_category' => true]);
         HardwareCategory::create([...$creator, 'name' => 'Acessórios', 'is_system_category' => true]);
 
-        HardwareStatus::create([...$creator, 'name' => 'Vinculado', 'only_system' => true, 'is_binding' => true]);
+        HardwareStatus::create([...$creator, 'name' => 'Vinculado', 'only_system' => true, 'is_machine_binding' => true]);
         HardwareStatus::create([...$creator, 'name' => 'Armazenado']);
         HardwareStatus::create([...$creator, 'name' => 'Defeituoso']);
         HardwareStatus::create([...$creator, 'name' => 'Em Análise']);
         HardwareStatus::create([...$creator, 'name' => 'Em Garantia']);
 
-        MachineStatus::create([...$creator, 'name' => 'Vinculado', 'only_system' => true, 'is_binding' => true]);
-        MachineStatus::create([...$creator, 'name' => 'Armazenado']);
-        MachineStatus::create([...$creator, 'name' => 'Defeituoso']);
-        MachineStatus::create([...$creator, 'name' => 'Em Espera']);
-        MachineStatus::create([...$creator, 'name' => 'Em Garantia']);
+        MachineStatus::create(['name' => 'Vinculado', 'only_system' => true, 'tag' => 'linked']);
+        MachineStatus::create(['name' => 'Armazenado', 'only_system' => true, 'tag' => 'storage']);
+        MachineStatus::create(['name' => 'Defeituoso', 'only_system' => true, 'tag' => 'broken']);
+        MachineStatus::create(['name' => 'Em Garantia', 'only_system' => true, 'tag' => 'guarantee']);
 
         MachineCategory::create([...$creator, 'name' => 'Desktop', 'is_system_category' => true]);
         MachineCategory::create([...$creator, 'name' => 'Notebook', 'is_system_category' => true]);
