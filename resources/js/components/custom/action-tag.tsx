@@ -14,7 +14,7 @@ export function ActionTag({ action }: { action: string }) {
   };
 
   return (
-    <div className="mt-0.5 shrink-0">
+    <div className="flex items-center justify-center mt-0.5 shrink-0 min-w-22">
       <span
         className={cn(
           'rounded-full px-2 py-0.5 text-xs font-medium',
