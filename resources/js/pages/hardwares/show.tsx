@@ -191,6 +191,7 @@ export default function ShowHardware({ hardware, linked }: Props) {
                   {hardware.move_histories.map((h) => (
                     <li key={h.id}>
                       <CardMoveHistory
+                        mnId={h.machine?.id ?? h.previous_machine?.id}
                         action={h.action}
                         date={h.modified_at}
                         notes={h.notes}

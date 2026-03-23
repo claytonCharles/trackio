@@ -1,29 +1,35 @@
 import { useState } from "react"
 import { ActionTag } from "./action-tag"
-import { MessageSquareIcon } from "lucide-react";
+import { Eye, MessageSquareIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
 } from "@/components/default/dialog";
+import hardwares from "@/routes/hardwares";
+import { Link } from "@inertiajs/react";
+import machines from "@/routes/machines";
 
 type Props = {
-  action: 'attached' | 'detached' | 'moved';
+  hwId?: number;
+  mnId?: number;
   title: string;
   date: string;
   userName: string;
   notes: string | null;
+  action: 'attached' | 'detached' | 'moved';
 }
 
 export function CardMoveHistory({
-  action,
+  hwId,
+  mnId,
   title,
   date,
   userName,
-  notes
+  notes,
+  action,
 }: Props) {
   const [show, setShow] = useState(false);
 
@@ -37,7 +43,38 @@ export function CardMoveHistory({
           </span>
           <p className="text-muted-foreground text-xs">
             {`${date} · por ${userName}`}
-
+            {
+              hwId && (
+                <Link
+                  href={hardwares.show(hwId)}
+                  className={cn(
+                    "border-muted-foreground/40 text-muted-foreground ml-2",
+                    "inline-flex cursor-pointer items-center gap-1 rounded-md",
+                    "border px-1.5 py-0.5 text-xs transition-colors",
+                    "hover:border-current"
+                  )}
+                >
+                  <Eye className="size-3 shrink-0" />
+                  Ver Hardware
+                </Link>
+              )
+            }
+            {
+              mnId && (
+                <Link
+                  href={machines.show(mnId)}
+                  className={cn(
+                    "border-muted-foreground/40 text-muted-foreground ml-2",
+                    "inline-flex cursor-pointer items-center gap-1 rounded-md",
+                    "border px-1.5 py-0.5 text-xs transition-colors",
+                    "hover:border-current"
+                  )}
+                >
+                  <Eye className="size-3 shrink-0" />
+                  Ver Máquina
+                </Link>
+              )
+            }
             {
               notes && (
                 <span

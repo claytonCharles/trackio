@@ -49,21 +49,16 @@ class MachineService
         $result = [];
         try {
             $term = strip_tags($filters['hw_search'] ?? '');
-            $page = max(1, (int) ($filters['hw_page'] ?? 1));
-            $perPage = 10;
-
             $paginated = Hardware::whereDoesntHave('machineHardware')
                 ->with(['category', 'manufacturer'])
                 ->search($term)
                 ->orderBy('name')
-                ->paginate($perPage, ['*'], 'page', $page);
+                ->paginate(20);
 
             $result = [
                 'categories' => MachineCategory::orderBy('name')->get(['id', 'name']),
-                'statuses' => MachineStatus::orderBy('name')->get(['id', 'name']),
                 'manufacturers' => Manufacturer::orderBy('name')->get(['id', 'name']),
                 'hardwares' => $paginated->items(),
-                'hw_has_more' => $paginated->hasMorePages(),
                 'hw_total' => $paginated->total(),
             ];
         } catch (Exception $exc) {
@@ -73,11 +68,10 @@ class MachineService
         return $result;
     }
 
-    public function loadFullMachine(Machine $machine)
+    public function loadFullMachine(Machine $machine): ?Machine
     {
-        $result = [];
         try {
-            $machine->load([
+            return $machine->load([
                 'category:id,name',
                 'manufacturer:id,name',
                 'status:id,name',
@@ -98,33 +92,35 @@ class MachineService
                 ->latest('modified_at')
                 ->get());
 
-
-            $result = $machine->toArray();
         } catch (Exception $exc) {
             LogService::error(
                 "Falhou resgatar as informações completa da máquina #{$machine->id}! ERROR: {$exc->getMessage()}"
             );
-        }
 
-        return $result;
+            return null;
+        }
     }
 
     public function loadDataEditMachine(Machine $machine, array $filters = []): array
     {
         $result = [];
         try {
-            $machine->load(['machineHardwares.hardware', 'category', 'status', 'manufacturer']);
-
+            $hwFields = ['id', 'name', 'serial_number', 'inventory_number', 'category_id', 'manufacturer_id'];
+            $hwRelations = ['category:id,name', 'manufacturer:id,name'];
+            $machine->load([
+                'machineHardwares.hardware' => fn ($q) => $q->select($hwFields)->with($hwRelations),
+                'category:id,name',
+                'status',
+                'manufacturer:id,name',
+            ]);
             $term = strip_tags($filters['hw_search'] ?? '');
-            $page = max(1, (int) ($filters['hw_page'] ?? 1));
-            $perPage = 15;
-
-            $paginated = Hardware::where(function ($q) use ($machine) {
-                $q->whereDoesntHave('machineHardware')
-                    ->orWhereHas('machineHardware', fn ($q2) => $q2->where('machine_id', $machine->id)
-                    );
-            })
-                ->with(['category', 'manufacturer'])
+            $paginated = Hardware::select($hwFields)
+                ->where(function ($q) use ($machine) {
+                    $q->whereDoesntHave('machineHardware')
+                        ->orWhereHas('machineHardware', fn ($q2) => $q2->where('machine_id', $machine->id)
+                        );
+                })
+                ->with($hwRelations)
                 ->search($term)
                 ->orderByRaw('
                     CASE
@@ -137,46 +133,48 @@ class MachineService
                     END ASC,
                     name ASC
                 ', [$machine->id])
-                ->paginate($perPage, ['*'], 'page', $page);
+                ->paginate(30);
 
             $result = [
                 'machine' => $machine,
                 'categories' => MachineCategory::orderBy('name')->get(['id', 'name']),
                 'manufacturers' => Manufacturer::orderBy('name')->get(['id', 'name']),
-                'statuses' => MachineStatus::orderBy('name')->get(['id', 'name']),
                 'hardwares' => $paginated->items(),
-                'hw_has_more' => $paginated->hasMorePages(),
                 'hw_total' => $paginated->total(),
             ];
         } catch (Exception $exc) {
-            LogService::error("Falhou resgatar dados para edição da máquina #{$machine->id}! ERROR: {$exc->getMessage()}");
+            LogService::error(
+                "Falhou resgatar dados para edição da máquina #{$machine->id}! ERROR: {$exc->getMessage()}"
+            );
         }
 
         return $result;
     }
 
-    public function storeMachine(array $propsMachine, array $hardwares = [], ?string $notes = null): array
+    public function storeMachine(array $propsMachine, array $hardwares, bool $template): ?Machine
     {
-        $result = [];
         try {
             $creator = ['created_by' => Auth::id(), 'updated_by' => Auth::id()];
-            $machine = DB::transaction(function () use ($propsMachine, $creator, $hardwares, $notes) {
-                $machine = Machine::create(array_merge($propsMachine, $creator));
-
+            $machine = DB::transaction(function () use ($propsMachine, $creator, $hardwares, $template) {
+                $status = $template ? MachineStatus::templateStatus() : MachineStatus::storageStatus();
+                $status = $status->firstOrFail();
+                $propsMachine = array_merge($propsMachine, $creator, ['status_id' => $status->id]);
+                $machine = Machine::create($propsMachine);
                 if (! empty($hardwares)) {
-                    $this->linkMachineHardwares(collect($hardwares), $machine->id, $creator, $notes);
+                    $this->linkMachineHardwares(collect($hardwares), $machine->id, $creator, null);
                 }
 
                 return $machine;
             });
 
-            $result = $machine->toArray();
             LogService::created("Cadastrou uma nova máquina #{$machine->id} com Sucesso! ");
+
+            return $machine;
         } catch (Exception $exc) {
             LogService::error("Falhou em cadastrar uma nova máquina! ERROR: {$exc->getMessage()}");
-        }
 
-        return $result;
+            return null;
+        }
     }
 
     public function updateMachine(array $newProps, array $hardwares, Machine $machine, ?string $notes = null): array
@@ -230,15 +228,16 @@ class MachineService
         return $message;
     }
 
-    
     public function searchMachinesForTemplate(array $filters): array
     {
         $result = [];
         try {
             $term = strip_tags($filters['search'] ?? '');
+            $template = MachineStatus::templateStatus();
             $paginated = Machine::query()
                 ->with(['manufacturer', 'status', 'category'])
                 ->withCount('machineHardwares')
+                ->where('status_id', $template->id)
                 ->search($term)
                 ->latest()
                 ->paginate(10);
@@ -282,8 +281,10 @@ class MachineService
                 ->dispatch();
 
             return true;
-        } catch (Exception $e) {
-            LogService::error("Falhou ao despachar batch de clonagem da máquina #{$source->id}! ERROR: {$e->getMessage()}");
+        } catch (Exception $exc) {
+            LogService::error(
+                "Falhou ao despachar batch de clonagem da máquina #{$source->id}! ERROR: {$exc->getMessage()}"
+            );
 
             return false;
         }

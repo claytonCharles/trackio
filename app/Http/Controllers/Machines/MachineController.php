@@ -58,12 +58,14 @@ class MachineController extends Controller
     {
         $data = $request->validated();
         $hardwares = $data['hardware_ids'] ?? [];
-        $notes = $data['notes'] ?? null;
-        $machineProps = Arr::except($data, ['hardware_ids', 'notes']);
-
-        $machine = $this->machineService->storeMachine($machineProps, $hardwares, $notes);
+        $template = filter_var($data['template'], FILTER_VALIDATE_BOOLEAN);
+        $machineProps = Arr::except($data, ['hardware_ids', 'template']);
+        $machine = $this->machineService->storeMachine($machineProps, $hardwares, $template);
         if (empty($machine)) {
-            return back()->with('flashMsg', FlashMsg::error('Não foi possivel realizar o cadastro da máquina!'));
+            return back()->with(
+                'flashMsg',
+                FlashMsg::error('Não foi possivel realizar o cadastro da máquina!')
+            );
         }
 
         return redirect(route('machines.show', ['machine' => $machine['id']]));

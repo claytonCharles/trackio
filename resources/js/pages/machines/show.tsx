@@ -1,3 +1,4 @@
+import { CardMoveHistory } from "@/components/custom/card-move-history";
 import { Button } from "@/components/default/button";
 import useSafeBack from "@/hooks/use-safe-back";
 import AppLayout from "@/layouts/app-layout";
@@ -5,8 +6,17 @@ import hardwares from "@/routes/hardwares";
 import machines from "@/routes/machines";
 import { BreadcrumbItem, SimpleIdentifier } from "@/types";
 import { Head, Link, router, usePage } from "@inertiajs/react";
-import { ArrowLeftIcon, ClockIcon, Eye, MessageSquareIcon, PencilIcon, Trash2Icon } from "lucide-react";
+import {
+  ArrowLeftIcon,
+  ClockIcon,
+  PencilIcon,
+  Trash2Icon
+} from "lucide-react";
 import { useEffect } from "react";
+import {
+  HardwareMoveHistory
+} from "@/pages/hardwares/types/hardware-move-history";
+import { cn } from "@/lib/utils";
 
 type HardwareItem = {
   id: number;
@@ -23,16 +33,6 @@ type MachineHardware = {
   hardware: HardwareItem;
 };
 
-type History = {
-  id: number;
-  action: "attached" | "detached" | "moved";
-  notes: string | null;
-  created_at: string;
-  hardware: SimpleIdentifier;
-  previous_machine: SimpleIdentifier | null;
-  created_by: SimpleIdentifier;
-};
-
 type Machine = {
   id: number;
   name: string;
@@ -46,22 +46,10 @@ type Machine = {
   created_at: string;
   updated_at: string;
   machine_hardwares: MachineHardware[];
-  hardware_histories: History[];
+  hardware_histories: HardwareMoveHistory[];
 };
 
 type Props = { machine: Machine };
-
-const actionLabel: Record<string, string> = {
-  attached: "Vinculado",
-  detached: "Desvinculado",
-  moved: "Movido",
-};
-
-const actionClass: Record<string, string> = {
-  attached: "bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300",
-  detached: "bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300",
-  moved: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/40 dark:text-yellow-300",
-};
 
 export default function ShowMachine({ machine }: Props) {
   const props = usePage().props;
@@ -85,7 +73,6 @@ export default function ShowMachine({ machine }: Props) {
       <Head title={machine.name} />
 
       <div className="mt-5 flex w-full flex-col gap-6 px-6">
-        {/* Header */}
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
             <Button
@@ -100,7 +87,8 @@ export default function ShowMachine({ machine }: Props) {
                 {machine.name}
               </h2>
               <p className="text-muted-foreground text-sm">
-                Criado por {machine.created_by.name} · Última atualização por{" "}
+                Criado por {machine.created_by.name}
+                · Última atualização por{" "}
                 {machine.updated_by.name} em {machine.updated_at}
               </p>
             </div>
@@ -120,7 +108,6 @@ export default function ShowMachine({ machine }: Props) {
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
-          {/* Coluna esquerda — Informações */}
           <div className="space-y-6 lg:col-span-1">
             <div className="rounded-lg border p-5">
               <h3 className="mb-4 font-semibold">Informações</h3>
@@ -132,7 +119,10 @@ export default function ShowMachine({ machine }: Props) {
                 <div>
                   <dt className="text-muted-foreground">Status</dt>
                   <dd>
-                    <span className="bg-secondary text-secondary-foreground rounded-full px-2 py-0.5 text-xs font-medium">
+                    <span className={cn(
+                      "bg-secondary text-secondary-foreground rounded-full",
+                      "px-2 py-0.5 text-xs font-medium"
+                    )}>
                       {machine.status.name}
                     </span>
                   </dd>
@@ -165,13 +155,16 @@ export default function ShowMachine({ machine }: Props) {
             </div>
           </div>
 
-          {/* Coluna direita — Hardwares + Histórico */}
           <div className="space-y-6 lg:col-span-2">
-            {/* Hardwares vinculados */}
             <div className="rounded-lg border p-5">
               <h3 className="mb-4 flex items-center gap-2 font-semibold">
                 Hardwares Vinculados
-                <span className="bg-secondary text-secondary-foreground rounded-full px-2 py-0.5 text-xs font-medium">
+                <span
+                  className={cn(
+                    "bg-secondary text-secondary-foreground rounded-full px-2",
+                    "py-0.5 text-xs font-medium"
+                  )}
+                >
                   {machine.machine_hardwares.length}
                 </span>
               </h3>
@@ -186,19 +179,26 @@ export default function ShowMachine({ machine }: Props) {
                     <Link
                       key={hardware.id}
                       href={hardwares.show(hardware.id).url}
-                      className="flex items-start justify-between rounded-md border p-3 hover:bg-muted/40"
+                      className={cn(
+                        "flex items-start justify-between rounded-md border",
+                        "p-3 hover:bg-muted/40"
+                      )}
                     >
                       <div>
                         <p className="text-sm font-medium">{hardware.name}</p>
                         <p className="text-muted-foreground text-xs">
-                          {hardware.category.name} · {hardware.manufacturer.name}
+                          {hardware.category.name}
+                          · {hardware.manufacturer.name}
                           {hardware.serial_number &&
                             ` · S/N: ${hardware.serial_number}`}
                           {hardware.inventory_number &&
                             ` · Tomb.: ${hardware.inventory_number}`}
                         </p>
                       </div>
-                      <span className="bg-secondary text-secondary-foreground rounded-full px-2 py-0.5 text-xs font-medium">
+                      <span className={cn(
+                        "bg-secondary text-secondary-foreground rounded-full",
+                        "px-2 py-0.5 text-xs font-medium"
+                      )}>
                         {hardware.status.name}
                       </span>
                     </Link>
@@ -207,7 +207,6 @@ export default function ShowMachine({ machine }: Props) {
               )}
             </div>
 
-            {/* Histórico de movimentações */}
             <div className="rounded-lg border p-5">
               <h3 className="mb-4 flex items-center gap-2 font-semibold">
                 <ClockIcon className="size-4" />
@@ -220,47 +219,22 @@ export default function ShowMachine({ machine }: Props) {
                 </p>
               ) : (
                 <ol className="space-y-3">
-                  {machine.hardware_histories.map((h) => (
-                    <li key={h.id} className="flex gap-3 text-sm">
-                      <div className="mt-0.5 shrink-0">
-                        <span
-                          className={`rounded-full px-2 py-0.5 text-xs font-medium ${actionClass[h.action] ?? "bg-secondary text-secondary-foreground"
-                            }`}
-                        >
-                          {actionLabel[h.action] ?? h.action}
-                        </span>
-                      </div>
-                      <div className="flex-1">
-                        <p>
-                          <span className="font-medium">{h.hardware.name}</span>
-                          {h.previous_machine && (
-                            <span className="text-muted-foreground">
-                              {" "}← {h.previous_machine.name}
-                            </span>
-                          )}
-                        </p>
-                        <p className="text-muted-foreground text-xs">
-                          {h.created_at} · por {h.created_by.name}
-                          {h.notes && (
-                            <span
-                              title={h.notes}
-                              className="border-muted-foreground/40 text-muted-foreground ml-2 inline-flex cursor-help items-center gap-1 rounded-md border px-1.5 py-0.5 text-xs transition-colors hover:border-current"
-                            >
-                              <MessageSquareIcon className="size-3 shrink-0" />
-                              Observação
-                            </span>
-                          )}
-                          <Link
-                            href={hardwares.show(h.hardware.id)}
-                            className="border-muted-foreground/40 text-muted-foreground ml-2 inline-flex cursor-pointer items-center gap-1 rounded-md border px-1.5 py-0.5 text-xs transition-colors hover:border-current"
-                          >
-                            <Eye className="size-3 shrink-0" />
-                            Ver Hardware
-                          </Link>
-                        </p>
-                      </div>
-                    </li>
-                  ))}
+                  {
+                    machine.hardware_histories.map((h) => (
+                      <li key={h.id}>
+                        <CardMoveHistory
+                          hwId={h.hardware.id}
+                          date={h.modified_at}
+                          title={
+                            ` ← ${h.previous_machine?.name ?? h.machine?.name}`
+                          }
+                          userName={h.created_by.name}
+                          notes={h.notes}
+                          action={h.action}
+                        />
+                      </li>
+                    ))
+                  }
                 </ol>
               )}
             </div>

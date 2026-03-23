@@ -2,6 +2,7 @@
 
 namespace App\Models\Machines;
 
+use App\Casts\BrasilDataCast;
 use App\Models\Departments\Department;
 use App\Models\Departments\DepartmentMachine;
 use App\Models\Hardwares\Hardware;
@@ -31,6 +32,12 @@ class Machine extends Model
         'serial_number',
         'inventory_number',
         'deleted_at',
+    ];
+
+    protected $casts = [
+        'created_at' => BrasilDataCast::class,
+        'updated_at' => BrasilDataCast::class,
+        'deleted_at' => BrasilDataCast::class,
     ];
 
     protected static function newFactory(): MachineFactory

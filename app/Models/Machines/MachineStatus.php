@@ -39,4 +39,9 @@ class MachineStatus extends Model
         return $query->where('tag', 'guarantee');
 
     }
+
+    public function scopeTemplateStatus($query)
+    {
+        return $query->where('tag', 'template');
+    }
 }

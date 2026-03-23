@@ -78,6 +78,7 @@ class DatabaseSeeder extends Seeder
     private function setupMachineStatus(): void
     {
         $data = [
+            ['name' => 'Template', 'only_system' => true, 'tag' => 'template'],
             ['name' => 'Vinculado', 'only_system' => true, 'tag' => 'linked'],
             ['name' => 'Armazenado', 'only_system' => true, 'tag' => 'storage'],
             ['name' => 'Defeituoso', 'only_system' => true, 'tag' => 'broken'],
