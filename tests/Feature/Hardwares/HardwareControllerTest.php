@@ -48,7 +48,9 @@ class HardwareControllerTest extends TestCase
             'updated_by' => $this->adminUser->id,
         ];
 
-        $this->status = HardwareStatus::create([...$creator, 'name' => 'Ativo']);
+        HardwareStatus::forceCreate(['name' => 'Vinculado', 'tag' => 'linked']);
+
+        $this->status = HardwareStatus::forceCreate(['name' => 'Armazenado', 'tag' => 'storage']);
         $this->category = HardwareCategory::create([...$creator, 'name' => 'Periférico']);
         $this->manufacturer = Manufacturer::create([...$creator, 'name' => 'Dell']);
     }
@@ -121,7 +123,6 @@ class HardwareControllerTest extends TestCase
             ->assertInertia(fn (Assert $page) => $page
                 ->component('hardwares/save')
                 ->has('listCategories')
-                ->has('listStatus')
                 ->has('listManufacturers')
             );
     }
@@ -167,7 +168,7 @@ class HardwareControllerTest extends TestCase
     {
         $this->actingAs($this->adminUser)
             ->post(route('hardwares.store'), [])
-            ->assertSessionHasErrors(['name', 'category_id', 'status_id', 'manufacturer_id']);
+            ->assertSessionHasErrors(['name', 'category_id', 'manufacturer_id']);
     }
 
     public function test_store_fails_with_nonexistent_relations(): void
@@ -178,7 +179,7 @@ class HardwareControllerTest extends TestCase
                 'status_id' => 999,
                 'manufacturer_id' => 999,
             ]))
-            ->assertSessionHasErrors(['category_id', 'status_id', 'manufacturer_id']);
+            ->assertSessionHasErrors(['category_id', 'manufacturer_id']);
     }
 
     public function test_store_fails_with_duplicate_serial_number(): void
@@ -223,7 +224,6 @@ class HardwareControllerTest extends TestCase
                 ->where('hardware.id', $hardware->id)
                 ->where('hardware.name', $hardware->name)
                 ->has('hardware.category')
-                ->has('hardware.status')
                 ->has('hardware.manufacturer')
                 ->has('hardware.histories')
             );
@@ -260,7 +260,6 @@ class HardwareControllerTest extends TestCase
                 ->has('hardware')
                 ->where('hardware.id', $hardware->id)
                 ->has('listCategories')
-                ->has('listStatus')
                 ->has('listManufacturers')
             );
     }
@@ -412,7 +411,6 @@ class HardwareControllerTest extends TestCase
     {
         return array_merge([
             'category_id' => $this->category->id,
-            'status_id' => $this->status->id,
             'manufacturer_id' => $this->manufacturer->id,
             'name' => 'Hardware Teste',
             'description' => 'Descrição de teste do hardware.',

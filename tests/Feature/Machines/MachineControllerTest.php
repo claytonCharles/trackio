@@ -63,14 +63,13 @@ class MachineControllerTest extends TestCase
             'updated_by' => $this->adminUser->id,
         ];
 
-        HardwareStatus::forceCreate([...$creator, 'name' => 'Vinculado', 'only_system' => true, 'is_machine_binding' => true]);
-        HardwareStatus::create([...$creator, 'name' => 'Armazenado']);
+        HardwareStatus::forceCreate(['name' => 'Vinculado', 'tag' => 'linked']);
 
         $this->machineStatus = MachineStatus::forceCreate(['name' => 'Armazenado', 'tag' => 'storage']);
         $this->machineCategory = MachineCategory::create([...$creator, 'name' => 'Desktop']);
         $this->manufacturer = Manufacturer::create([...$creator, 'name' => 'Dell']);
-        $this->hwStatus = HardwareStatus::create([...$creator, 'name' => 'Disponível']);
         $this->hwCategory = HardwareCategory::create([...$creator, 'name' => 'Periférico']);
+        $this->hwStatus = HardwareStatus::forceCreate(['name' => 'Armazenado', 'tag' => 'storage']);
     }
 
     /**
@@ -143,9 +142,7 @@ class MachineControllerTest extends TestCase
                 ->component('machines/save')
                 ->has('categories')
                 ->has('manufacturers')
-                ->has('statuses')
                 ->has('hardwares')
-                ->has('hw_has_more')
                 ->has('hw_total')
             );
     }
@@ -211,23 +208,6 @@ class MachineControllerTest extends TestCase
         $this->assertDatabaseHas('machines', [
             'created_by' => $this->adminUser->id,
             'updated_by' => $this->adminUser->id,
-        ]);
-    }
-
-    public function test_store_with_notes_fills_machine_hardware_history(): void
-    {
-        $hardware = $this->createHardware();
-
-        $this->actingAs($this->adminUser)
-            ->post(route('machines.store'), $this->validPayload([
-                'hardware_ids' => [$hardware->id],
-                'notes' => 'Vinculado para uso no setor de TI.',
-            ]));
-
-        $this->assertDatabaseHas('xht_machines_hardwares', [
-            'hardware_id' => $hardware->id,
-            'action' => 'attached',
-            'notes' => 'Vinculado para uso no setor de TI.',
         ]);
     }
 
@@ -339,7 +319,7 @@ class MachineControllerTest extends TestCase
     {
         $this->actingAs($this->adminUser)
             ->post(route('machines.store'), [])
-            ->assertSessionHasErrors(['name', 'category_id', 'manufacturer_id', 'status_id']);
+            ->assertSessionHasErrors(['name', 'category_id', 'manufacturer_id', 'template']);
     }
 
     public function test_store_fails_with_duplicate_serial_number(): void
@@ -421,7 +401,6 @@ class MachineControllerTest extends TestCase
                 ->where('machine.id', $machine->id)
                 ->has('categories')
                 ->has('manufacturers')
-                ->has('statuses')
                 ->has('hardwares')
             );
     }
@@ -628,7 +607,7 @@ class MachineControllerTest extends TestCase
             'inventory_number' => null,
             'category_id' => $this->machineCategory->id,
             'manufacturer_id' => $this->manufacturer->id,
-            'status_id' => $this->machineStatus->id,
+            'template' => false,
             'hardware_ids' => [],
         ], $overrides);
     }
