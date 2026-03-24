@@ -32,6 +32,8 @@ class MachineCloneControllerTest extends TestCase
 
     private MachineStatus $machineStatus;
 
+    private MachineStatus $machineStorageStatus;
+
     private MachineCategory $machineCategory;
 
     private Manufacturer $manufacturer;
@@ -60,7 +62,8 @@ class MachineCloneControllerTest extends TestCase
 
         HardwareStatus::forceCreate(['name' => 'Vinculado', 'tag' => 'linked']);
 
-        $this->machineStatus = MachineStatus::forceCreate(['name' => 'Armazenado', 'tag' => 'storage']);
+        $this->machineStorageStatus = MachineStatus::forceCreate(['name' => 'Armazenado', 'tag' => 'storage']);
+        $this->machineStatus = MachineStatus::forceCreate(['name' => 'Template', 'tag' => 'template']);
         $this->machineCategory = MachineCategory::create([...$creator, 'name' => 'Desktop']);
         $this->manufacturer = Manufacturer::create([...$creator, 'name' => 'Dell']);
         $this->hwCategory = HardwareCategory::create([...$creator, 'name' => 'Periférico']);
@@ -152,6 +155,16 @@ class MachineCloneControllerTest extends TestCase
             ->assertSessionHasErrors('copies');
     }
 
+    public function test_store_fails_dispatches_batch_jobs_with_no_template(): void
+    {
+        $source = $this->createMachine(['status_id' => $this->machineStorageStatus->id]);
+
+        $this->actingAs($this->adminUser)
+            ->post(route('machine-clone.store', $source), ['copies' => 3])
+            ->assertRedirect()
+            ->assertSessionHas('flashMsg.type', 'warning');
+    }
+
     public function test_store_is_forbidden_without_permission(): void
     {
         $source = $this->createMachine();
@@ -232,7 +245,7 @@ class MachineCloneControllerTest extends TestCase
 
         $clone = Machine::where('id', '!=', $source->id)->first();
         $this->assertEquals($source->manufacturer_id, $clone->manufacturer_id);
-        $this->assertEquals($source->status_id, $clone->status_id);
+        $this->assertEquals($this->machineStorageStatus->id, $clone->status_id);
         $this->assertEquals($source->category_id, $clone->category_id);
     }
 

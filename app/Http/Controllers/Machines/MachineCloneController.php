@@ -38,6 +38,11 @@ class MachineCloneController extends Controller
     {
         $data = $request->validated();
         $copies = $data['copies'];
+        $ok = $this->machineService->cloneAvaliable($machine);
+        if (! $ok) {
+            return back()->with('flashMsg', FlashMsg::warning('Não e possivel clonar máquinas avulsas!'));
+        }
+
         $ok = $this->machineService->dispatchCloneBatch($machine, $copies);
 
         if (! $ok) {

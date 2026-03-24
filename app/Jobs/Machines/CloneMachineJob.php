@@ -6,6 +6,7 @@ use App\Models\Hardwares\Hardware;
 use App\Models\Hardwares\HardwareStatus;
 use App\Models\Machines\Machine;
 use App\Models\Machines\MachineHardware;
+use App\Models\Machines\MachineStatus;
 use App\Services\LogService;
 use Illuminate\Bus\Batchable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -41,14 +42,15 @@ class CloneMachineJob implements ShouldQueue
         }
 
         $creator = ['created_by' => $this->createdById, 'updated_by' => $this->createdById];
+        $machineStorage = MachineStatus::storageStatus()->first();
         $hwLinkStatus = HardwareStatus::linkedStatus()->first();
-        DB::transaction(function () use ($source, $creator, $hwLinkStatus) {
+        DB::transaction(function () use ($source, $creator, $hwLinkStatus, $machineStorage) {
             $machineMirror = Machine::create([
                 'name' => $source->name,
                 'serial_number' => null,
                 'inventory_number' => null,
                 'manufacturer_id' => $source->manufacturer_id,
-                'status_id' => $source->status_id,
+                'status_id' => $machineStorage->id,
                 'category_id' => $source->category_id,
                 ...$creator,
             ]);

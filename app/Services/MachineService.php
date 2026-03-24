@@ -233,7 +233,7 @@ class MachineService
         $result = [];
         try {
             $term = strip_tags($filters['search'] ?? '');
-            $template = MachineStatus::templateStatus();
+            $template = MachineStatus::templateStatus()->first();
             $paginated = Machine::query()
                 ->with(['manufacturer', 'status', 'category'])
                 ->withCount('machineHardwares')
@@ -284,6 +284,24 @@ class MachineService
         } catch (Exception $exc) {
             LogService::error(
                 "Falhou ao despachar batch de clonagem da máquina #{$source->id}! ERROR: {$exc->getMessage()}"
+            );
+
+            return false;
+        }
+    }
+
+    public function cloneAvaliable(Machine $machine): bool
+    {
+        try {
+            $template = MachineStatus::templateStatus()->first();
+            if ($machine->status_id !== $template->id) {
+                return false;
+            }
+
+            return true;
+        } catch (Exception $exc) {
+            LogService::error(
+                "Falhou ao validar se a clonagem da máquina está disponivel! ERROR: {$exc->getMessage()}"
             );
 
             return false;
