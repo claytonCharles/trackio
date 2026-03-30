@@ -290,6 +290,21 @@ class MachineService
         }
     }
 
+    public function updateAvaliable(Machine $machine): bool
+    {
+        try {
+            $linkedStatus = MachineStatus::linkedStatus()->first();
+
+            return $machine->status_id !== $linkedStatus->id;
+        } catch (Exception $exc) {
+            LogService::error(
+                "Falhou ao validar se a edição da máquina está disponivel! ERROR: {$exc->getMessage()}"
+            );
+
+            return false;
+        }
+    }
+
     public function cloneAvaliable(Machine $machine): bool
     {
         try {

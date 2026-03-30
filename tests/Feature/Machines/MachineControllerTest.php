@@ -64,6 +64,7 @@ class MachineControllerTest extends TestCase
         ];
 
         HardwareStatus::forceCreate(['name' => 'Vinculado', 'tag' => 'linked']);
+        MachineStatus::forceCreate(['name' => 'Vinculado', 'tag' => 'linked']);
 
         $this->machineStatus = MachineStatus::forceCreate(['name' => 'Armazenado', 'tag' => 'storage']);
         $this->machineCategory = MachineCategory::create([...$creator, 'name' => 'Desktop']);

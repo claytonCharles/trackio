@@ -1,22 +1,20 @@
 import { CardMoveHistory } from "@/components/custom/card-move-history";
 import { Button } from "@/components/default/button";
-import useSafeBack from "@/hooks/use-safe-back";
 import AppLayout from "@/layouts/app-layout";
 import hardwares from "@/routes/hardwares";
 import machines from "@/routes/machines";
 import { BreadcrumbItem, SimpleIdentifier } from "@/types";
-import { Head, Link, router, usePage } from "@inertiajs/react";
+import { Link, router } from "@inertiajs/react";
 import {
-  ArrowLeftIcon,
   ClockIcon,
   PencilIcon,
   Trash2Icon
 } from "lucide-react";
-import { useEffect } from "react";
 import {
   HardwareMoveHistory
 } from "@/pages/hardwares/types/hardware-move-history";
 import { cn } from "@/lib/utils";
+import { ShowHeader, ShowToolbox } from "@/components/custom/show-header";
 
 type HardwareItem = {
   id: number;
@@ -49,14 +47,9 @@ type Machine = {
   hardware_histories: HardwareMoveHistory[];
 };
 
-type Props = { machine: Machine };
+type Props = { machine: Machine, linked: boolean };
 
-export default function ShowMachine({ machine }: Props) {
-  const props = usePage().props;
-  useEffect(() => {
-    console.log(props);
-  }, []);
-
+export default function ShowMachine({ machine, linked }: Props) {
   const breadcrumbs: BreadcrumbItem[] = [
     { title: "Máquinas", href: machines.index().url },
     { title: "Visualizar", href: "#" },
@@ -70,30 +63,14 @@ export default function ShowMachine({ machine }: Props) {
 
   return (
     <AppLayout breadcrumbs={breadcrumbs}>
-      <Head title={machine.name} />
-
       <div className="mt-5 flex w-full flex-col gap-6 px-6">
-        <div className="flex items-start justify-between">
-          <div className="flex items-center gap-3">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => useSafeBack(machines.index().url)}
-            >
-              <ArrowLeftIcon className="size-4" />
-            </Button>
-            <div>
-              <h2 className="text-foreground text-2xl font-bold">
-                {machine.name}
-              </h2>
-              <p className="text-muted-foreground text-sm">
-                Criado por {machine.created_by.name}
-                · Última atualização por{" "}
-                {machine.updated_by.name} em {machine.updated_at}
-              </p>
-            </div>
-          </div>
-          <div className="flex gap-2">
+        <ShowHeader
+          title={machine.name}
+          created_user_name={machine.created_by.name}
+          created_date={machine.created_at}
+          fallback_url={machines.index().url}
+        >
+          <ShowToolbox enable={linked} disableMessage="Máquina em uso">
             <Link href={machines.edit(machine.id).url}>
               <Button variant="outline" size="sm">
                 <PencilIcon className="mr-2 size-4" />
@@ -104,8 +81,8 @@ export default function ShowMachine({ machine }: Props) {
               <Trash2Icon className="mr-2 size-4" />
               Remover
             </Button>
-          </div>
-        </div>
+          </ShowToolbox>
+        </ShowHeader>
 
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-1">
@@ -211,6 +188,38 @@ export default function ShowMachine({ machine }: Props) {
               <h3 className="mb-4 flex items-center gap-2 font-semibold">
                 <ClockIcon className="size-4" />
                 Histórico de Movimentações
+              </h3>
+
+              {machine.hardware_histories.length === 0 ? (
+                <p className="text-muted-foreground text-sm">
+                  Nenhuma movimentação registrada.
+                </p>
+              ) : (
+                <ol className="space-y-3">
+                  {
+                    machine.hardware_histories.map((h) => (
+                      <li key={h.id}>
+                        <CardMoveHistory
+                          hwId={h.hardware.id}
+                          date={h.modified_at}
+                          title={
+                            ` ← ${h.previous_machine?.name ?? h.machine?.name}`
+                          }
+                          userName={h.created_by.name}
+                          notes={h.notes}
+                          action={h.action}
+                        />
+                      </li>
+                    ))
+                  }
+                </ol>
+              )}
+            </div>
+
+            <div className="rounded-lg border p-5">
+              <h3 className="mb-4 flex items-center gap-2 font-semibold">
+                <ClockIcon className="size-4" />
+                Histórico de manejamento do hardware
               </h3>
 
               {machine.hardware_histories.length === 0 ? (

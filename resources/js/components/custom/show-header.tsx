@@ -3,8 +3,9 @@ import { Button } from "@/components/default/button";
 import { ArrowLeftIcon } from "lucide-react";
 import useSafeBack from "@/hooks/use-safe-back";
 import { ReactNode } from "react";
+import { cn } from "@/lib/utils";
 
-type ShowHeaderProps  = {
+type ShowHeaderProps = {
   title: string;
   created_user_name: string;
   created_date: string;
@@ -13,7 +14,9 @@ type ShowHeaderProps  = {
 }
 
 type ShowToolboxProps = {
-    children: ReactNode;
+  enable: boolean;
+  disableMessage: string;
+  children: ReactNode;
 };
 
 export function ShowHeader({
@@ -22,7 +25,7 @@ export function ShowHeader({
   created_date,
   fallback_url,
   children,
-}: ShowHeaderProps ) {
+}: ShowHeaderProps) {
   return (
     <>
       <Head title={title} />
@@ -45,12 +48,36 @@ export function ShowHeader({
             </p>
           </div>
         </div>
-        { children }
+        {children}
       </div>
     </>
   )
 }
 
-export function ShowToolbox({ children }: ShowToolboxProps) {
-    return <div className="flex gap-2">{children}</div>;
+export function ShowToolbox({
+  enable,
+  disableMessage,
+  children
+}: ShowToolboxProps) {
+  return (
+    <div className="flex gap-2">
+      {
+        enable ? (
+          <span
+            title="Hardwares em uso não podem ser modificados!"
+            className={cn(
+              "hover:bg-muted/40 flex items-center justify-between",
+              "rounded-md border p-3 transition-colors cursor-help"
+            )}
+          >
+            {disableMessage}
+          </span>
+        ) : (
+          <>
+            {children}
+          </>
+        )
+      }
+    </div>
+  );
 }

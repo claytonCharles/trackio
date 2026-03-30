@@ -2,7 +2,7 @@ import { Button } from "@/components/default/button";
 import AppLayout from "@/layouts/app-layout";
 import hardwares from "@/routes/hardwares";
 import { BreadcrumbItem } from "@/types";
-import { Link, router, usePage } from "@inertiajs/react";
+import { Link, router } from "@inertiajs/react";
 import {
   ArrowLeftIcon,
   ClockIcon,
@@ -43,42 +43,26 @@ export default function ShowHardware({ hardware, linked }: Props) {
           created_date={hardware.created_at}
           fallback_url={hardwares.index().url}
         >
-          <ShowToolbox>
-            {
-              linked ? (
-                <span
-                  title="Hardwares em uso não podem ser modificados!"
-                  className={cn(
-                    "hover:bg-muted/40 flex items-center justify-between",
-                    "rounded-md border p-3 transition-colors cursor-help"
-                  )}
-                >
-                  Hardware em uso
-                </span>
-              ) : (
-                <>
-                  <Link href={hardwares.edit(hardware.id).url}>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      className="cursor-pointer"
-                    >
-                      <PencilIcon className="mr-2 size-4" />
-                      Editar
-                    </Button>
-                  </Link>
-                  <Button
-                    className="cursor-pointer"
-                    variant="destructive"
-                    size="sm"
-                    onClick={handleDelete}
-                  >
-                    <Trash2Icon className="mr-2 size-4" />
-                    Deletar
-                  </Button>
-                </>
-              )
-            }
+          <ShowToolbox enable={linked} disableMessage="Hardware em uso">
+            <Link href={hardwares.edit(hardware.id).url}>
+              <Button
+                variant="outline"
+                size="sm"
+                className="cursor-pointer"
+              >
+                <PencilIcon className="mr-2 size-4" />
+                Editar
+              </Button>
+            </Link>
+            <Button
+              className="cursor-pointer"
+              variant="destructive"
+              size="sm"
+              onClick={handleDelete}
+            >
+              <Trash2Icon className="mr-2 size-4" />
+              Deletar
+            </Button>
           </ShowToolbox>
         </ShowHeader>
 
@@ -188,20 +172,24 @@ export default function ShowHardware({ hardware, linked }: Props) {
                 </p>
               ) : (
                 <ol className="space-y-3">
-                  {hardware.move_histories.map((h) => (
-                    <li key={h.id}>
-                      <CardMoveHistory
-                        mnId={h.machine?.id ?? h.previous_machine?.id}
-                        action={h.action}
-                        date={h.modified_at}
-                        notes={h.notes}
-                        title={
-                          h.machine?.name ?? h.previous_machine?.name ?? ''
-                        }
-                        userName={h.created_by.name}
-                      />
-                    </li>
-                  ))}
+                  {hardware.move_histories.map((h) => {
+                    var title = h.machine
+                      ? `a → ${h.machine.name}`
+                      : `de → ${h.previous_machine?.name}`
+
+                    return (
+                      <li key={h.id}>
+                        <CardMoveHistory
+                          mnId={h.machine?.id ?? h.previous_machine?.id}
+                          action={h.action}
+                          date={h.modified_at}
+                          notes={h.notes}
+                          title={title}
+                          userName={h.created_by.name}
+                        />
+                      </li>
+                    )
+                  })}
                 </ol>
               )}
             </div>

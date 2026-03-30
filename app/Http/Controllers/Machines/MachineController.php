@@ -80,6 +80,7 @@ class MachineController extends Controller
 
         return Inertia::render('machines/show', [
             'machine' => $machine,
+            'linked' => ! $this->machineService->updateAvaliable($machine),
         ]);
     }
 
@@ -89,6 +90,10 @@ class MachineController extends Controller
     public function edit(Machine $machine, MachineHardwareSearchRequest $request)
     {
         $filters = $request->validated();
+        if (! $this->machineService->updateAvaliable($machine)) {
+            return back()->with('flashMsg', FlashMsg::warning('Não e possivel editar uma máquina que está em uso!'));
+        }
+
         $editingData = $this->machineService->loadDataEditMachine($machine, $filters);
 
         return Inertia::render('machines/save', $editingData);
@@ -100,6 +105,10 @@ class MachineController extends Controller
     public function update(MachineUpdateRequest $request, Machine $machine)
     {
         $data = $request->validated();
+        if (! $this->machineService->updateAvaliable($machine)) {
+            return back()->with('flashMsg', FlashMsg::warning('Não e possivel editar uma máquina que está em uso!'));
+        }
+
         $hardwares = $data['hardware_ids'] ?? [];
         $notes = $data['notes'] ?? null;
         $newProps = Arr::except($data, ['hardware_ids', 'notes']);
@@ -117,6 +126,10 @@ class MachineController extends Controller
      */
     public function destroy(Machine $machine)
     {
+        if (! $this->machineService->updateAvaliable($machine)) {
+            return back()->with('flashMsg', FlashMsg::warning('Não e possivel desativar uma máquina que está em uso!'));
+        }
+
         $result = $this->machineService->deactivateMachine($machine);
 
         return redirect()->route('machines.index')->with('flashMsg', $result);
