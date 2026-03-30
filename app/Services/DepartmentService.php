@@ -119,6 +119,11 @@ class DepartmentService
     {
         try {
             $machine = Machine::findOrFail($propsMachine['machine_id']);
+            $templateStatus = MachineStatus::templateStatus()->first();
+            if ($machine->status_id === $templateStatus->id) {
+                return false;
+            }
+            
             DB::transaction(function () use ($machine, $department) {
                 DepartmentMachine::create([
                     'department_id' => $department->id,
@@ -171,11 +176,14 @@ class DepartmentService
         $result = [];
         try {
             $term = strip_tags($filters['search'] ?? '');
+            $templateStatus = MachineStatus::templateStatus()->first();
+
             $result = Machine::query()
+                ->select(['id', 'name', 'serial_number', 'category_id', 'status_id'])
+                ->whereNot('status_id', $templateStatus->id)
                 ->with(['category', 'status'])
                 ->whereDoesntHave('departmentMachine')
                 ->search($term)
-                ->select(['id', 'name', 'serial_number', 'category_id', 'status_id'])
                 ->limit(20)
                 ->get()
                 ->toArray();

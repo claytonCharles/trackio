@@ -28,7 +28,6 @@ export default function DepartmentsIndex({
   pagination,
   filters
 }: Props) {
-  console.log(usePage().props)
   const [save, setSave] = useState(false);
   const [editing, setEditing] = useState<Department | null>(null);
   const timeout = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -58,7 +57,7 @@ export default function DepartmentsIndex({
               Departamentos
             </h2>
             <p className="text-muted-foreground mt-1 text-sm">
-              {pagination.totalItems ?? listDepartments.length} 
+              {(pagination.totalItems ?? listDepartments.length) + " "} 
               departamento(s) cadastrado(s)
             </p>
           </div>
